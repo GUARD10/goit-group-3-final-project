@@ -21,7 +21,10 @@ class CommandService(ICommandService):  # сервіс трохи роздути
         self._help_text: str | None = None
 
         self.commands: dict[str, Command] = {
-            "hello": Command("hello", self.hello, "Greet the bot"),
+            "hello": Command(
+                "hello",
+                self.hello,
+                "Greet the bot"),
             "add-contact": Command(
                 "add-contact",
                 self.add_contact,
