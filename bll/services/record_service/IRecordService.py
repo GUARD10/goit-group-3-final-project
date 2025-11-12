@@ -34,3 +34,7 @@ class IRecordService(ABC):
     @abstractmethod
     def get_with_upcoming_birthdays(self) -> list[Record]:
         pass
+
+    @abstractmethod
+    def search(self, query: str) -> list[Record]:
+        pass

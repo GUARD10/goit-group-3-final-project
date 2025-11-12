@@ -98,6 +98,81 @@ class RecordService(IRecordService):
 
         return sorted(records, key=lambda r: next_birthday_date(r) or date.max)
 
+    def search(self, query: str) -> list[Record]:
+        if query is None:
+            raise InvalidException("Search query cannot be None")
+
+        query = query.strip()
+        if not query:
+            raise InvalidException("Search query cannot be empty")
+
+        tokens = [t.lower() for t in query.split() if t]
+
+        def is_match(record: Record) -> bool:
+            haystack = " ".join(self._iter_search_strings(record)).lower()
+            return all(token in haystack for token in tokens)
+
+        return self.storage.filter(is_match)
+
+    @staticmethod
+    def _iter_search_strings(obj) -> list[str]:
+        from dal.entities.Field import Field
+        from datetime import date, datetime
+
+        results: list[str] = []
+        visited: set[int] = set()
+
+        def walk(o):
+            oid = id(o)
+            if oid in visited:
+                return
+            visited.add(oid)
+
+            if o is None:
+                return
+
+            if isinstance(o, Field):
+                try:
+                    results.append(str(o))
+                except Exception:
+                    pass
+                return
+
+            if isinstance(o, (str, int, float, bool, date, datetime)):
+                results.append(str(o))
+                return
+
+            if isinstance(o, (list, tuple, set, frozenset)):
+                for item in o:
+                    walk(item)
+                return
+
+            if isinstance(o, dict):
+                for k, v in o.items():
+                    walk(k)
+                    walk(v)
+                return
+
+            if hasattr(o, "value") and not isinstance(o, (bytes, bytearray)):
+                try:
+                    results.append(str(getattr(o, "value")))
+                except Exception:
+                    pass
+
+            try:
+                for attr in vars(o).values():
+                    walk(attr)
+            except Exception:
+                pass
+
+            try:
+                results.append(str(o))
+            except Exception:
+                pass
+
+        walk(obj)
+        return results
+
     @staticmethod
     def _validate_record_name(record_name: str) -> None:
         if record_name is None:
