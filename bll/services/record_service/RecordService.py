@@ -13,7 +13,7 @@ class RecordService(IRecordService):
     def __init__(self, storage: IStorage[str, Record]):
         self.storage = storage
 
-    def save(self, new_record: Record) -> None:
+    def save(self, new_record: Record) -> Record:
         self._validate_record(new_record)
 
         if self.has(new_record.name.value):
@@ -22,6 +22,8 @@ class RecordService(IRecordService):
             )
 
         self.storage.add(new_record)
+
+        return new_record
 
     def update(self, record_name: str, new_record: Record) -> Record:
         self._validate_record(new_record)
@@ -33,11 +35,13 @@ class RecordService(IRecordService):
 
         return new_record
 
-    def get_by_name(self, record_name: str) -> Record | None:
-        if not self.has(record_name):
+    def get_by_name(self, record_name: str) -> Record:
+        record = self.storage.find(record_name)
+
+        if not record:
             raise NotFoundException(f"Record '{record_name}' does not exist")
 
-        return self.storage.find(record_name)
+        return record
 
     def get_all(self) -> list[Record]:
         return self.storage.all_values()
@@ -66,20 +70,21 @@ class RecordService(IRecordService):
 
     def get_with_upcoming_birthdays(self) -> list[Record]:
         def is_birthday_within_week(record: Record) -> bool:
-            if not getattr(record, "birthday", None) or record.birthday is None:
+            # record.birthday може бути None, тому перевіряємо явно
+            if record.birthday is None or record.birthday.value is None:
                 return False
 
-            birthday_value = getattr(record.birthday, "value", None)
-            if not birthday_value:
-                return False
-
+            birthday_value = record.birthday.value
             return DateHelper.is_date_within_next_week(
                 birthday_value, today=date.today()
             )
 
         records = self.storage.filter(is_birthday_within_week)
 
-        def next_birthday_date(record: Record):
+        def next_birthday_date(record: Record) -> date | None:
+            if record.birthday is None or record.birthday.value is None:
+                return None
+
             bday = record.birthday.value
             today_date = date.today()
             adjusted = DateHelper.set_date_with_feb_edge_case(bday, today_date.year)
@@ -91,7 +96,7 @@ class RecordService(IRecordService):
 
             return adjusted
 
-        return sorted(records, key=next_birthday_date)
+        return sorted(records, key=lambda r: next_birthday_date(r) or date.max)
 
     @staticmethod
     def _validate_record_name(record_name: str) -> None:

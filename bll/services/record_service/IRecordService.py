@@ -12,7 +12,7 @@ class IRecordService(ABC):
         pass
 
     @abstractmethod
-    def get_by_name(self, record_name: str) -> Record | None:
+    def get_by_name(self, record_name: str) -> Record:
         pass
 
     @abstractmethod

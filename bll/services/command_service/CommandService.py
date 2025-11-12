@@ -18,7 +18,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
     ) -> None:
         self.record_service = record_service
         self.file_service = file_service
-        self._help_text = None
+        self._help_text: str | None = None
 
         self.commands: dict[str, Command] = {
             "hello": Command("hello", self.hello, "Greet the bot"),

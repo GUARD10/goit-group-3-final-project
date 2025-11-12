@@ -42,7 +42,7 @@ class Record:
 
         return phone in self.phones
 
-    def find_phone(self, phone: str | Phone) -> Phone:
+    def find_phone(self, phone: str | Phone) -> Phone | None:
         if not self.has_phone(phone):
             raise NotFoundException(f"Record {self.name} do not have {phone} phone")
 
