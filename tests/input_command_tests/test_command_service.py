@@ -37,6 +37,7 @@ class FakeRecordService:
             return DateHelper.is_date_within_next_week(
                 r.birthday.value, today=date.today(), days=days
             )
+
         return [r for r in self.records.values() if within(r)]
 
     def has(self, name):

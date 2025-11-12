@@ -140,8 +140,8 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             except (ValueError, TypeError):
                 raise InvalidException("Days must be a positive integer")
 
-        contacts_with_upcoming_birthdays = self.record_service.get_with_upcoming_birthdays(
-            days
+        contacts_with_upcoming_birthdays = (
+            self.record_service.get_with_upcoming_birthdays(days)
         )
 
         if not contacts_with_upcoming_birthdays:
