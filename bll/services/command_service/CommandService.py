@@ -80,6 +80,11 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             "show-all-files": Command(
                 "show-all-files", self.show_all_files, "Show all data files"
             ),
+            "search-contacts": Command(
+                "search-contacts",
+                self.search_contacts,
+                "Search contacts by any field: search-contacts [text]",
+            ),
         }
 
     @command_handler_decorator
@@ -177,6 +182,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
                     "show-phone",
                     "delete-contact",
                     "show-all-contacts",
+                    "search-contacts",
                 ],
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
                 "Files": ["save", "load", "delete-file", "show-all-files"],
@@ -236,3 +242,13 @@ class CommandService(ICommandService):  # сервіс трохи роздути
 
     def get_command(self, command: str) -> Optional[Command]:
         return self.commands.get(command)
+
+    @command_handler_decorator
+    def search_contacts(self, arguments: list[str]) -> str:
+        query = " ".join(arguments).strip()
+        matches = self.record_service.search(query)
+
+        if not matches:
+            return "No matching contacts found."
+
+        return "\n".join([f"{contact}" for contact in matches])
