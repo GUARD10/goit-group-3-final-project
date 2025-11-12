@@ -7,6 +7,7 @@ from dal.entities.Record import Record
 from dal.exceptions.AlreadyExistException import AlreadyExistException
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.NotFoundException import NotFoundException
+from datetime import timedelta
 
 
 @pytest.fixture
@@ -96,3 +97,16 @@ def test_get_with_upcoming_birthdays(service):
 
     assert len(upcoming) == 1
     assert upcoming[0].name.value == "John"
+
+
+def test_get_with_upcoming_birthdays_days_param(service):
+    today = date.today()
+    in_2 = today.replace(year=2000) + timedelta(days=2)
+    in_8 = today.replace(year=2000) + timedelta(days=8)
+
+    service.save(Record("Near", "1234567890", birthday=in_2.strftime("%d.%m.%Y")))
+    service.save(Record("Far", "0987654321", birthday=in_8.strftime("%d.%m.%Y")))
+
+    upcoming5 = service.get_with_upcoming_birthdays(days=5)
+    names5 = [r.name.value for r in upcoming5]
+    assert "Near" in names5 and "Far" not in names5

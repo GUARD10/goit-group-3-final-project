@@ -1,5 +1,7 @@
 import pytest
 from bll.services.command_service.CommandService import CommandService
+from bll.helpers.DateHelper import DateHelper
+from datetime import date, timedelta
 from dal.entities.Record import Record
 from dal.entities.Birthday import Birthday
 from dal.exceptions.ExitBotException import ExitBotException
@@ -28,8 +30,14 @@ class FakeRecordService:
     def get_all(self):
         return list(self.records.values())
 
-    def get_with_upcoming_birthdays(self):
-        return [r for r in self.records.values() if r.birthday]
+    def get_with_upcoming_birthdays(self, days: int = 7):
+        def within(r):
+            if not r.birthday:
+                return False
+            return DateHelper.is_date_within_next_week(
+                r.birthday.value, today=date.today(), days=days
+            )
+        return [r for r in self.records.values() if within(r)]
 
     def has(self, name):
         return name in self.records
@@ -119,16 +127,33 @@ def test_show_birthday(command_service, fake_record_service):
 
 
 def test_birthdays(command_service, fake_record_service):
-    rec = Record("John", "+380991112233", birthday="05.11.2000")
+    # pick a birthday within next 7 days, but with past year to pass validation
+    dt = date.today() + timedelta(days=1)
+    bday = dt.replace(year=2000).strftime("%d.%m.%Y")
+    rec = Record("John", "+380991112233", birthday=bday)
     fake_record_service.save(rec)
     result = command_service.birthdays()
     assert "John" in result
-    assert "05.11.2000" in result
+    assert bday in result
 
 
 def test_birthdays_empty(command_service):
     result = command_service.birthdays()
     assert "No birthdays" in result
+
+
+def test_birthdays_with_days_param(command_service, fake_record_service):
+    near_dt = date.today() + timedelta(days=2)
+    far_dt = date.today() + timedelta(days=10)
+    near = near_dt.replace(year=2000).strftime("%d.%m.%Y")
+    far = far_dt.replace(year=2000).strftime("%d.%m.%Y")
+
+    fake_record_service.save(Record("Near", "+380991112233", birthday=near))
+    fake_record_service.save(Record("Far", "+380665554433", birthday=far))
+
+    result = command_service.birthdays(["5"])  # only 5 days window
+    assert "Near" in result
+    assert "Far" not in result
 
 
 def test_show_all(command_service, fake_record_service):
