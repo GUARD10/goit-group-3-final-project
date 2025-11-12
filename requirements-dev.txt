@@ -1,0 +1,22 @@
+# requirements-dev.txt
+-r requirements.txt
+
+# --- Лінтинг та форматування ---
+ruff==0.14.4
+
+# --- Перевірка типів ---
+mypy==1.18.2
+mypy_extensions==1.1.0
+typing_extensions==4.15.0
+types-requests==2.32.4.20250913
+types-setuptools==80.9.0.20250822
+
+# --- Тестування ---
+pytest==9.0.0
+colorama==0.4.6
+iniconfig==2.3.0
+packaging==25.0
+pathspec==0.12.1
+pluggy==1.6.0
+Pygments==2.19.2
+urllib3==2.5.0
