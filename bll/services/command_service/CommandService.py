@@ -130,7 +130,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
         return f"Contact birthday: {contact.birthday}"
 
     @command_handler_decorator
-    def birthdays(self, arguments: list[str] = None) -> str:
+    def birthdays(self, arguments: list[str] | None = None) -> str:
         days = 7
         if arguments:
             try:
