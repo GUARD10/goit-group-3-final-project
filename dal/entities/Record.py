@@ -2,8 +2,8 @@
 from dal.entities.Birthday import Birthday
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
 from datetime import datetime, date
 
 class Record:
@@ -41,6 +41,6 @@ class Record:
         return next((p for p in self.phones if p == phone), None)
 
     def update(self):
-        from dal.entity_builders.RecordBuilder.RecordBuilder import RecordBuilder
+        from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
         return RecordBuilder(self)
 

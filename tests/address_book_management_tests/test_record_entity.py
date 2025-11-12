@@ -4,8 +4,8 @@ from datetime import date, datetime
 from dal.entities.Record import Record
 from dal.entities.Phone import Phone
 from dal.entities.Birthday import Birthday
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
 
 
 # --- BASIC INITIALIZATION --- #
@@ -82,6 +82,6 @@ def test_find_phone_raises_if_missing():
 def test_update_returns_record_builder_instance():
     record = Record("John", "+380991112233")
     builder = record.update()
-    from dal.entity_builders.RecordBuilder.RecordBuilder import RecordBuilder
+    from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
     assert isinstance(builder, RecordBuilder)
     assert builder._record is record

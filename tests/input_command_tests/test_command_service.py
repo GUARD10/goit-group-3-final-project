@@ -3,7 +3,7 @@ from datetime import datetime
 from bll.services.command_service.CommandService import CommandService
 from dal.entities.Record import Record
 from dal.entities.Birthday import Birthday
-from dal.Exceptions.ExitBotException import ExitBotException
+from dal.exceptions.ExitBotException import ExitBotException
 
 
 # === Fake dependencies ===

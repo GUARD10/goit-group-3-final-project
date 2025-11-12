@@ -2,12 +2,12 @@ from bll.services.command_service.CommandService import CommandService
 from bll.services.input_service.InputService import InputService
 from bll.services.pickle_file_service.PickleFileService import PickleFileService
 from bll.services.record_service.RecordService import RecordService
-from dal.FileManagers.PickleFileManager.PickleFileManager import PickleFileManager
-from dal.Storages.AddressBookStorage import AddressBookStorage
-from dal.Exceptions.AlreadyExistException import AlreadyExistException
-from dal.Exceptions.ExitBotException import ExitBotException
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
+from dal.storages.AddressBookStorage import AddressBookStorage
+from dal.exceptions.AlreadyExistException import AlreadyExistException
+from dal.exceptions.ExitBotException import ExitBotException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
 
 def main():
     book_storage = AddressBookStorage()

@@ -1,7 +1,7 @@
 import pytest
-from dal.Storages.AddressBookStorage import AddressBookStorage
+from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.entities.Record import Record
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 
 @pytest.fixture

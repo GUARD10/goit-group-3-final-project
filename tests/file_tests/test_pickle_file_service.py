@@ -1,7 +1,6 @@
 import pytest
-import pickle
 from unittest.mock import MagicMock
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 from bll.services.pickle_file_service.PickleFileService import PickleFileService
 
 

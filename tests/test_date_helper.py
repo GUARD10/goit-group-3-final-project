@@ -1,7 +1,7 @@
 import pytest
 from datetime import date, datetime, timedelta
 from bll.helpers.DateHelper import DateHelper
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 def test_date_within_next_week():
     today = date.today()

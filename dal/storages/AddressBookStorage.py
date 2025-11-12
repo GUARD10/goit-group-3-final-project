@@ -2,9 +2,9 @@ from collections import UserDict
 from typing import Callable
 
 from dal.entities.Record import Record
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Storages.ISerializableStorage import ISerializableStorage
-from dal.Storages.IStorage import IStorage
+from dal.exceptions.InvalidException import InvalidException
+from dal.storages.ISerializableStorage import ISerializableStorage
+from dal.storages.IStorage import IStorage
 
 
 class AddressBookStorage(UserDict, IStorage[str, Record], ISerializableStorage[dict[str, Record]]):
