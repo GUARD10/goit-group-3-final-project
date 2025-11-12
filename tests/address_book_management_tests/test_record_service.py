@@ -7,7 +7,6 @@ from dal.entities.Record import Record
 from dal.exceptions.AlreadyExistException import AlreadyExistException
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.NotFoundException import NotFoundException
-from datetime import timedelta
 
 
 @pytest.fixture
