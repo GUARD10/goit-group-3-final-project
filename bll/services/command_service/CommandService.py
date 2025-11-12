@@ -6,6 +6,7 @@ from bll.services.record_service.IRecordService import IRecordService
 from dal.entities.Command import Command
 from dal.entities.Record import Record
 from dal.exceptions.ExitBotException import ExitBotException
+from dal.exceptions.InvalidException import InvalidException
 from bll.decorators.CommandHandlerDecorator import command_handler_decorator
 from dal.storages.IStorage import IStorage
 
@@ -56,7 +57,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             "upcoming-birthdays": Command(
                 "upcoming-birthdays",
                 self.birthdays,
-                "Show upcoming birthdays for next week",
+                "Show upcoming birthdays for next N days (default 7): upcoming-birthdays [days]",
             ),
             "delete-contact": Command(
                 "delete-contact",
@@ -134,13 +135,22 @@ class CommandService(ICommandService):  # сервіс трохи роздути
         return f"Contact birthday: {contact.birthday}"
 
     @command_handler_decorator
-    def birthdays(self) -> str:
+    def birthdays(self, arguments: list[str] | None = None) -> str:
+        days = 7
+        if arguments:
+            try:
+                days = int(arguments[0])
+                if days <= 0:
+                    raise ValueError
+            except (ValueError, TypeError):
+                raise InvalidException("Days must be a positive integer")
+
         contacts_with_upcoming_birthdays = (
-            self.record_service.get_with_upcoming_birthdays()
+            self.record_service.get_with_upcoming_birthdays(days)
         )
 
         if not contacts_with_upcoming_birthdays:
-            return "No birthdays this week 🎂"
+            return f"No birthdays in the next {days} days 🎂"
 
         return "\n".join(
             [
