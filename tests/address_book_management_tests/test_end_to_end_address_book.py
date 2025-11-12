@@ -2,6 +2,7 @@ from bll.services.record_service.RecordService import RecordService
 from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.entities.Record import Record
 
+
 def test_end_to_end_scenario():
     # --- core init ---
     book = AddressBookStorage()

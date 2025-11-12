@@ -1,34 +1,32 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Callable
+from typing import Callable
 
-T = TypeVar("T")
-K = TypeVar("K")
 
-class IStorage(ABC, Generic[K, T]):
+class IStorage[Key, Item](ABC):
     @abstractmethod
-    def add(self, item: T) -> T:
+    def add(self, item: Item) -> Item:
         pass
 
     @abstractmethod
-    def update_item(self, key: K, item: T) -> T:
+    def update_item(self, key: Key, item: Item) -> Item:
         pass
 
     @abstractmethod
-    def find(self, key: str) -> T | None:
+    def find(self, key: str) -> Item | None:
         pass
 
     @abstractmethod
-    def delete(self, key: K) -> None:
+    def delete(self, key: Key) -> None:
         pass
 
     @abstractmethod
-    def has(self, key: K) -> bool:
+    def has(self, key: Key) -> bool:
         pass
 
     @abstractmethod
-    def all_values(self) -> list[T]:
+    def all_values(self) -> list[Item]:
         pass
 
     @abstractmethod
-    def filter(self, predicate: Callable[[T], bool]) -> list[T]:
+    def filter(self, predicate: Callable[[Item], bool]) -> list[Item]:
         pass

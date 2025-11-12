@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
-
-T = TypeVar("T")
 
 
-class ISerializableStorage(ABC, Generic[T]):
+class ISerializableStorage[State](ABC):
     @abstractmethod
-    def export_state(self) -> T:
+    def export_state(self) -> State:
         pass
 
     @abstractmethod
-    def import_state(self, state: T) -> None:
+    def import_state(self, state: State) -> None:
         pass

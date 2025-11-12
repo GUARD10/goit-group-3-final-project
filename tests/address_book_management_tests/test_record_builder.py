@@ -24,6 +24,7 @@ def builder(base_record):
 
 # --- SET NAME --- #
 
+
 def test_set_name_success(builder):
     builder.set_name("New Name")
     assert builder._record.name.value == "New Name"
@@ -37,6 +38,7 @@ def test_set_name_invalid(builder, bad_name):
 
 # --- BUILD --- #
 
+
 def test_build_returns_record(builder):
     record = builder.build()
     assert isinstance(record, Record)
@@ -45,11 +47,14 @@ def test_build_returns_record(builder):
 def test_build_raises_if_name_invalid(base_record):
     base_record.name.value = " "
     builder = RecordBuilder(base_record)
-    with pytest.raises(InvalidException, match="Record must have a name before building"):
+    with pytest.raises(
+        InvalidException, match="Record must have a name before building"
+    ):
         builder.build()
 
 
 # --- ADD PHONE --- #
+
 
 def test_add_phone_success(builder):
     builder.add_phone("+380987654321")
@@ -70,6 +75,7 @@ def test_add_phone_duplicate_raises(builder):
 
 # --- UPDATE PHONE --- #
 
+
 def test_update_phone_success(builder):
     old = builder._record.phones[0].value
     builder.update_phone(old, "+380111111111")
@@ -84,6 +90,7 @@ def test_update_phone_not_found_raises(builder):
 
 # --- REMOVE PHONE --- #
 
+
 def test_remove_phone_success(builder):
     phone = builder._record.phones[0].value
     builder.remove_phone(phone)
@@ -97,6 +104,7 @@ def test_remove_phone_not_found(builder):
 
 # --- CLEAR PHONES --- #
 
+
 def test_clear_phones(builder):
     builder.add_phone("+380111111111")
     builder.add_phone("+380222222222")
@@ -105,6 +113,7 @@ def test_clear_phones(builder):
 
 
 # --- BIRTHDAY --- #
+
 
 def test_set_birthday_from_str(builder):
     builder.set_birthday("2000-05-20")

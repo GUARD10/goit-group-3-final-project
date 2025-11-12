@@ -17,7 +17,9 @@ class RecordService(IRecordService):
         self._validate_record(new_record)
 
         if self.has(new_record.name.value):
-            raise AlreadyExistException(f"Record '{new_record.name.value}' already exists")
+            raise AlreadyExistException(
+                f"Record '{new_record.name.value}' already exists"
+            )
 
         self.storage.add(new_record)
 
@@ -71,7 +73,9 @@ class RecordService(IRecordService):
             if not birthday_value:
                 return False
 
-            return DateHelper.is_date_within_next_week(birthday_value, today=date.today())
+            return DateHelper.is_date_within_next_week(
+                birthday_value, today=date.today()
+            )
 
         records = self.storage.filter(is_birthday_within_week)
 
@@ -81,7 +85,9 @@ class RecordService(IRecordService):
             adjusted = DateHelper.set_date_with_feb_edge_case(bday, today_date.year)
 
             if adjusted < today_date:
-                adjusted = DateHelper.set_date_with_feb_edge_case(bday, today_date.year + 1)
+                adjusted = DateHelper.set_date_with_feb_edge_case(
+                    bday, today_date.year + 1
+                )
 
             return adjusted
 

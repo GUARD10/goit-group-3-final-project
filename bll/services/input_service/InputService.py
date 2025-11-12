@@ -4,7 +4,10 @@ from bll.services.command_service.ICommandService import ICommandService
 from bll.services.input_service.IInputService import IInputService
 from dal.exceptions.InvalidException import InvalidException
 
-class InputService(IInputService):
+
+class InputService(
+    IInputService
+):  # сюда крутити автозаповнення який буде взаємодіяти з CommandService
     def __init__(self, command_service: ICommandService):
         self.command_service = command_service
 
@@ -14,7 +17,7 @@ class InputService(IInputService):
         command = self.command_service.get_command(command_name)
 
         if not command:
-            raise InvalidException('Invalid command')
+            raise InvalidException("Invalid command")
 
         handler = command.handler
 
