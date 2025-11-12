@@ -48,6 +48,11 @@ class CommandService(ICommandService):
             "show-all-contacts": Command(
                 "show-all-contacts", self.show_all, "Show all contacts"
             ),
+            "add-email": Command(
+                "add-email",
+                self.add_email,
+                "Add new Email to contact: add-email [name] [new_phone].",
+            ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
@@ -211,6 +216,17 @@ class CommandService(ICommandService):
         )
 
     @command_handler_decorator
+    def add_email(self, arguments: list[str]) -> str:
+        name, new_email = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service.get_by_name(name).update().add_email(new_email).build()
+        )
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
     def hello(self) -> str:
         return "How can I help you?"
 
@@ -222,6 +238,7 @@ class CommandService(ICommandService):
                     "add-contact",
                     "add-phone",
                     "show-phone",
+                    "add-email",
                     "delete-contact",
                     "show-all-contacts",
                     "search-contacts",

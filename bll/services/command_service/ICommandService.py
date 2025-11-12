@@ -17,6 +17,10 @@ class ICommandService(ABC):
         pass
 
     @abstractmethod
+    def add_email(self, arguments: list) -> str:
+        pass
+
+    @abstractmethod
     def show_all(self) -> str:
         pass
 

@@ -4,6 +4,7 @@ from typing import Union
 from dal.entities.Record import Record
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
+from dal.entities.Email import Email
 from dal.entities.Birthday import Birthday
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.AlreadyExistException import AlreadyExistException
@@ -64,4 +65,14 @@ class RecordBuilder:
 
     def clear_birthday(self) -> "RecordBuilder":
         self._record.birthday = None
+        return self
+
+    def add_email(self, email: str | Email) -> "RecordBuilder":
+        if self._record.email is not None:
+            raise AlreadyExistException(
+                f"Record {self._record.name} already has email {self._record.email}"
+            )
+
+        email_obj = email if isinstance(email, Email) else Email(email)
+        self._record.email = email_obj
         return self
