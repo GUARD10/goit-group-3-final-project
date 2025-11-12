@@ -47,9 +47,10 @@ class DateHelper:
 
     @staticmethod
     def set_date_with_feb_edge_case(birthday_date: date, target_year: int) -> date:
-        is_leap = target_year % 4 == 0 and (
+        is_leap = (target_year % 4 == 0 and
+                   (
             target_year % 100 != 0 or target_year % 400 == 0
-        )
+        ))
 
         if birthday_date.month == 2 and birthday_date.day == 29 and not is_leap:
             return date(target_year, 2, 28)
