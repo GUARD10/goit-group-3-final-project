@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dal.entities.Record import Record
 
+
 class IRecordService(ABC):
     @abstractmethod
     def save(self, new_record: Record) -> Record:

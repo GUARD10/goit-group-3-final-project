@@ -25,6 +25,7 @@ def service(mock_file_manager, mock_storage):
 
 # --- SAVE_WITH_NAME --- #
 
+
 def test_save_with_name_success(service, mock_file_manager, mock_storage):
     service.save_with_name("backup")
 
@@ -60,6 +61,7 @@ def test_save_with_name_pickle_error(service, mock_storage):
 
 # --- LOAD_BY_NAME --- #
 
+
 def test_load_by_name_success(service, mock_file_manager, mock_storage):
     mock_file_manager.has_file_with_name.return_value = True
     mock_file_manager.load.return_value = {"a": 1}
@@ -78,6 +80,7 @@ def test_load_by_name_missing_file(service, mock_file_manager):
 
 # --- DELETE_BY_NAME --- #
 
+
 def test_delete_by_name_success(service, mock_file_manager):
     mock_file_manager.has_file_with_name.return_value = True
     service.delete_by_name("old.pkl")
@@ -92,6 +95,7 @@ def test_delete_by_name_missing_file_raises(service, mock_file_manager):
 
 # --- GET_FILE_LIST --- #
 
+
 def test_get_file_list_returns_names(service, mock_file_manager):
     result = service.get_file_list()
     assert result == ["file1.pkl", "file2.pkl"]
@@ -104,6 +108,7 @@ def test_get_file_list_empty_raises(service, mock_file_manager):
 
 
 # --- VALIDATION --- #
+
 
 @pytest.mark.parametrize("bad_name", [None, 123, "   ", ""])
 def test_validate_name_invalid(bad_name):

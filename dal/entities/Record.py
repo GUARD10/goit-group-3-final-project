@@ -1,4 +1,3 @@
-
 from dal.entities.Birthday import Birthday
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
@@ -6,8 +5,14 @@ from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.NotFoundException import NotFoundException
 from datetime import datetime, date
 
+
 class Record:
-    def __init__(self, name: str, *phone_numbers: str, birthday: str | datetime | date |  None = None):
+    def __init__(
+        self,
+        name: str,
+        *phone_numbers: str,
+        birthday: str | datetime | date | None = None,
+    ):
         self.name = Name(name)
         self.phones: list[Phone] = []
         self.birthday: Birthday | None = None
@@ -19,7 +24,10 @@ class Record:
             self.phones.append(Phone(phone_number))
 
     def __str__(self):
-        return f"\nContact: \nName: {self.name.value}, \nPhones: {', '.join(p.value for p in self.phones)}" + (f", \nBirthday: {self.birthday.value}" if self.birthday else "")
+        return (
+            f"\nContact: \nName: {self.name.value}, \nPhones: {', '.join(p.value for p in self.phones)}"
+            + (f", \nBirthday: {self.birthday.value}" if self.birthday else "")
+        )
 
     def __eq__(self, other):
         if isinstance(other, str):
@@ -42,5 +50,5 @@ class Record:
 
     def update(self):
         from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
-        return RecordBuilder(self)
 
+        return RecordBuilder(self)

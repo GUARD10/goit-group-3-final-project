@@ -1,19 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
 
-T = TypeVar("T")
 
-class IFileManager(ABC, Generic[T]):
+class IFileManager[Data](ABC):
     @abstractmethod
-    def save(self, obj: T, name: str) -> None:
+    def save(self, data: Data, name: str) -> None:
         pass
 
     @abstractmethod
-    def load(self, name: str) -> T:
+    def load(self, name: str) -> Data:
         pass
 
     @abstractmethod
-    def delete (self, name: str) -> None:
+    def delete(self, name: str) -> None:
         pass
 
     @abstractmethod

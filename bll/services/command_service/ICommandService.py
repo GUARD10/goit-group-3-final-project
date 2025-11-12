@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 from dal.entities.Command import Command
 
-class ICommandService(ABC):
 
+class ICommandService(ABC):
     @abstractmethod
     def add_contact(self, arguments: list) -> str:
         pass

@@ -17,7 +17,9 @@ def command_handler_decorator(func: Callable) -> Callable:
 
         except KeyError as ex:
             missing = str(ex).strip("'") if ex.args else "Unknown"
-            raise NotFoundException(f"'{missing}' not found. Please check the name and try again.")
+            raise NotFoundException(
+                f"'{missing}' not found. Please check the name and try again."
+            )
 
         except IndexError:
             raise InvalidException(

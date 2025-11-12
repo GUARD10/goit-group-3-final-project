@@ -3,10 +3,12 @@ from dal.entities.Field import Field
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
 
+
 def test_field_equality():
     assert Field("abc") == Field("abc")
     assert Field("123") == "123"
     assert Field("abc") != Field("xyz")
+
 
 def test_name_validation():
     with pytest.raises(ValueError):
@@ -15,6 +17,7 @@ def test_name_validation():
         Name(123)
     name = Name("Roman")
     assert str(name) == "Roman"
+
 
 def test_phone_validation():
     valid = Phone("1234567890")

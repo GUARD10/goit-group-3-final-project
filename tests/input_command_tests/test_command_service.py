@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 from bll.services.command_service.CommandService import CommandService
 from dal.entities.Record import Record
 from dal.entities.Birthday import Birthday
@@ -7,6 +6,7 @@ from dal.exceptions.ExitBotException import ExitBotException
 
 
 # === Fake dependencies ===
+
 
 class FakeRecordService:
     def __init__(self):
@@ -62,13 +62,16 @@ class FakeFileService:
 
 # === Fixtures ===
 
+
 @pytest.fixture
 def fake_record_service():
     return FakeRecordService()
 
+
 @pytest.fixture
 def fake_file_service():
     return FakeFileService()
+
 
 @pytest.fixture
 def command_service(fake_record_service, fake_file_service):
@@ -76,6 +79,7 @@ def command_service(fake_record_service, fake_file_service):
 
 
 # === Tests ===
+
 
 def test_add_contact(command_service, fake_record_service):
     result = command_service.add_contact(["John", "+380991112233"])

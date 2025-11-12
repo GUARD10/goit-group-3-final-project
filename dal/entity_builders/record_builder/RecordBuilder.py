@@ -28,20 +28,26 @@ class RecordBuilder:
 
     def add_phone(self, phone: str | Phone) -> "RecordBuilder":
         if self._record.has_phone(phone):
-            raise AlreadyExistException(f"Record {self._record.name} already has phone {phone}")
+            raise AlreadyExistException(
+                f"Record {self._record.name} already has phone {phone}"
+            )
 
         phone_obj = phone if isinstance(phone, Phone) else Phone(phone)
         self._record.phones.append(phone_obj)
         return self
 
-    def update_phone(self, old_phone: str | Phone, new_phone: str | Phone) -> "RecordBuilder":
+    def update_phone(
+        self, old_phone: str | Phone, new_phone: str | Phone
+    ) -> "RecordBuilder":
         self.remove_phone(old_phone)
         self.add_phone(new_phone)
         return self
 
     def remove_phone(self, phone: str | Phone) -> "RecordBuilder":
         if not self._record.has_phone(phone):
-            raise NotFoundException(f"Record {self._record.name} does not have phone {phone}")
+            raise NotFoundException(
+                f"Record {self._record.name} does not have phone {phone}"
+            )
 
         phone_value = phone.value if isinstance(phone, Phone) else str(phone)
         self._record.phones = [p for p in self._record.phones if p.value != phone_value]

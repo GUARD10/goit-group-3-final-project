@@ -2,6 +2,7 @@ import re
 
 from dal.entities.Field import Field
 
+
 class Phone(Field):
     PHONE_PATTERN = re.compile(r"^\+?\d{10,15}$")
 
@@ -13,4 +14,3 @@ class Phone(Field):
             raise ValueError(f"Incorrect phone number: '{value}'")
 
         super().__init__(value)
-

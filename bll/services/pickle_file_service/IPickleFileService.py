@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
 
-T = TypeVar("T")
 
-class IPickleFileService(ABC, Generic[T]):
-
+class IPickleFileService[T](ABC):
     @abstractmethod
-    def save_with_name(self, name: str = 'autosave') -> str:
+    def save_with_name(self, name: str = "autosave") -> str:
         pass
 
     @abstractmethod

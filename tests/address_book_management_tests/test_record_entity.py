@@ -1,5 +1,5 @@
 import pytest
-from datetime import date, datetime
+from datetime import date
 
 from dal.entities.Record import Record
 from dal.entities.Phone import Phone
@@ -9,6 +9,7 @@ from dal.exceptions.NotFoundException import NotFoundException
 
 
 # --- BASIC INITIALIZATION --- #
+
 
 def test_create_record_with_multiple_phones():
     record = Record("John", "+380991112233", "+380665554433")
@@ -35,6 +36,7 @@ def test_record_str_representation():
 
 # --- EQUALITY CHECKS --- #
 
+
 def test_record_equality_by_value():
     r1 = Record("John", "+380991112233")
     r2 = Record("John", "+380991112233")
@@ -52,6 +54,7 @@ def test_record_not_equal_to_other_type():
 
 
 # --- PHONE LOGIC --- #
+
 
 def test_has_phone_success():
     record = Record("John", "+380991112233")
@@ -79,9 +82,11 @@ def test_find_phone_raises_if_missing():
 
 # --- UPDATE BUILDER --- #
 
+
 def test_update_returns_record_builder_instance():
     record = Record("John", "+380991112233")
     builder = record.update()
     from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+
     assert isinstance(builder, RecordBuilder)
     assert builder._record is record

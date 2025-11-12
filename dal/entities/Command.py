@@ -1,5 +1,6 @@
 from typing import Callable
 
+
 class Command:
     def __init__(self, name: str, handler: Callable, description: str):
         self.name = name

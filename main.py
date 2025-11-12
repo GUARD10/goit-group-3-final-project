@@ -9,6 +9,7 @@ from dal.exceptions.ExitBotException import ExitBotException
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.NotFoundException import NotFoundException
 
+
 def main():
     book_storage = AddressBookStorage()
     record_service = RecordService(book_storage)
@@ -17,7 +18,7 @@ def main():
     command_service = CommandService(record_service, file_service)
     input_service = InputService(command_service)
 
-    print('\n🤖 Welcome to the Assistant Bot!')
+    print("\n🤖 Welcome to the Assistant Bot!")
     print("Type 'help' to see available commands.\n")
 
     try:
@@ -32,7 +33,7 @@ def main():
 
     while True:
         try:
-            user_input = input('Enter a command: ')
+            user_input = input("Enter a command: ")
 
             if not user_input:
                 continue
@@ -48,7 +49,7 @@ def main():
             print(nf)
         except KeyboardInterrupt:
             try:
-                input_service.handle('exit')
+                input_service.handle("exit")
             except ExitBotException as eb:
                 print(eb)
             break
@@ -56,8 +57,9 @@ def main():
             print(eb)
             break
         except Exception as ex:
-            print(f'💥 Unexpected error: {ex}')
+            print(f"💥 Unexpected error: {ex}")
             break
+
 
 if __name__ == "__main__":
     main()

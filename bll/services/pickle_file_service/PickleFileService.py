@@ -1,23 +1,21 @@
 import pickle
 from datetime import datetime
-from typing import Generic, TypeVar
 from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
 from dal.exceptions.InvalidException import InvalidException
 from dal.file_managers.IFileManager import IFileManager
 from dal.storages.ISerializableStorage import ISerializableStorage
 
-T = TypeVar("T")
-R = TypeVar("R")
 
-class PickleFileService(IPickleFileService[T], Generic[T, R]):
-
-    def __init__(self, file_manager: IFileManager[T], storage: ISerializableStorage[R]) -> None:
+class PickleFileService[Data, State](IPickleFileService[Data]):
+    def __init__(
+        self, file_manager: IFileManager[Data], storage: ISerializableStorage[State]
+    ) -> None:
         self.file_manager = file_manager
         self.storage = storage
         self._last_loaded_bytes: bytes | None = None
         self._last_loaded_name: str | None = None
 
-    def save_with_name(self, name: str = 'autosave') -> str:
+    def save_with_name(self, name: str = "autosave") -> str:
         self._validate_name(name)
         data_to_save = self.storage.export_state()
 

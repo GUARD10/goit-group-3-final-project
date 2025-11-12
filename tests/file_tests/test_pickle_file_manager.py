@@ -1,5 +1,4 @@
 import os
-import pickle
 import pytest
 from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
 

@@ -7,8 +7,9 @@ from dal.storages.ISerializableStorage import ISerializableStorage
 from dal.storages.IStorage import IStorage
 
 
-class AddressBookStorage(UserDict, IStorage[str, Record], ISerializableStorage[dict[str, Record]]):
-
+class AddressBookStorage(
+    UserDict, IStorage[str, Record], ISerializableStorage[dict[str, Record]]
+):
     def __init__(self):
         super().__init__()
 
@@ -40,8 +41,8 @@ class AddressBookStorage(UserDict, IStorage[str, Record], ISerializableStorage[d
 
     def import_state(self, state: dict[str, Record]) -> None:
         if not isinstance(state, dict):
-            raise InvalidException(f"Invalid state type: expected dict[str, Record], got {type(state).__name__}")
+            raise InvalidException(
+                f"Invalid state type: expected dict[str, Record], got {type(state).__name__}"
+            )
 
         self.data = state
-
-
