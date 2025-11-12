@@ -68,7 +68,7 @@ class RecordService(IRecordService):
         self._validate_record_name(record_name)
         return self.storage.has(record_name)
 
-    def get_with_upcoming_birthdays(self) -> list[Record]:
+    def get_with_upcoming_birthdays(self, days: int = 7) -> list[Record]:
         def is_birthday_within_week(record: Record) -> bool:
             # record.birthday може бути None, тому перевіряємо явно
             if record.birthday is None or record.birthday.value is None:
@@ -76,7 +76,7 @@ class RecordService(IRecordService):
 
             birthday_value = record.birthday.value
             return DateHelper.is_date_within_next_week(
-                birthday_value, today=date.today()
+                birthday_value, today=date.today(), days=days
             )
 
         records = self.storage.filter(is_birthday_within_week)

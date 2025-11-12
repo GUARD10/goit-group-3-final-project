@@ -37,3 +37,13 @@ def test_parse_invalid_format():
 def test_parse_none_value():
     with pytest.raises(InvalidException):
         DateHelper.parse_to_date(None)
+
+
+def test_cross_year_window_includes_next_year_birthday():
+    # today: Dec 31, event: Jan 1 (any past year) should be within next 2 days
+    dec31 = date(2024, 12, 31)
+    jan1_any = date(2000, 1, 1)
+    assert DateHelper.is_date_within_next_week(jan1_any, dec31, days=2)
+
+    # window = 1 day (Dec 31 to Jan 1 inclusive) should include
+    assert DateHelper.is_date_within_next_week(jan1_any, dec31, days=1)

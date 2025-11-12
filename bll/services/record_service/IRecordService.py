@@ -32,5 +32,5 @@ class IRecordService(ABC):
         pass
 
     @abstractmethod
-    def get_with_upcoming_birthdays(self) -> list[Record]:
+    def get_with_upcoming_birthdays(self, days: int = 7) -> list[Record]:
         pass
