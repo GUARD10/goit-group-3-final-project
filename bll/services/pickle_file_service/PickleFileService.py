@@ -6,9 +6,9 @@ from dal.file_managers.IFileManager import IFileManager
 from dal.storages.ISerializableStorage import ISerializableStorage
 
 
-class PickleFileService[Data, State](IPickleFileService[Data]):
+class PickleFileService[Data](IPickleFileService[Data]):
     def __init__(
-        self, file_manager: IFileManager[Data], storage: ISerializableStorage[State]
+        self, file_manager: IFileManager[Data], storage: ISerializableStorage[Data]
     ) -> None:
         self.file_manager = file_manager
         self.storage = storage

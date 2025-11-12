@@ -1,5 +1,8 @@
+from typing import Any
+
+
 class Field:
-    def __init__(self, value: any):
+    def __init__(self, value: Any):
         self.value = value
 
     def __str__(self):
