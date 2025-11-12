@@ -1,7 +1,7 @@
 from datetime import datetime, date
 
 from dal.entities.Field import Field
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 
 class Birthday(Field):

@@ -1,7 +1,7 @@
 import pytest
 from datetime import date, datetime, timedelta
 from dal.entities.Birthday import Birthday
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 def test_valid_birthday_from_string():
     b = Birthday("05.11.2000")

@@ -2,11 +2,11 @@ from datetime import date, timedelta
 
 import pytest
 from bll.services.record_service.RecordService import RecordService
-from dal.Storages.AddressBookStorage import AddressBookStorage
+from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.entities.Record import Record
-from dal.Exceptions.AlreadyExistException import AlreadyExistException
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.exceptions.AlreadyExistException import AlreadyExistException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
 
 @pytest.fixture
 def service():

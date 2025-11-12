@@ -5,9 +5,9 @@ from dal.entities.Record import Record
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
 from dal.entities.Birthday import Birthday
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.AlreadyExistException import AlreadyExistException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.AlreadyExistException import AlreadyExistException
+from dal.exceptions.NotFoundException import NotFoundException
 from bll.helpers.DateHelper import DateHelper
 
 

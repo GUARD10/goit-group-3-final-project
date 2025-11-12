@@ -2,7 +2,7 @@ import inspect
 
 from bll.services.command_service.ICommandService import ICommandService
 from bll.services.input_service.IInputService import IInputService
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 class InputService(IInputService):
     def __init__(self, command_service: ICommandService):

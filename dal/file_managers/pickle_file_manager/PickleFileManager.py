@@ -2,7 +2,7 @@ import os
 import pickle
 from typing import Generic, TypeVar
 
-from dal.FileManagers.IFileManager import IFileManager
+from dal.file_managers.IFileManager import IFileManager
 
 T = TypeVar("T")
 

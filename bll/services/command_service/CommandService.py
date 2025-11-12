@@ -6,9 +6,9 @@ from bll.services.pickle_file_service.IPickleFileService import IPickleFileServi
 from bll.services.record_service.IRecordService import IRecordService
 from dal.entities.Command import Command
 from dal.entities.Record import Record
-from dal.Exceptions.ExitBotException import ExitBotException
+from dal.exceptions.ExitBotException import ExitBotException
 from bll.decorators.CommandHandlerDecorator import command_handler_decorator
-from dal.Storages.IStorage import IStorage
+from dal.storages.IStorage import IStorage
 
 
 class CommandService(ICommandService):

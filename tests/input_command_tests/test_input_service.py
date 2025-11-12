@@ -1,6 +1,6 @@
 import pytest
 from bll.services.input_service.InputService import InputService
-from dal.Exceptions.InvalidException import InvalidException
+from dal.exceptions.InvalidException import InvalidException
 
 class DummyCommand:
     def __init__(self, fn): self.handler = fn

@@ -2,9 +2,9 @@ import pickle
 from datetime import datetime
 from typing import Generic, TypeVar
 from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
-from dal.Exceptions.InvalidException import InvalidException
-from dal.FileManagers.IFileManager import IFileManager
-from dal.Storages.ISerializableStorage import ISerializableStorage
+from dal.exceptions.InvalidException import InvalidException
+from dal.file_managers.IFileManager import IFileManager
+from dal.storages.ISerializableStorage import ISerializableStorage
 
 T = TypeVar("T")
 R = TypeVar("R")

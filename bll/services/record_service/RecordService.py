@@ -3,10 +3,10 @@ from datetime import date
 from bll.helpers.DateHelper import DateHelper
 from bll.services.record_service.IRecordService import IRecordService
 from dal.entities.Record import Record
-from dal.Exceptions.AlreadyExistException import AlreadyExistException
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
-from dal.Storages.IStorage import IStorage
+from dal.exceptions.AlreadyExistException import AlreadyExistException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
+from dal.storages.IStorage import IStorage
 
 
 class RecordService(IRecordService):

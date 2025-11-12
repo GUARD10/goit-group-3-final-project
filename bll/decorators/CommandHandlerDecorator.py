@@ -1,9 +1,9 @@
 from functools import wraps
 from typing import Callable
 
-from dal.Exceptions.ExitBotException import ExitBotException
-from dal.Exceptions.InvalidException import InvalidException
-from dal.Exceptions.NotFoundException import NotFoundException
+from dal.exceptions.ExitBotException import ExitBotException
+from dal.exceptions.InvalidException import InvalidException
+from dal.exceptions.NotFoundException import NotFoundException
 
 
 def command_handler_decorator(func: Callable) -> Callable:
