@@ -22,7 +22,7 @@ class Email(Field):
             raise ValueError("Email cannot be empty")
 
         if not self._RE.match(v):
-            raise ValueError("Email has invalid format")
+            raise ValueError(f"Email has invalid format: {v}")
 
         # додаткові перевірки 
         local, domain = v.split("@", 1)
