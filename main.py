@@ -12,6 +12,8 @@ from dal.exceptions.NotFoundException import NotFoundException
 from dal.storages.NoteStorage import NoteStorage
 from dal.entities.Record import Record
 
+from colorama import Fore as cf
+from colorama import Style as cs
 
 def main() -> None:
     book_storage = AddressBookStorage()
@@ -34,7 +36,7 @@ def main() -> None:
     )
 
     print("\n🤖 Welcome to the Assistant Bot!")
-    print("Type 'help' to see available commands.\n")
+    print(f"Type '{cf.CYAN}help{cs.RESET_ALL}' to see available commands.\n")
 
     try:
         latest_file_name = record_file_service.get_latest_file_name()
@@ -44,7 +46,7 @@ def main() -> None:
         else:
             print("📂 No saved state found, starting with empty address book.")
     except Exception as e:
-        print(f"⚠️ Could not load previous state: {e}")
+        print(f"⚠️ {cf.YELLOW}Could not load previous state: {e}{cs.RESET_ALL}")
 
     while True:
         try:
@@ -58,25 +60,25 @@ def main() -> None:
             print(result)
 
         except InvalidException as ic:
-            print(ic)
+            print(f"{cf.RED}{ic}{cs.RESET_ALL}")
             continue
         except AlreadyExistException as aee:
-            print(aee)
+            print(f"{cf.RED}{aee}{cs.RESET_ALL}")
         except NotFoundException as nf:
-            print(nf)
+            print(f"{cf.RED}{nf}{cs.RESET_ALL}")
         except KeyboardInterrupt:
             try:
                 result = command_service.execute("exit", [])
                 if result:
                     print(result)
             except ExitBotException as eb:
-                print(eb)
+                print(f"{cf.RED}{eb}{cs.RESET_ALL}")
             break
         except ExitBotException as eb:
-            print(eb)
+            print(f"{cf.RED}{eb}{cs.RESET_ALL}")
             break
         except Exception as ex:
-            print(f"💥 Unexpected error: {ex}")
+            print(f"💥 {cf.RED}Unexpected error: {ex}{cs.RESET_ALL}")
             break
 
 
