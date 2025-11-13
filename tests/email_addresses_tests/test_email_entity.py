@@ -29,15 +29,15 @@ def test_email_with_plus_and_subdomain():
 @pytest.mark.parametrize(
     "raw_email",
     [
-        "",                # порожній рядок
-        "   ",             # тільки пробіли
-        "plainaddress",    # без @
+        "",  # порожній рядок
+        "   ",  # тільки пробіли
+        "plainaddress",  # без @
         "no-at-sign.com",  # без @
         "@no-local-part.com",  # немає локальної частини
-        "user@",               # немає домену
-        "user@nodotdomain",    # домен без крапки
-        "user@exa mple.com",   # пробіл у домені
-        "us er@example.com",   # пробіл у локальній частині
+        "user@",  # немає домену
+        "user@nodotdomain",  # домен без крапки
+        "user@exa mple.com",  # пробіл у домені
+        "us er@example.com",  # пробіл у локальній частині
     ],
 )
 def test_email_invalid_format_raises_value_error(raw_email):
