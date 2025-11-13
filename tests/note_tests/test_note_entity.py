@@ -1,7 +1,4 @@
-import pytest
 from dal.entities.Note import Note
-from dal.entities.Title import Title
-from dal.entities.Content import Content
 from datetime import datetime
 
 

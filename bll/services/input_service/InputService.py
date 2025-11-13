@@ -1,4 +1,3 @@
-import inspect
 from typing import List, Tuple
 
 from prompt_toolkit import prompt

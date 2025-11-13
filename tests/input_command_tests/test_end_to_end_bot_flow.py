@@ -3,7 +3,6 @@ from bll.services.input_service.InputService import InputService
 from bll.services.command_service.CommandService import CommandService
 from bll.services.record_service.RecordService import RecordService
 from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
 from dal.entities.Note import Note
 from dal.exceptions.ExitBotException import ExitBotException
 

@@ -1,4 +1,3 @@
-import pytest
 from dal.entities.Note import Note
 from dal.storages.NoteStorage import NoteStorage
 
