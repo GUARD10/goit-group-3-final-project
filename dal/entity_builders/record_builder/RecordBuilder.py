@@ -80,3 +80,35 @@ class RecordBuilder:
 
         self._record.emails.append(email_obj)
         return self
+
+
+    def update_email(self, old_email: str | Email, new_email: str | Email) -> "RecordBuilder":
+        old_email_obj = old_email if isinstance(old_email, Email) else Email(old_email)
+        new_email_obj = new_email if isinstance(new_email, Email) else Email(new_email)
+
+        if old_email_obj not in self._record.emails:
+            raise NotFoundException(
+                f"Record {self._record.name} does not have email {old_email_obj.value}"
+            )
+
+        if new_email_obj in self._record.emails:
+            raise AlreadyExistException(
+                f"Record {self._record.name} already has email {new_email_obj.value}"
+            )
+
+        self._record.emails = [
+            new_email_obj if e == old_email_obj else e
+            for e in self._record.emails
+        ]
+        return self
+
+    def remove_email(self, email: str | Email) -> "RecordBuilder":
+        email_obj = email if isinstance(email, Email) else Email(email)
+
+        if email_obj not in self._record.emails:
+            raise NotFoundException(
+                f"Record {self._record.name} does not have email {email_obj.value}"
+            )
+
+        self._record.emails = [e for e in self._record.emails if e != email_obj]
+        return self

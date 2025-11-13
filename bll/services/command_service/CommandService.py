@@ -51,7 +51,17 @@ class CommandService(ICommandService):
             "add-email": Command(
                 "add-email",
                 self.add_email,
-                "Add new Email to contact: add-email [name] [new_phone].",
+                "Add new Email to contact: add-email [name] [new_email].",
+            ),
+            "update-email": Command(
+                "update-email",
+                self.update_email,
+                "Update Email for contact: update-email [name] [old_email] [new_email].",
+            ),
+            "delete-email": Command(
+                "delete-email",
+                self.delete_email,
+                "Delete Email for contact: delete-email [name] [email].",
             ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
@@ -227,6 +237,40 @@ class CommandService(ICommandService):
         return f"Contact updated. {contact}"
 
     @command_handler_decorator
+    def update_email(self, arguments: list[str]) -> str:
+        # очікуємо: name, old_email, new_email
+        name, old_email, new_email = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service
+            .get_by_name(name)
+            .update()
+            .update_email(old_email, new_email)
+            .build()
+        )
+
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def delete_email(self, arguments: list[str]) -> str:
+        # очікуємо: name, email_to_delete
+        name, email_to_delete = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service
+            .get_by_name(name)
+            .update()
+            .remove_email(email_to_delete)
+            .build()
+        )
+
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
     def hello(self) -> str:
         return "How can I help you?"
 
@@ -239,6 +283,8 @@ class CommandService(ICommandService):
                     "add-phone",
                     "show-phone",
                     "add-email",
+                    "update-email",
+                    "delete-email",
                     "delete-contact",
                     "show-all-contacts",
                     "search-contacts",
