@@ -8,8 +8,7 @@ def test_note_builder_setters():
     builder = note.update()
 
     updated = (
-        builder
-        .set_name("new")
+        builder.set_name("new")
         .set_title("New Title")
         .set_content("Some long new content")
         .build()

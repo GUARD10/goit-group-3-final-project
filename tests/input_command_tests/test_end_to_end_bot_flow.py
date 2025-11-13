@@ -12,6 +12,7 @@ from dal.exceptions.ExitBotException import ExitBotException
 # Fake services
 # =========================
 
+
 class FakeFileService:
     def __init__(self):
         self.files = {}
@@ -58,6 +59,7 @@ class FakeNoteService:
 # Fixtures
 # =========================
 
+
 @pytest.fixture
 def full_bot():
     storage = AddressBookStorage()
@@ -67,10 +69,7 @@ def full_bot():
     input_service = InputService()
 
     command_service = CommandService(
-        record_service,
-        file_service,
-        note_service,
-        input_service
+        record_service, file_service, note_service, input_service
     )
 
     return input_service, command_service, record_service, note_service
@@ -79,6 +78,7 @@ def full_bot():
 # =========================
 # Updated full bot test
 # =========================
+
 
 def test_full_bot_flow(full_bot):
     input_service, command_service, record_service, note_service = full_bot
