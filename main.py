@@ -66,7 +66,6 @@ def main() -> None:
             print(nf)
         except KeyboardInterrupt:
             try:
-                # коректно завершуємо через команду exit
                 result = command_service.execute("exit", [])
                 if result:
                     print(result)
