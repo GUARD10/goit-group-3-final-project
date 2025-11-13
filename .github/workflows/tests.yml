@@ -1,0 +1,31 @@
+name: 🧪 Unit Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  run-tests:
+    name: 🧪 Запуск pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Клонування репозиторію
+        uses: actions/checkout@v4
+
+      - name: 🐍 Встановлення Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 📦 Встановлення залежностей
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: 🧪 Запуск pytest
+        run: |
+          echo "🚀 Запускаємо тести..."
+          pytest --maxfail=1 --disable-warnings -q

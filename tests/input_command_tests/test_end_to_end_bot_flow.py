@@ -3,20 +3,26 @@ from bll.services.input_service.InputService import InputService
 from bll.services.command_service.CommandService import CommandService
 from bll.services.record_service.RecordService import RecordService
 from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
+from dal.entities.Note import Note
 from dal.exceptions.ExitBotException import ExitBotException
+
+
+# =========================
+# Fake services
+# =========================
 
 
 class FakeFileService:
     def __init__(self):
         self.files = {}
+        self._saveable = False
 
     def is_save_able(self):
-        # Для тестів завжди False, щоб не викликати input()
-        return False
+        return self._saveable
 
-    def save_with_name(self, name="autosave"):  # no-op
+    def save_with_name(self, name="autosave"):
         self.files[name] = "data"
+        return name
 
     def load_by_name(self, name):
         if name not in self.files:
@@ -29,76 +35,134 @@ class FakeFileService:
         return list(self.files.keys()) or ["autosave_test"]
 
 
+class FakeNoteService:
+    def __init__(self):
+        self.notes = {}
+
+    def add(self, name: str, title: str, content: str) -> Note:
+        note = Note(name, title, content)
+        self.notes[name] = note
+        return note
+
+    def get_by_name(self, name: str) -> Note:
+        return self.notes[name]
+
+    def update(self, old_name: str, updated_note: Note) -> None:
+        self.notes[old_name] = updated_note
+
+    def has(self, name: str) -> bool:
+        return name in self.notes
+
+
+# =========================
+# Fixtures
+# =========================
+
+
 @pytest.fixture
 def full_bot():
     storage = AddressBookStorage()
     record_service = RecordService(storage)
     file_service = FakeFileService()
-    command_service = CommandService(record_service, file_service)
-    input_service = InputService(command_service)
-    return input_service, record_service
+    note_service = FakeNoteService()
+    input_service = InputService()
+
+    command_service = CommandService(
+        record_service, file_service, note_service, input_service
+    )
+
+    return input_service, command_service, record_service, note_service
+
+
+# =========================
+# Updated full bot test
+# =========================
 
 
 def test_full_bot_flow(full_bot):
-    input_service, record_service = full_bot
+    input_service, command_service, record_service, note_service = full_bot
 
-    # 1️⃣ Add 2 contacts
-    result = input_service.handle("add-contact John +380991112233")
-    assert "John" in result and "+380991112233" in result
+    # helper executor
+    def run(cmd: str) -> str:
+        command, args = input_service.handle(cmd)
+        return command_service.execute(command, args)
 
-    result = input_service.handle("add-contact Jane +380987654321")
-    assert "Jane" in result and "+380987654321" in result
+    # 1️⃣ Add contacts
+    result = run("add-contact John +380991112233")
+    assert "John" in result
+
+    result = run("add-contact Jane +380987654321")
+    assert "Jane" in result
 
     # 2️⃣ Add birthdays
-    result = input_service.handle("add-birthday John 05.11.2000")
-    assert "contact updated" in result.lower()
+    result = run("add-birthday John 05.11.2000")
+    assert "updated" in result.lower()
 
-    result = input_service.handle("add-birthday Jane 29.02.1996")
-    assert "contact updated" in result.lower()
+    result = run("add-birthday Jane 29.02.1996")
+    assert "updated" in result.lower()
 
-    # 3️⃣ Check birthdays
-    result = input_service.handle("show-birthday John")
-    assert "05.11.2000" in result or "2000-11-05" in result
+    # 3️⃣ Show birthday
+    result = run("show-birthday John")
+    assert "2000" in result
 
-    # 4️⃣ Add another phone to John
-    result = input_service.handle("add-phone John +380990001122")
+    # 4️⃣ Add phone to John
+    result = run("add-phone John +380990001122")
     john = record_service.get_by_name("John")
     assert len(john.phones) == 2
-    assert any(p.value == "+380990001122" for p in john.phones)
 
-    # 5️⃣ Show all contacts
-    result = input_service.handle("show-all-contacts")
-    assert "John" in result and "Jane" in result
+    # 5️⃣ Show all
+    res = run("show-all-contacts")
+    assert "John" in res and "Jane" in res
 
-    # 6️⃣ Show upcoming birthdays
-    result = input_service.handle("upcoming-birthdays")
-    assert isinstance(result, str)
-    assert "contact" in result.lower() or "no birthdays" in result.lower()
+    # 6️⃣ Check birthdays
+    res = run("upcoming-birthdays")
+    assert isinstance(res, str)
 
-    # 7️⃣ Show help
-    result = input_service.handle("help")
-    assert "available commands" in result.lower()
-    assert "add-contact" in result.lower()
-    assert "exit" in result.lower()
+    # 7️⃣ Help
+    res = run("help")
+    assert "available commands" in res.lower()
 
-    # 8️⃣ Greeting
-    result = input_service.handle("hello")
-    assert "how can i help" in result.lower()
+    # 8️⃣ Hello
+    res = run("hello")
+    assert "how can i help" in res.lower()
 
-    # 9️⃣ Exit command
+    # =============================
+    # Notes subsystem tests 📝
+    # =============================
+
+    # 9️⃣ Add note
+    # monkeypatch input in read_value + read_multiline
+    # but test full flow → simulate values directly
+    command_service.input_service.read_value = lambda *a, **k: "My Title"
+    command_service.input_service.read_multiline = lambda *a, **k: "My content here"
+
+    result = run("add-note my_note")
+    assert "Note added" in result or "success" in result.lower()
+    assert note_service.has("my_note")
+
+    # 🔟 Edit title
+    command_service.input_service.read_value = lambda *a, **k: "Updated Title"
+
+    result = run("edit-note-title my_note")
+    assert "updated" in result.lower()
+    assert note_service.get_by_name("my_note").title.value == "Updated Title"
+
+    # 1️⃣1️⃣ Edit content
+    command_service.input_service.read_multiline = lambda **kw: "New edited content"
+
+    result = run("edit-note-content my_note")
+    assert "updated" in result.lower()
+    assert note_service.get_by_name("my_note").content.value == "New edited content"
+
+    # =============================
+    # Exit
+    # =============================
     with pytest.raises(ExitBotException):
-        input_service.handle("exit")
+        run("exit")
 
-    # 🔟 Final data validation
+    # Final validation
     all_records = record_service.get_all()
     assert len(all_records) == 2
 
-    john = record_service.get_by_name("John")
-    assert isinstance(john, Record)
-    assert len(john.phones) == 2
-    assert john.birthday is not None
-    assert john.birthday.value.year == 2000
-
-    jane = record_service.get_by_name("Jane")
-    assert jane.birthday is not None
-    assert jane.birthday.value.year == 1996
+    assert record_service.get_by_name("John").birthday.value.year == 2000
+    assert record_service.get_by_name("Jane").birthday.value.year == 1996

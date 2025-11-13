@@ -39,7 +39,7 @@ class RecordService(IRecordService):
         record = self.storage.find(record_name)
 
         if not record:
-            raise NotFoundException(f"Record '{record_name}' does not exist")
+            raise NotFoundException(f"Record '{record_name}' not found")
 
         return record
 
