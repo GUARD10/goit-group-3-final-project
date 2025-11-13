@@ -19,7 +19,7 @@ class Record:
     ):
         self.name = Name(name)
         self.phones: list[Phone] = []
-        self.emails: list[Phone] = []
+        self.emails: list[Email] = []
         self.birthday: Birthday | None = None
         self.address: Address | None = None
 
