@@ -65,7 +65,7 @@ class CommandService(ICommandService):
             "upcoming-birthdays": Command(
                 "upcoming-birthdays",
                 self.birthdays,
-                "Show upcoming birthdays for next week",
+                "Show upcoming birthdays for next N days (default 7): upcoming-birthdays [days]",
             ),
             "delete-contact": Command(
                 "delete-contact",
@@ -87,6 +87,11 @@ class CommandService(ICommandService):
             ),
             "show-all-files": Command(
                 "show-all-files", self.show_all_files, "Show all data files"
+            ),
+            "search-contacts": Command(
+                "search-contacts",
+                self.search_contacts,
+                "Search contacts by any field: search-contacts [text]",
             ),
             "add-note": Command(
                 "add-note",
@@ -183,13 +188,22 @@ class CommandService(ICommandService):
         return f"Contact birthday: {contact.birthday}"
 
     @command_handler_decorator
-    def birthdays(self) -> str:
+    def birthdays(self, arguments: list[str] | None = None) -> str:
+        days = 7
+        if arguments:
+            try:
+                days = int(arguments[0])
+                if days <= 0:
+                    raise ValueError
+            except (ValueError, TypeError):
+                raise InvalidException("Days must be a positive integer")
+
         contacts_with_upcoming_birthdays = (
-            self.record_service.get_with_upcoming_birthdays()
+            self.record_service.get_with_upcoming_birthdays(days)
         )
 
         if not contacts_with_upcoming_birthdays:
-            return "No birthdays this week 🎂"
+            return f"No birthdays in the next {days} days 🎂"
 
         return "\n".join(
             f"Contact: {contact.name} - {contact.birthday}"
@@ -210,6 +224,7 @@ class CommandService(ICommandService):
                     "show-phone",
                     "delete-contact",
                     "show-all-contacts",
+                    "search-contacts",
                 ],
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
                 "Files": ["save", "load", "delete-file", "show-all-files"],
@@ -348,3 +363,13 @@ class CommandService(ICommandService):
         if not notes:
             return "No notes found."
         return "\n".join([f"{note}" for note in notes])
+
+    @command_handler_decorator
+    def search_contacts(self, arguments: list[str]) -> str:
+        query = " ".join(arguments).strip()
+        matches = self.record_service.search(query)
+
+        if not matches:
+            return "No matching contacts found."
+
+        return "\n".join([f"{contact}" for contact in matches])

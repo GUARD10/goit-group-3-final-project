@@ -9,22 +9,27 @@ class DateHelper:
     def is_date_within_next_week(
         event_date: Union[str, datetime, date, None],
         today: Optional[Union[str, datetime, date]] = None,
+        days: int = 7,
     ) -> bool:
         if event_date is None:
             return False
 
         today_date = DateHelper.parse_to_date(today or date.today())
         event_date_parsed = DateHelper.parse_to_date(event_date)
-        next_week = today_date + timedelta(days=7)
+
+        if not isinstance(days, int) or days <= 0:
+            raise InvalidException("Days must be a positive integer")
+
+        next_week = today_date + timedelta(days=days)
 
         adjusted_date = DateHelper.set_date_with_feb_edge_case(
             event_date_parsed, today_date.year
         )
 
-        if adjusted_date.weekday() == 5:  # Saturday
-            adjusted_date += timedelta(days=2)
-        elif adjusted_date.weekday() == 6:  # Sunday
-            adjusted_date += timedelta(days=1)
+        if adjusted_date < today_date:
+            adjusted_date = DateHelper.set_date_with_feb_edge_case(
+                event_date_parsed, today_date.year + 1
+            )
 
         return today_date <= adjusted_date <= next_week
 
