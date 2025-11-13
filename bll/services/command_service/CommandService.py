@@ -63,6 +63,16 @@ class CommandService(ICommandService):
                 self.delete_email,
                 "Delete Email for contact: delete-email [name] [email].",
             ),
+            "set-address": Command(
+                "set-address",
+                self.set_address,
+                "Set address for contact: set-address [name] [address].",
+            ),
+            "delete-address": Command(
+                "delete-address",
+                self.delete_address,
+                "Delete address for contact: delete-address [name].",
+            ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
@@ -271,6 +281,38 @@ class CommandService(ICommandService):
         return f"Contact updated. {contact}"
 
     @command_handler_decorator
+    def set_address(self, arguments: list[str]) -> str:
+        # очікуємо: name, address
+        name, address = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service
+            .get_by_name(name)
+            .update()
+            .set_address(address)
+            .build()
+        )
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def delete_address(self, arguments: list[str]) -> str:
+        # очікуємо: тільки name
+        (name,) = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service
+            .get_by_name(name)
+            .update()
+            .clear_address()
+            .build()
+        )
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
     def hello(self) -> str:
         return "How can I help you?"
 
@@ -285,6 +327,8 @@ class CommandService(ICommandService):
                     "add-email",
                     "update-email",
                     "delete-email",
+                    "set-address",
+                    "delete-address",
                     "delete-contact",
                     "show-all-contacts",
                     "search-contacts",

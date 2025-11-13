@@ -6,6 +6,7 @@ from dal.entities.Name import Name
 from dal.entities.Phone import Phone
 from dal.entities.Email import Email
 from dal.entities.Birthday import Birthday
+from dal.entities.Address import Address
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.AlreadyExistException import AlreadyExistException
 from dal.exceptions.NotFoundException import NotFoundException
@@ -111,4 +112,18 @@ class RecordBuilder:
             )
 
         self._record.emails = [e for e in self._record.emails if e != email_obj]
+        return self
+
+    def set_address(self, address: str | Address) -> "RecordBuilder":
+        addr_obj = address if isinstance(address, Address) else Address(address)
+        self._record.address = addr_obj
+        return self
+
+    def clear_address(self) -> "RecordBuilder":
+        if self._record.address is None:
+            raise NotFoundException(
+                f"Record {self._record.name} does not have address"
+            )
+
+        self._record.address = None
         return self
