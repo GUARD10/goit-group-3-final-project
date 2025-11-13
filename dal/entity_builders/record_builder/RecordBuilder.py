@@ -68,11 +68,15 @@ class RecordBuilder:
         return self
 
     def add_email(self, email: str | Email) -> "RecordBuilder":
-        if self._record.email is not None:
+        email_obj = email if isinstance(email, Email) else Email(email)
+
+        if self._record.emails is None:
+            self._record.emails = []
+
+        if email_obj in self._record.emails:
             raise AlreadyExistException(
-                f"Record {self._record.name} already has email {self._record.email}"
+                f"Record {self._record.name} already has email {email_obj.value}"
             )
 
-        email_obj = email if isinstance(email, Email) else Email(email)
-        self._record.email = email_obj
+        self._record.emails.append(email_obj)
         return self
