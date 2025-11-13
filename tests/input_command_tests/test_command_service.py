@@ -1,11 +1,77 @@
 import pytest
+from datetime import datetime
+
 from bll.services.command_service.CommandService import CommandService
 from dal.entities.Record import Record
 from dal.entities.Birthday import Birthday
 from dal.exceptions.ExitBotException import ExitBotException
 
 
-# === Fake dependencies ===
+class FakeField:
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return str(self.value)
+
+
+class FakeNote:
+    def __init__(self, name="my_note", title="Old title", content="Old content"):
+        self.name = FakeField(name)
+        self.title = FakeField(title)
+        self.content = FakeField(content)
+
+        self.created_at = datetime.now()
+        self.updated_at = None
+
+    def update(self):
+        return FakeNoteBuilder(self)
+
+
+class FakeNoteBuilder:
+    def __init__(self, note: FakeNote):
+        self._note = note
+
+    def set_name(self, value: str):
+        self._note.name = FakeField(value)
+        return self
+
+    def set_title(self, value: str):
+        self._note.title = FakeField(value)
+        return self
+
+    def set_content(self, value: str):
+        self._note.content = FakeField(value)
+        return self
+
+    def build(self):
+        if not self._note.name or not self._note.title or not self._note.content:
+            raise ValueError(
+                "Name, Title, and Content must be set before building the Note."
+            )
+
+        if not self._note.updated_at or self._note.created_at > self._note.updated_at:
+            self._note.updated_at = self._note.created_at
+
+        return self._note
+
+
+class FakeNoteService:
+    def __init__(self):
+        self.notes = {}
+
+    def add(self, name, title, content):
+        note = FakeNote(name, title, content)
+        self.notes[name] = note
+        return note
+
+    def get_by_name(self, name):
+        if name not in self.notes:
+            self.notes[name] = FakeNote(name)
+        return self.notes[name]
+
+    def update(self, name, note):
+        self.notes[name] = note
 
 
 class FakeRecordService:
@@ -41,14 +107,15 @@ class FakeFileService:
         self.loaded = []
         self.deleted = []
         self.files = ["file1.pkl", "file2.pkl"]
-        self._saveable = False  # контроль для тестів
+        self._saveable = False
 
     def is_save_able(self):
         return self._saveable
 
     def save_with_name(self, name=None):
-        self.saved.append(name or "autosave")
-        return name or "autosave"
+        result = name or "autosave"
+        self.saved.append(result)
+        return result
 
     def load_by_name(self, name):
         self.loaded.append(name)
@@ -60,7 +127,16 @@ class FakeFileService:
         return self.files
 
 
-# === Fixtures ===
+class FakeInputService:
+    def __init__(self):
+        self.next_value = None
+        self.next_multiline = None
+
+    def read_value(self, *args, **kwargs):
+        return self.next_value
+
+    def read_multiline(self, *args, **kwargs):
+        return self.next_multiline
 
 
 @pytest.fixture
@@ -74,11 +150,27 @@ def fake_file_service():
 
 
 @pytest.fixture
-def command_service(fake_record_service, fake_file_service):
-    return CommandService(fake_record_service, fake_file_service)
+def fake_note_service():
+    return FakeNoteService()
 
 
-# === Tests ===
+@pytest.fixture
+def fake_input_service():
+    return FakeInputService()
+
+
+@pytest.fixture
+def command_service(
+    fake_record_service, fake_file_service, fake_note_service, fake_input_service
+):
+    return CommandService(
+        fake_record_service, fake_file_service, fake_note_service, fake_input_service
+    )
+
+
+# ===================================================================
+# ==========                 Tests                      ==============
+# ===================================================================
 
 
 def test_add_contact(command_service, fake_record_service):
@@ -90,6 +182,7 @@ def test_add_contact(command_service, fake_record_service):
 def test_add_phone(command_service, fake_record_service):
     rec = Record("John", "+380991112233")
     fake_record_service.save(rec)
+
     result = command_service.add_phone(["John", "+380111222333"])
     assert "Contact updated" in result
     assert len(fake_record_service.records["John"].phones) == 2
@@ -98,6 +191,7 @@ def test_add_phone(command_service, fake_record_service):
 def test_show_phone(command_service, fake_record_service):
     rec = Record("John", "+380991112233", "+380665554433")
     fake_record_service.save(rec)
+
     result = command_service.show_phone(["John"])
     assert "+380991112233" in result
     assert "+380665554433" in result
@@ -106,14 +200,16 @@ def test_show_phone(command_service, fake_record_service):
 def test_add_birthday(command_service, fake_record_service):
     rec = Record("John", "+380991112233")
     fake_record_service.save(rec)
+
     result = command_service.add_birthday(["John", "05.11.2000"])
     assert "Contact updated" in result
-    assert isinstance(rec.birthday, Birthday)
+    assert isinstance(fake_record_service.records["John"].birthday, Birthday)
 
 
 def test_show_birthday(command_service, fake_record_service):
     rec = Record("John", "+380991112233", birthday="05.11.2000")
     fake_record_service.save(rec)
+
     result = command_service.show_birthday(["John"])
     assert "05.11.2000" in result
 
@@ -121,6 +217,7 @@ def test_show_birthday(command_service, fake_record_service):
 def test_birthdays(command_service, fake_record_service):
     rec = Record("John", "+380991112233", birthday="05.11.2000")
     fake_record_service.save(rec)
+
     result = command_service.birthdays()
     assert "John" in result
     assert "05.11.2000" in result
@@ -134,6 +231,7 @@ def test_birthdays_empty(command_service):
 def test_show_all(command_service, fake_record_service):
     fake_record_service.save(Record("John", "+380991112233"))
     fake_record_service.save(Record("Jane", "+380665554433"))
+
     result = command_service.show_all()
     assert "John" in result and "Jane" in result
 
@@ -149,17 +247,13 @@ def test_hello_and_help(command_service):
 
 
 def test_exit_bot_no_save(command_service):
-    """exit_bot when file_service.is_save_able() == False"""
     command_service.file_service._saveable = False
     with pytest.raises(ExitBotException):
         command_service.exit_bot()
 
 
-def test_exit_bot_with_save(monkeypatch, command_service):
-    """exit_bot when file_service.is_save_able() == True"""
+def test_exit_bot_with_save(command_service):
     command_service.file_service._saveable = True
-    # емулюємо відповідь користувача "n" на питання про збереження
-    monkeypatch.setattr("builtins.input", lambda _: "n")
     with pytest.raises(ExitBotException):
         command_service.exit_bot()
 
@@ -167,6 +261,7 @@ def test_exit_bot_with_save(monkeypatch, command_service):
 def test_delete_contact(command_service, fake_record_service):
     rec = Record("John", "+380991112233")
     fake_record_service.save(rec)
+
     result = command_service.delete_contact(["John"])
     assert "deleted" in result.lower()
     assert not fake_record_service.has("John")
@@ -181,7 +276,7 @@ def test_save_state_with_name(command_service, fake_file_service):
 def test_save_state_without_name(command_service, fake_file_service):
     res = command_service.save_state([])
     assert "autosave" in res
-    assert any("autosave" in s for s in fake_file_service.saved)
+    assert "autosave" in fake_file_service.saved
 
 
 def test_load_state(command_service, fake_file_service):
@@ -203,10 +298,44 @@ def test_show_all_files(command_service, fake_file_service):
 
 
 def test_get_command_exists(command_service):
-    cmd = command_service.get_command("add-contact")
-    assert cmd is not None
-    assert cmd.name == "add-contact"
+    assert command_service.get_command("add-contact") is not None
 
 
 def test_get_command_missing(command_service):
     assert command_service.get_command("not-a-command") is None
+
+
+def test_add_note(command_service, fake_note_service, fake_input_service):
+    fake_input_service.next_value = "My Title"
+    fake_input_service.next_multiline = "Content is long enough"
+
+    result = command_service.add_note(["my_note"])
+
+    assert "Note added" in result
+    assert "my_note" in fake_note_service.notes
+    assert fake_note_service.notes["my_note"].title.value == "My Title"
+
+
+def test_edit_note_title(command_service, fake_note_service, fake_input_service):
+    fake_note_service.add("my_note", "Old title", "content")
+
+    fake_input_service.next_value = "New title"
+
+    result = command_service.edit_note_title(["my_note"])
+
+    assert "New title" in result
+    assert fake_note_service.notes["my_note"].title.value == "New title"
+
+
+def test_edit_note_content(command_service, fake_note_service, fake_input_service):
+    fake_note_service.add("my_note", "Title", "Old content")
+
+    fake_input_service.next_multiline = "This is new multiline content"
+
+    result = command_service.edit_note_content(["my_note"])
+
+    assert "updated" in result.lower()
+    assert (
+        fake_note_service.notes["my_note"].content.value
+        == "This is new multiline content"
+    )

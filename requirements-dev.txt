@@ -11,7 +11,7 @@ typing_extensions==4.15.0
 types-requests==2.32.4.20250913
 types-setuptools==80.9.0.20250822
 
-# --- Тестування ---
+# --- Тестування та CLI ---
 pytest==9.0.0
 colorama==0.4.6
 iniconfig==2.3.0
@@ -20,3 +20,6 @@ pathspec==0.12.1
 pluggy==1.6.0
 Pygments==2.19.2
 urllib3==2.5.0
+
+# --- Інтерактивний CLI (редагування нотаток) ---
+prompt_toolkit==3.0.48

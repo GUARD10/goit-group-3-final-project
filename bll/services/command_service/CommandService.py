@@ -1,23 +1,31 @@
 from typing import Optional
 
+import inspect
+
+from bll.decorators.CommandHandlerDecorator import command_handler_decorator
 from bll.services.command_service.ICommandService import ICommandService
+from bll.services.input_service.IInputService import IInputService
+from bll.services.note_service.INoteService import INoteService
 from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
 from bll.services.record_service.IRecordService import IRecordService
 from dal.entities.Command import Command
 from dal.entities.Record import Record
 from dal.exceptions.ExitBotException import ExitBotException
-from bll.decorators.CommandHandlerDecorator import command_handler_decorator
-from dal.storages.IStorage import IStorage
-
-Data = IStorage[str, Record]
+from dal.exceptions.InvalidException import InvalidException
 
 
-class CommandService(ICommandService):  # сервіс трохи роздутий і потребує рефакторингу
+class CommandService(ICommandService):
     def __init__(
-        self, record_service: IRecordService, file_service: IPickleFileService[Data]
+        self,
+        record_service: IRecordService,
+        file_service: IPickleFileService,
+        note_service: INoteService,
+        input_service: IInputService,
     ) -> None:
         self.record_service = record_service
         self.file_service = file_service
+        self.note_service = note_service
+        self.input_service = input_service
         self._help_text: str | None = None
 
         self.commands: dict[str, Command] = {
@@ -36,7 +44,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
                 "show-phone",
                 self.show_phone,
                 "Show a contact's phone by name: show-phone [name]",
-            ),  # оце має сенс переробити на show-contact і показувати всю інфу по контакту замість чогось конкртеного
+            ),
             "show-all-contacts": Command(
                 "show-all-contacts", self.show_all, "Show all contacts"
             ),
@@ -46,13 +54,14 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             "add-birthday": Command(
                 "add-birthday",
                 self.add_birthday,
-                "Add birthday to contact: add-birthday [name] [birthday]. Note it will replace birthday if exist",
+                "Add birthday to contact: add-birthday [name] [birthday]. "
+                "Note it will replace birthday if exist",
             ),
             "show-birthday": Command(
                 "show-birthday",
                 self.show_birthday,
                 "Show birthday to contact: show-birthday [name]",
-            ),  # те саме що і show-phone
+            ),
             "upcoming-birthdays": Command(
                 "upcoming-birthdays",
                 self.birthdays,
@@ -79,14 +88,50 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             "show-all-files": Command(
                 "show-all-files", self.show_all_files, "Show all data files"
             ),
+            "add-note": Command(
+                "add-note",
+                self.add_note,
+                "Add a new note: add-note [name]",
+            ),
+            "edit-note-title": Command(
+                "edit-note-title",
+                self.edit_note_title,
+                "Edit note title: edit-note-title [name]",
+            ),
+            "edit-note-content": Command(
+                "edit-note-content",
+                self.edit_note_content,
+                "Edit note content: edit-note-content [name]",
+            ),
+            "delete-note": Command(
+                "delete-note",
+                self.delete_note,
+                "Delete a note: delete-note [name]",
+            ),
+            "show-all-notes": Command(
+                "show-all-notes", self.show_all_notes, "Show all notes"
+            ),
         }
+
+    def execute(self, command_name: str, arguments: list[str]) -> str:
+        command = self.get_command(command_name)
+        if not command:
+            raise InvalidException("Invalid command")
+
+        handler = command.handler
+        sig = inspect.signature(handler)
+        param_count = len(sig.parameters)
+
+        return handler() if param_count == 0 else handler(arguments)
+
+    def get_command(self, command: str) -> Optional[Command]:
+        return self.commands.get(command)
 
     @command_handler_decorator
     def add_contact(self, arguments: list[str]) -> str:
         name, phone = [arg.strip() for arg in arguments]
         new_contact = Record(name, phone)
         self.record_service.save(new_contact)
-
         return f"Contact added. {new_contact}"
 
     @command_handler_decorator
@@ -104,8 +149,20 @@ class CommandService(ICommandService):  # сервіс трохи роздути
     def show_phone(self, arguments: list[str]) -> str:
         name = arguments[0]
         contact = self.record_service.get_by_name(name)
-
         return ", ".join(p.value for p in contact.phones)
+
+    @command_handler_decorator
+    def delete_contact(self, arguments: list[str]) -> str:
+        name = arguments[0]
+        self.record_service.delete(name)
+        return f"Contact '{name}' deleted."
+
+    @command_handler_decorator
+    def show_all(self) -> str:
+        contacts = self.record_service.get_all()
+        if not contacts:
+            return "No contacts found."
+        return "\n".join([f"{contact}" for contact in contacts])
 
     @command_handler_decorator
     def add_birthday(self, arguments: list[str]) -> str:
@@ -116,16 +173,13 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             .set_birthday(birthday)
             .build()
         )
-
         self.record_service.update(name, updated_contact)
-
         return f"Contact updated. {name}"
 
     @command_handler_decorator
     def show_birthday(self, arguments: list[str]) -> str:
         name = arguments[0]
         contact = self.record_service.get_by_name(name)
-
         return f"Contact birthday: {contact.birthday}"
 
     @command_handler_decorator
@@ -138,20 +192,9 @@ class CommandService(ICommandService):  # сервіс трохи роздути
             return "No birthdays this week 🎂"
 
         return "\n".join(
-            [
-                f"Contact: {contact.name} - {contact.birthday}"
-                for contact in contacts_with_upcoming_birthdays
-            ]
+            f"Contact: {contact.name} - {contact.birthday}"
+            for contact in contacts_with_upcoming_birthdays
         )
-
-    @command_handler_decorator
-    def show_all(self) -> str:
-        contacts = self.record_service.get_all()
-
-        if not contacts:
-            return "No contacts found."
-
-        return "\n".join([f"{contact}" for contact in contacts])
 
     @command_handler_decorator
     def hello(self) -> str:
@@ -171,8 +214,15 @@ class CommandService(ICommandService):  # сервіс трохи роздути
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
                 "Files": ["save", "load", "delete-file", "show-all-files"],
                 "System": ["hello", "help", "exit", "close"],
+                "Notes": [
+                    "add-note",
+                    "edit-note-title",
+                    "edit-note-content",
+                    "delete-note",
+                    "show-all-notes",
+                ],
             }
-            lines = []
+            lines: list[str] = []
             for title, cmds in sections.items():
                 lines.append(f"\n{title}")
                 for cmd in cmds:
@@ -187,14 +237,7 @@ class CommandService(ICommandService):  # сервіс трохи роздути
         if self.file_service.is_save_able():
             saved_file_name = self.file_service.save_with_name()
             print(f"State saved to {saved_file_name}")
-
         raise ExitBotException("\nGood bye!")
-
-    @command_handler_decorator
-    def delete_contact(self, arguments: list[str]) -> str:
-        name = arguments[0]
-        self.record_service.delete(name)
-        return f"Contact '{name}' deleted."
 
     @command_handler_decorator
     def save_state(self, arguments: list[str]) -> str:
@@ -210,7 +253,6 @@ class CommandService(ICommandService):  # сервіс трохи роздути
     def load_state(self, arguments: list[str]) -> str:
         file_name = arguments[0]
         self.file_service.load_by_name(file_name)
-
         return f"State loaded from file '{file_name}'."
 
     @command_handler_decorator
@@ -224,5 +266,85 @@ class CommandService(ICommandService):  # сервіс трохи роздути
         file_names = self.file_service.get_file_list()
         return "Available files:\n" + "\n".join(file_names)
 
-    def get_command(self, command: str) -> Optional[Command]:
-        return self.commands.get(command)
+    @command_handler_decorator
+    def add_note(self, arguments: list[str]) -> str:
+        note_name = arguments[0].strip()
+
+        note_title = self.input_service.read_value(
+            "\nEnter note title (or /cancel to abort)",
+            allow_empty=False,
+        )
+        if note_title is None:
+            return "Note creation cancelled."
+
+        note_content = self.input_service.read_multiline(
+            header=(
+                "\nEnter note content (multi-line):\n"
+                "- Type your text, multiple lines allowed\n"
+                "- End input with an empty line\n"
+                "- Minimum required length: 10 characters\n"
+                "- Type /cancel to abort\n"
+            ),
+            min_len=10,
+        )
+        if note_content is None:
+            return "Note creation cancelled."
+
+        new_note = self.note_service.add(note_name, note_title, note_content)
+
+        return f"Note added successfully.\n{new_note}"
+
+    @command_handler_decorator
+    def edit_note_title(self, arguments: list[str]) -> str:
+        note_name = arguments[0].strip()
+        note = self.note_service.get_by_name(note_name)
+
+        new_title = self.input_service.read_value(
+            "\nEdit title (/cancel to abort)",
+            default=note.title.value,
+            allow_empty=False,
+        )
+        if new_title is None:
+            return "Editing cancelled."
+
+        updated_note = note.update().set_title(new_title).build()
+        self.note_service.update(note_name, updated_note)
+
+        return f"Note title updated. New title: {updated_note.title}"
+
+    @command_handler_decorator
+    def edit_note_content(self, arguments: list[str]) -> str:
+        note_name = arguments[0].strip()
+        note = self.note_service.get_by_name(note_name)
+
+        new_content = self.input_service.read_multiline(
+            header=(
+                "\nEnter new content (multi-line):\n"
+                "- Existing content shown above\n"
+                "- Type your new content below\n"
+                "- Finish with an empty line\n"
+                "- Type /cancel to abort\n"
+            ),
+            min_len=10,
+            show_existing=note.content.value,
+        )
+        if new_content is None:
+            return "Editing cancelled."
+
+        updated_note = note.update().set_content(new_content).build()
+        self.note_service.update(note_name, updated_note)
+
+        return "Note content updated successfully."
+
+    @command_handler_decorator
+    def delete_note(self, arguments: list[str]) -> str:
+        note_name = arguments[0].strip()
+        self.note_service.delete(note_name)
+        return f"Note '{note_name}' deleted."
+
+    @command_handler_decorator
+    def show_all_notes(self) -> str:
+        notes = self.note_service.get_all()
+        if not notes:
+            return "No notes found."
+        return "\n".join([f"{note}" for note in notes])

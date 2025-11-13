@@ -11,10 +11,18 @@ def test_field_equality():
 
 
 def test_name_validation():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         Name(None)
+
     with pytest.raises(TypeError):
         Name(123)
+
+    with pytest.raises(ValueError):
+        Name("")
+
+    with pytest.raises(ValueError):
+        Name("   ")
+
     name = Name("Roman")
     assert str(name) == "Roman"
 

@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 
-class ISerializableStorage[Data](ABC):
+class ISerializableStorage[Dict](ABC):
     @abstractmethod
-    def export_state(self) -> Data:
+    def export_state(self) -> Dict:
         pass
 
     @abstractmethod
-    def import_state(self, state: Data) -> None:
+    def import_state(self, state: Dict) -> None:
         pass
