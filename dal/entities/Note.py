@@ -60,9 +60,7 @@ class Note:
 
         return NoteBuilder(self)
 
-    def set_tags(
-        self, tags: Sequence[Tag | tuple[str, str | None] | str]
-    ) -> "Note":
+    def set_tags(self, tags: Sequence[Tag | tuple[str, str | None] | str]) -> "Note":
         self.tags = []
         for raw in tags:
             self._append_tag(raw)

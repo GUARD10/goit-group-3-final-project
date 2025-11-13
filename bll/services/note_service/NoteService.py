@@ -92,7 +92,9 @@ class NoteService(INoteService):
 
         return self.storage.filter(is_match)
 
-    def add_tags(self, note_name: str, tags: Sequence[tuple[str, str | None] | str]) -> Note:
+    def add_tags(
+        self, note_name: str, tags: Sequence[tuple[str, str | None] | str]
+    ) -> Note:
         normalized = self._prepare_tags(tags)
         if not normalized:
             raise InvalidException("Tags list cannot be empty")
@@ -109,18 +111,14 @@ class NoteService(INoteService):
         normalized = self._normalize_tag_name(tag_name)
         removed = note.remove_tag(normalized)
         if not removed:
-            raise NotFoundException(
-                f"Tag '{tag_name}' not found in note '{note_name}'"
-            )
+            raise NotFoundException(f"Tag '{tag_name}' not found in note '{note_name}'")
         note.updated_at = datetime.now()
         self.storage.update_item(note_name, note)
         return note
 
     def get_by_tag(self, tag_name: str) -> list[Note]:
         normalized = self._normalize_tag_name(tag_name)
-        return [
-            note for note in self.get_all() if note.has_tag(normalized)
-        ]
+        return [note for note in self.get_all() if note.has_tag(normalized)]
 
     def get_all_sorted_by_tags(self, tag_name: str | None = None) -> list[Note]:
         notes = self.get_all()

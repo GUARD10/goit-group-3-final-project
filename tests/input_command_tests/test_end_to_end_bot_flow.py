@@ -64,9 +64,7 @@ class FakeNoteService:
 
     def remove_tag(self, note_name: str, tag_name: str):
         note = self.get_by_name(note_name)
-        note.tags = [
-            tag for tag in note.tags if tag.value.lower() != tag_name.lower()
-        ]
+        note.tags = [tag for tag in note.tags if tag.value.lower() != tag_name.lower()]
         return note
 
     def get_distinct_tags(self):
@@ -170,16 +168,10 @@ def test_full_bot_flow(full_bot):
     # monkeypatch input in read_value + read_multiline
     # but test full flow → simulate values directly
     note_inputs = iter(["My Title", ""])
-    command_service.input_service.read_value = (
-        lambda *a, **k: next(note_inputs, "")
-    )
+    command_service.input_service.read_value = lambda *a, **k: next(note_inputs, "")
     command_service.input_service.read_multiline = lambda *a, **k: "My content here"
-    command_service.input_service.choose_multiple_from_list = (
-        lambda *a, **k: []
-    )
-    command_service.input_service.choose_from_list = (
-        lambda *a, **k: "__auto__"
-    )
+    command_service.input_service.choose_multiple_from_list = lambda *a, **k: []
+    command_service.input_service.choose_from_list = lambda *a, **k: "__auto__"
 
     result = run("add-note my_note")
     assert "Note added" in result or "success" in result.lower()

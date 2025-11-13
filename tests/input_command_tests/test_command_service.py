@@ -87,9 +87,7 @@ class FakeNoteService:
 
     def remove_tag(self, note_name, tag_name):
         note = self.get_by_name(note_name)
-        note.tags = [
-            tag for tag in note.tags if tag.value.lower() != tag_name.lower()
-        ]
+        note.tags = [tag for tag in note.tags if tag.value.lower() != tag_name.lower()]
         return note
 
     def get_distinct_tags(self):

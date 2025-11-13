@@ -338,7 +338,11 @@ class CommandService(ICommandService):
             note_name,
             note_title,
             note_content,
-            **({"tags": tags} if "tags" in inspect.signature(self.note_service.add).parameters else {})
+            **(
+                {"tags": tags}
+                if "tags" in inspect.signature(self.note_service.add).parameters
+                else {}
+            ),
         )
 
         return f"Note added successfully.\n{new_note}"
@@ -430,11 +434,14 @@ class CommandService(ICommandService):
                 )
                 for tag in existing_tags
             ]
-            selected = self.input_service.choose_multiple_from_list(
-                "Existing Tags",
-                "Select tags to add (use arrows + space, Enter to confirm, Esc to skip)",
-                choices,
-            ) or []
+            selected = (
+                self.input_service.choose_multiple_from_list(
+                    "Existing Tags",
+                    "Select tags to add (use arrows + space, Enter to confirm, Esc to skip)",
+                    choices,
+                )
+                or []
+            )
 
             color_map = {tag.value: tag.color for tag in existing_tags}
             for tag_name in selected:
@@ -483,10 +490,7 @@ class CommandService(ICommandService):
     def _prompt_tag_color(self, tag_name: str) -> str | None:
         options = [("__auto__", "Auto assign color")]
         options.extend(
-            [
-                (code, f"{label} ({code})")
-                for label, code in self.TAG_COLOR_CHOICES
-            ]
+            [(code, f"{label} ({code})") for label, code in self.TAG_COLOR_CHOICES]
         )
         options.append(("__custom__", "Custom color..."))
 
@@ -516,9 +520,7 @@ class CommandService(ICommandService):
     @command_handler_decorator
     def add_note_tags(self, arguments: list[str]) -> str:
         if not arguments:
-            raise InvalidException(
-                "Usage: add-note-tags [note-name] [tag[:color] ...]"
-            )
+            raise InvalidException("Usage: add-note-tags [note-name] [tag[:color] ...]")
 
         note_name = arguments[0].strip()
         tag_specs = arguments[1:]
@@ -532,16 +534,12 @@ class CommandService(ICommandService):
 
         updated_note = self.note_service.add_tags(note_name, tags)
 
-        return (
-            f"Tags updated. Current tags: {', '.join(updated_note.tag_names())}"
-        )
+        return f"Tags updated. Current tags: {', '.join(updated_note.tag_names())}"
 
     @command_handler_decorator
     def remove_note_tag(self, arguments: list[str]) -> str:
         if len(arguments) < 2:
-            raise InvalidException(
-                "Usage: remove-note-tag [note-name] [tag-name]"
-            )
+            raise InvalidException("Usage: remove-note-tag [note-name] [tag-name]")
 
         note_name = arguments[0].strip()
         tag_name = arguments[1].strip()

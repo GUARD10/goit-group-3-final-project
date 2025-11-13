@@ -45,7 +45,9 @@ class INoteService(ABC):
         pass
 
     @abstractmethod
-    def add_tags(self, note_name: str, tags: Sequence[tuple[str, Optional[str]] | str]) -> Note:
+    def add_tags(
+        self, note_name: str, tags: Sequence[tuple[str, Optional[str]] | str]
+    ) -> Note:
         pass
 
     @abstractmethod
