@@ -82,8 +82,9 @@ class RecordBuilder:
         self._record.emails.append(email_obj)
         return self
 
-
-    def update_email(self, old_email: str | Email, new_email: str | Email) -> "RecordBuilder":
+    def update_email(
+        self, old_email: str | Email, new_email: str | Email
+    ) -> "RecordBuilder":
         old_email_obj = old_email if isinstance(old_email, Email) else Email(old_email)
         new_email_obj = new_email if isinstance(new_email, Email) else Email(new_email)
 
@@ -98,8 +99,7 @@ class RecordBuilder:
             )
 
         self._record.emails = [
-            new_email_obj if e == old_email_obj else e
-            for e in self._record.emails
+            new_email_obj if e == old_email_obj else e for e in self._record.emails
         ]
         return self
 
@@ -121,9 +121,7 @@ class RecordBuilder:
 
     def clear_address(self) -> "RecordBuilder":
         if self._record.address is None:
-            raise NotFoundException(
-                f"Record {self._record.name} does not have address"
-            )
+            raise NotFoundException(f"Record {self._record.name} does not have address")
 
         self._record.address = None
         return self

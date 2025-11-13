@@ -41,7 +41,7 @@ class Record:
         emails_str = ", ".join(e.value for e in self.emails) if self.emails else "—"
         birthday_str = self.birthday.value if self.birthday else "—"
         address_str = self.address.value if self.address else "—"
-        
+
         return (
             f"\nContact:"
             f"\nName: {self.name.value}"

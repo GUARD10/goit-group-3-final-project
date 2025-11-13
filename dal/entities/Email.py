@@ -24,7 +24,7 @@ class Email(Field):
         if not self._RE.match(v):
             raise ValueError(f"Email has invalid format: {v}")
 
-        # додаткові перевірки 
+        # додаткові перевірки
         local, domain = v.split("@", 1)
 
         if ".." in local or ".." in domain:

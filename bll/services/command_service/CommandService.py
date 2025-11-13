@@ -252,8 +252,7 @@ class CommandService(ICommandService):
         name, old_email, new_email = [arg.strip() for arg in arguments]
 
         contact = (
-            self.record_service
-            .get_by_name(name)
+            self.record_service.get_by_name(name)
             .update()
             .update_email(old_email, new_email)
             .build()
@@ -269,8 +268,7 @@ class CommandService(ICommandService):
         name, email_to_delete = [arg.strip() for arg in arguments]
 
         contact = (
-            self.record_service
-            .get_by_name(name)
+            self.record_service.get_by_name(name)
             .update()
             .remove_email(email_to_delete)
             .build()
@@ -286,11 +284,7 @@ class CommandService(ICommandService):
         name, address = [arg.strip() for arg in arguments]
 
         contact = (
-            self.record_service
-            .get_by_name(name)
-            .update()
-            .set_address(address)
-            .build()
+            self.record_service.get_by_name(name).update().set_address(address).build()
         )
         self.record_service.update(name, contact)
 
@@ -301,13 +295,7 @@ class CommandService(ICommandService):
         # очікуємо: тільки name
         (name,) = [arg.strip() for arg in arguments]
 
-        contact = (
-            self.record_service
-            .get_by_name(name)
-            .update()
-            .clear_address()
-            .build()
-        )
+        contact = self.record_service.get_by_name(name).update().clear_address().build()
         self.record_service.update(name, contact)
 
         return f"Contact updated. {contact}"
