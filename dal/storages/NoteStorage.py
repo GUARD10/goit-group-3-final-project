@@ -3,9 +3,11 @@ from typing import Callable
 
 from dal.entities.Note import Note
 from dal.storages.IStorage import IStorage
+from dal.exceptions.InvalidException import InvalidException
+from dal.storages.ISerializableStorage import ISerializableStorage
 
 
-class NoteStorage(UserDict, IStorage[str, Note]):
+class NoteStorage(UserDict, IStorage[str, Note], ISerializableStorage[dict[str, Note]]):
     def add(self, note: Note) -> Note:
         self.data[note.name.value] = note
         return note
@@ -28,3 +30,14 @@ class NoteStorage(UserDict, IStorage[str, Note]):
 
     def filter(self, predicate: Callable[[Note], bool]) -> list[Note]:
         return [note for note in self.data.values() if predicate(note)]
+
+    def export_state(self) -> dict[str, Note]:
+        return self.data
+
+    def import_state(self, state: dict[str, Note]) -> None:
+        if not isinstance(state, dict):
+            raise InvalidException(
+                f"Invalid state type: expected dict[str, Note], got {type(state).__name__}"
+            )
+
+        self.data = state

@@ -6,118 +6,158 @@ from bll.decorators.CommandHandlerDecorator import command_handler_decorator
 from bll.services.command_service.ICommandService import ICommandService
 from bll.services.input_service.IInputService import IInputService
 from bll.services.note_service.INoteService import INoteService
-from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
 from bll.services.record_service.IRecordService import IRecordService
+from bll.helpers.TagPalette import TAG_COLORS
 from dal.entities.Command import Command
 from dal.entities.Record import Record
 from dal.exceptions.ExitBotException import ExitBotException
 from dal.exceptions.InvalidException import InvalidException
+from bll.registries.IRegistry import IRegistry
 
 from colorama import Fore as cf
 from colorama import Style as cs
 
 
 class CommandService(ICommandService):
+    TAG_COLOR_CHOICES = TAG_COLORS
+
     def __init__(
         self,
         record_service: IRecordService,
-        file_service: IPickleFileService,
         note_service: INoteService,
         input_service: IInputService,
+        file_service_registry: IRegistry,
     ) -> None:
         self.record_service = record_service
-        self.file_service = file_service
         self.note_service = note_service
         self.input_service = input_service
+        self.file_service_registry = file_service_registry
         self._help_text: str | None = None
 
         self.commands: dict[str, Command] = {
             "hello": Command("hello", self.hello, "Greet the bot"),
             "add-contact": Command(
-                "add-contact",
+                "add-contact [name] [phone]",
                 self.add_contact,
-                "Add a new contact: add-contact [name] [phone]",
+                "Add a new contact",
             ),
             "add-phone": Command(
-                "add-phone",
+                "add-phone [name] [new_phone]",
                 self.add_phone,
-                "Add new phone to contact: add-phone [name] [new_phone].",
+                "Add new phone to contact.",
             ),
             "show-phone": Command(
-                "show-phone",
+                "show-phone [name]",
                 self.show_phone,
-                "Show a contact's phone by name: show-phone [name]",
+                "Show a contact's phone by name",
             ),
-            "show-all-contacts": Command(
-                "show-all-contacts", self.show_all, "Show all contacts"
-            ),
+            "all-contacts": Command("all-contacts", self.show_all, "Show all contacts"),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
             "add-birthday": Command(
-                "add-birthday",
+                "add-birthday [name] [birthday]",
                 self.add_birthday,
-                "Add birthday to contact: add-birthday [name] [birthday]. "
-                "Note it will replace birthday if exist",
+                "Add birthday to contact.Note it will replace birthday if exist",
             ),
             "show-birthday": Command(
-                "show-birthday",
+                "show-birthday [name]",
                 self.show_birthday,
-                "Show birthday to contact: show-birthday [name]",
+                "Show birthday to contact",
             ),
             "upcoming-birthdays": Command(
-                "upcoming-birthdays",
+                "upcoming-birthdays [days]",
                 self.birthdays,
-                "Show upcoming birthdays for next N days (default 7): upcoming-birthdays [days]",
+                "Show upcoming birthdays for next N days (default 7)",
             ),
             "delete-contact": Command(
-                "delete-contact",
+                "delete-contact [name]",
                 self.delete_contact,
-                "Delete a contact: delete-contact [name]",
+                "Delete a contact",
             ),
-            "save": Command(
-                "save",
-                self.save_state,
-                'Save current state to file: save [name] or "save" without name for autosave',
+            "save-contact": Command(
+                "save-contact [name]?",
+                self.save_contact_state,
+                "Save current state to file. NOTE save without name for autosave",
             ),
-            "load": Command(
-                "load", self.load_state, "Load state from file: load [name]"
+            "load-contact": Command(
+                "load-contact [name]",
+                self.load_contact_state,
+                "Load state from file",
             ),
-            "delete-file": Command(
-                "delete-file",
-                self.delete_file,
-                "Delete the data file: delete-file [name]",
+            "delete-contact-file": Command(
+                "delete-contact-file [name]",
+                self.delete_contact_file,
+                "Delete the data file",
             ),
-            "show-all-files": Command(
-                "show-all-files", self.show_all_files, "Show all data files"
+            "contacts-files": Command(
+                "contacts-files", self.show_contact_files, "Show all contact files"
             ),
             "search-contacts": Command(
-                "search-contacts",
+                "search-contacts [text]",
                 self.search_contacts,
-                "Search contacts by any field: search-contacts [text]",
+                "Search contacts by any field",
             ),
             "add-note": Command(
-                "add-note",
+                "add-note [name]",
                 self.add_note,
-                "Add a new note: add-note [name]",
+                "Add a new note",
             ),
             "edit-note-title": Command(
-                "edit-note-title",
+                "edit-note-title [name]",
                 self.edit_note_title,
-                "Edit note title: edit-note-title [name]",
+                "Edit note title",
             ),
             "edit-note-content": Command(
-                "edit-note-content",
+                "edit-note-content [name]",
                 self.edit_note_content,
-                "Edit note content: edit-note-content [name]",
+                "Edit note content",
             ),
             "delete-note": Command(
-                "delete-note",
+                "delete-note [name]",
                 self.delete_note,
-                "Delete a note: delete-note [name]",
+                "Delete a note",
             ),
             "show-all-notes": Command(
                 "show-all-notes", self.show_all_notes, "Show all notes"
+            ),
+            "search-notes": Command(
+                "search-notes [text]",
+                self.search_notes,
+                "Search notes by any field",
+            ),
+            "add-note-tags": Command(
+                "add-note-tags [name] [tag[:color] ...]",
+                self.add_note_tags,
+                "Attach tags to a note",
+            ),
+            "remove-note-tag": Command(
+                "remove-note-tag [name] [tag]",
+                self.remove_note_tag,
+                "Remove tag from a note",
+            ),
+            "show-notes-by-tag": Command(
+                "show-notes-by-tag [tag]",
+                self.show_notes_by_tag,
+                "Show notes filtered/sorted by tag",
+            ),
+            "save-note": Command(
+                "save-note [name]?",
+                self.save_note_state,
+                "Save current notes state to file. NOTE save without name for autosave",
+            ),
+            "load-note": Command(
+                "load-note [name]",
+                self.load_note_state,
+                "Load notes state from file",
+            ),
+            "delete-note-file": Command(
+                "delete-note-file [name]",
+                self.delete_note_file,
+                "Delete the notes data file",
+            ),
+            "note-files": Command(
+                "show-all-note-files", self.show_note_files, "Show all notes files"
             ),
         }
 
@@ -233,7 +273,16 @@ class CommandService(ICommandService):
                     "search-contacts",
                 ],
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
-                "Files": ["save", "load", "delete-file", "show-all-files"],
+                "Files": [
+                    "save-contact",
+                    "load-contact",
+                    "delete-contact-file",
+                    "contacts-files",
+                    "save-note",
+                    "load-note",
+                    "delete-note-file",
+                    "note-files",
+                ],
                 "System": ["hello", "help", "exit", "close"],
                 "Notes": [
                     "add-note",
@@ -241,6 +290,10 @@ class CommandService(ICommandService):
                     "edit-note-content",
                     "delete-note",
                     "show-all-notes",
+                    "search-notes",
+                    "add-note-tags",
+                    "remove-note-tag",
+                    "show-notes-by-tag",
                 ],
             }
             lines: list[str] = []
@@ -257,38 +310,41 @@ class CommandService(ICommandService):
 
     @command_handler_decorator
     def exit_bot(self) -> None:
-        if self.file_service.is_save_able():
-            saved_file_name = self.file_service.save_with_name()
-            print(f"State saved to {saved_file_name}")
+        self._save_all_states()
+
         raise ExitBotException("\nGood bye!")
 
     @command_handler_decorator
-    def save_state(self, arguments: list[str]) -> str:
-        try:
-            file_name = arguments[0]
-        except IndexError:
-            file_name = "autosave"
-
-        self.file_service.save_with_name(file_name)
-        return f"{cf.GREEN}State saved to file '{file_name}'.{cs.RESET_ALL}"
+    def save_contact_state(self, arguments: list[str]) -> str:
+        return self._save_state(arguments, "contacts")
 
     @command_handler_decorator
-    def load_state(self, arguments: list[str]) -> str:
-        file_name = arguments[0]
-        self.file_service.load_by_name(file_name)
-
-        return f"{cf.GREEN}State loaded from file '{file_name}'.{cs.RESET_ALL}"
+    def load_contact_state(self, arguments: list[str]) -> str:
+        return self._load_state(arguments, "contacts")
 
     @command_handler_decorator
-    def delete_file(self, arguments: list[str]) -> str:
-        file_name = arguments[0]
-        self.file_service.delete_by_name(file_name)
-        return f"{cf.GREEN}File '{file_name}' deleted.{cs.RESET_ALL}"
+    def save_note_state(self, arguments: list[str]) -> str:
+        return self._save_state(arguments, "notes")
 
     @command_handler_decorator
-    def show_all_files(self) -> str:
-        file_names = self.file_service.get_file_list()
-        return "Available files:\n" + "\n".join(file_names)
+    def load_note_state(self, arguments: list[str]) -> str:
+        return self._load_state(arguments, "notes")
+
+    @command_handler_decorator
+    def delete_contact_file(self, arguments: list[str]) -> str:
+        return self._delete_state(arguments, "contacts")
+
+    @command_handler_decorator
+    def delete_note_file(self, arguments: list[str]) -> str:
+        return self._delete_state(arguments, "notes")
+
+    @command_handler_decorator
+    def show_contact_files(self) -> str:
+        return self._show_all_state_files("contacts")
+
+    @command_handler_decorator
+    def show_note_files(self) -> str:
+        return self._show_all_state_files("notes")
 
     @command_handler_decorator
     def add_note(self, arguments: list[str]) -> str:
@@ -314,7 +370,18 @@ class CommandService(ICommandService):
         if note_content is None:
             return f"{cf.YELLOW}Note creation cancelled.{cs.RESET_ALL}"
 
-        new_note = self.note_service.add(note_name, note_title, note_content)
+        tags = self._collect_tags_interactively()
+
+        new_note = self.note_service.add(
+            note_name,
+            note_title,
+            note_content,
+            **(
+                {"tags": tags}
+                if "tags" in inspect.signature(self.note_service.add).parameters
+                else {}
+            ),
+        )
 
         return f"{cf.GREEN}Note added successfully.{cs.RESET_ALL}\n{new_note}"
 
@@ -368,7 +435,7 @@ class CommandService(ICommandService):
 
     @command_handler_decorator
     def show_all_notes(self) -> str:
-        notes = self.note_service.get_all()
+        notes = self.note_service.get_all_sorted_by_tags()
         if not notes:
             return f"{cf.RED}No notes found.{cs.RESET_ALL}"
         return "\n".join([f"{note}" for note in notes])
@@ -382,3 +449,196 @@ class CommandService(ICommandService):
             return f"{cf.RED}No matching contacts found.{cs.RESET_ALL}"
 
         return "\n".join([f"{contact}" for contact in matches])
+
+    @command_handler_decorator
+    def search_notes(self, arguments: list[str]) -> str:
+        query = " ".join(arguments).strip()
+        matches = self.note_service.search(query)
+
+        if not matches:
+            return "No matching notes found."
+
+        return "\n".join([f"{note}" for note in matches])
+
+    def _collect_tags_interactively(self) -> list[tuple[str, str | None]]:
+        tags: list[tuple[str, str | None]] = []
+
+        existing_tags = self.note_service.get_distinct_tags()
+        if existing_tags:
+            choices = [
+                (
+                    tag.value,
+                    f"{tag.value}" + (f" ({tag.color})" if tag.color else ""),
+                )
+                for tag in existing_tags
+            ]
+            selected = (
+                self.input_service.choose_multiple_from_list(
+                    "Existing Tags",
+                    "Select tags to add (use arrows + space, Enter to confirm, Esc to skip)",
+                    choices,
+                )
+                or []
+            )
+
+            color_map = {tag.value: tag.color for tag in existing_tags}
+            for tag_name in selected:
+                tags.append((tag_name, color_map.get(tag_name)))
+
+        while True:
+            raw = self.input_service.read_value(
+                "\nEnter new tags (comma-separated, use name or name:#hex, blank to finish)",
+                allow_empty=True,
+            )
+
+            if not raw:
+                break
+
+            entries = [entry.strip() for entry in raw.split(",") if entry.strip()]
+            if not entries:
+                break
+
+            for entry in entries:
+                if ":" in entry:
+                    name, raw_color = entry.split(":", 1)
+                    color_value: str | None = raw_color.strip() or None
+                    tags.append((name.strip(), color_value))
+                else:
+                    color_value = self._prompt_tag_color(entry)
+                    tags.append((entry, color_value))
+
+        return tags
+
+    def _parse_tag_specs(self, specs: list[str]) -> list[tuple[str, str | None]]:
+        parsed: list[tuple[str, str | None]] = []
+        for spec in specs:
+            if ":" in spec:
+                name, color = spec.split(":", 1)
+            else:
+                name, color = spec, None
+
+            name = name.strip()
+            if not name:
+                continue
+            color = color.strip() if color else None
+            parsed.append((name, color))
+
+        return parsed
+
+    def _prompt_tag_color(self, tag_name: str) -> str | None:
+        options = [("__auto__", "Auto assign color")]
+        options.extend(
+            [(code, f"{label} ({code})") for label, code in self.TAG_COLOR_CHOICES]
+        )
+        options.append(("__custom__", "Custom color..."))
+
+        choice = self.input_service.choose_from_list(
+            f"Tag color for '{tag_name}'",
+            "Use arrows to choose and Enter to confirm.",
+            options,
+        )
+
+        if choice is None:
+            manual = self.input_service.read_value(
+                "Enter custom color (e.g. #FF00AA) or leave empty for auto",
+                allow_empty=True,
+            )
+            return manual or None
+
+        if choice == "__auto__":
+            return None
+
+        if choice == "__custom__":
+            return self.input_service.read_value(
+                "Enter custom color (e.g. #FF00AA or teal)", allow_empty=False
+            )
+
+        return choice
+
+    @command_handler_decorator
+    def add_note_tags(self, arguments: list[str]) -> str:
+        if not arguments:
+            raise InvalidException("Usage: add-note-tags [note-name] [tag[:color] ...]")
+
+        note_name = arguments[0].strip()
+        tag_specs = arguments[1:]
+        tags = self._parse_tag_specs(tag_specs)
+
+        if not tags:
+            tags = self._collect_tags_interactively()
+
+        if not tags:
+            raise InvalidException("At least one tag is required")
+
+        updated_note = self.note_service.add_tags(note_name, tags)
+
+        return f"Tags updated. Current tags: {', '.join(updated_note.tag_names())}"
+
+    @command_handler_decorator
+    def remove_note_tag(self, arguments: list[str]) -> str:
+        if len(arguments) < 2:
+            raise InvalidException("Usage: remove-note-tag [note-name] [tag-name]")
+
+        note_name = arguments[0].strip()
+        tag_name = arguments[1].strip()
+        self.note_service.remove_tag(note_name, tag_name)
+
+        return f"Tag '{tag_name}' removed from note '{note_name}'."
+
+    @command_handler_decorator
+    def show_notes_by_tag(self, arguments: list[str]) -> str:
+        tag_name = arguments[0].strip() if arguments else None
+        if tag_name == "":
+            tag_name = None
+        notes = self.note_service.get_all_sorted_by_tags(tag_name)
+
+        if not notes:
+            if tag_name:
+                return f"No notes found with tag '{tag_name}'."
+            return "No notes found."
+
+        heading = (
+            f"Notes with tag '{tag_name}':" if tag_name else "Notes sorted by tags:"
+        )
+        rendered = "\n".join([f"{note}" for note in notes])
+        return f"{heading}\n{rendered}"
+
+    def _save_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+
+        try:
+            file_name = arguments[0]
+        except IndexError:
+            file_name = "autosave"
+
+        file_service.save_with_name(file_name)
+        return f"{key} state saved to file '{file_name}'."
+
+    def _load_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+
+        file_name = arguments[0]
+        file_service.load_by_name(file_name)
+
+        return f"{key} state loaded from file '{file_name}'."
+
+    def _delete_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+        file_name = arguments[0]
+        file_service.delete_by_name(file_name)
+        return f"File '{file_name}' deleted."
+
+    def _show_all_state_files(self, key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+        file_names = file_service.get_file_list()
+
+        if not file_names:
+            return "No files found."
+
+        return "Available files:\n" + "\n".join(file_names)
+
+    def _save_all_states(self) -> None:
+        for key, service in self.file_service_registry.get_all().items():
+            if service.is_save_able():
+                saved_file = service.save_with_name()
+                print(f"[{key}] state saved to {saved_file}")
