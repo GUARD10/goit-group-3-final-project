@@ -50,4 +50,3 @@ def test_address_without_letters_raises_value_error():
 def test_address_with_invalid_character_raises_value_error():
     with pytest.raises(ValueError):
         Address("Kyiv\tKhreshchatyk 1")
-
