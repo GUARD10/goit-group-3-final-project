@@ -14,6 +14,9 @@ from dal.exceptions.ExitBotException import ExitBotException
 from dal.exceptions.InvalidException import InvalidException
 from bll.registries.IRegistry import IRegistry
 
+from colorama import Fore as cf
+from colorama import Style as cs
+
 
 class CommandService(ICommandService):
     TAG_COLOR_CHOICES = TAG_COLORS
@@ -177,7 +180,8 @@ class CommandService(ICommandService):
         name, phone = [arg.strip() for arg in arguments]
         new_contact = Record(name, phone)
         self.record_service.save(new_contact)
-        return f"Contact added. {new_contact}"
+
+        return f"{cf.GREEN}Contact added.{cs.RESET_ALL}{new_contact}"
 
     @command_handler_decorator
     def add_phone(self, arguments: list[str]) -> str:
@@ -188,7 +192,7 @@ class CommandService(ICommandService):
         )
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return f"{cf.GREEN}Contact updated.{cs.RESET_ALL}{contact}"
 
     @command_handler_decorator
     def show_phone(self, arguments: list[str]) -> str:
@@ -200,7 +204,9 @@ class CommandService(ICommandService):
     def delete_contact(self, arguments: list[str]) -> str:
         name = arguments[0]
         self.record_service.delete(name)
-        return f"Contact '{name}' deleted."
+        return (
+            f"{cf.GREEN}Contact '{cf.MAGENTA}{name}{cf.GREEN}' deleted.{cs.RESET_ALL}"
+        )
 
     @command_handler_decorator
     def show_all(self) -> str:
@@ -219,7 +225,7 @@ class CommandService(ICommandService):
             .build()
         )
         self.record_service.update(name, updated_contact)
-        return f"Contact updated. {name}"
+        return f"{cf.GREEN}Contact updated. {cs.RESET_ALL}{name}"
 
     @command_handler_decorator
     def show_birthday(self, arguments: list[str]) -> str:
@@ -292,11 +298,13 @@ class CommandService(ICommandService):
             }
             lines: list[str] = []
             for title, cmds in sections.items():
-                lines.append(f"\n{title}")
+                lines.append(f"\n{cf.BLUE}{title}{cs.RESET_ALL}")
                 for cmd in cmds:
                     if cmd in self.commands:
                         c = self.commands[cmd]
-                        lines.append(f" - {c.name}: {c.description}")
+                        lines.append(
+                            f" - {cf.CYAN}{c.name}{cs.RESET_ALL}: {c.description}"
+                        )
             self._help_text = "Available commands:\n" + "\n".join(lines)
         return self._help_text
 
@@ -347,7 +355,7 @@ class CommandService(ICommandService):
             allow_empty=False,
         )
         if note_title is None:
-            return "Note creation cancelled."
+            return f"{cf.YELLOW}Note creation cancelled.{cs.RESET_ALL}"
 
         note_content = self.input_service.read_multiline(
             header=(
@@ -360,7 +368,7 @@ class CommandService(ICommandService):
             min_len=10,
         )
         if note_content is None:
-            return "Note creation cancelled."
+            return f"{cf.YELLOW}Note creation cancelled.{cs.RESET_ALL}"
 
         tags = self._collect_tags_interactively()
 
@@ -375,7 +383,7 @@ class CommandService(ICommandService):
             ),
         )
 
-        return f"Note added successfully.\n{new_note}"
+        return f"{cf.GREEN}Note added successfully.{cs.RESET_ALL}\n{new_note}"
 
     @command_handler_decorator
     def edit_note_title(self, arguments: list[str]) -> str:
@@ -388,12 +396,12 @@ class CommandService(ICommandService):
             allow_empty=False,
         )
         if new_title is None:
-            return "Editing cancelled."
+            return f"{cf.YELLOW}Editing cancelled.{cs.RESET_ALL}"
 
         updated_note = note.update().set_title(new_title).build()
         self.note_service.update(note_name, updated_note)
 
-        return f"Note title updated. New title: {updated_note.title}"
+        return f"{cf.GREEN}Note title updated. New title: {cf.MAGENTA}{updated_note.title}{cs.RESET_ALL}"
 
     @command_handler_decorator
     def edit_note_content(self, arguments: list[str]) -> str:
@@ -412,24 +420,24 @@ class CommandService(ICommandService):
             show_existing=note.content.value,
         )
         if new_content is None:
-            return "Editing cancelled."
+            return f"{cf.YELLOW}Editing cancelled.{cs.RESET_ALL}"
 
         updated_note = note.update().set_content(new_content).build()
         self.note_service.update(note_name, updated_note)
 
-        return "Note content updated successfully."
+        return f"{cf.GREEN}Note content updated successfully.{cs.RESET_ALL}"
 
     @command_handler_decorator
     def delete_note(self, arguments: list[str]) -> str:
         note_name = arguments[0].strip()
         self.note_service.delete(note_name)
-        return f"Note '{note_name}' deleted."
+        return f"{cf.GREEN}Note '{cf.MAGENTA}{note_name}' deleted.{cs.RESET_ALL}"
 
     @command_handler_decorator
     def show_all_notes(self) -> str:
         notes = self.note_service.get_all_sorted_by_tags()
         if not notes:
-            return "No notes found."
+            return f"{cf.RED}No notes found.{cs.RESET_ALL}"
         return "\n".join([f"{note}" for note in notes])
 
     @command_handler_decorator
@@ -438,7 +446,7 @@ class CommandService(ICommandService):
         matches = self.record_service.search(query)
 
         if not matches:
-            return "No matching contacts found."
+            return f"{cf.RED}No matching contacts found.{cs.RESET_ALL}"
 
         return "\n".join([f"{contact}" for contact in matches])
 
