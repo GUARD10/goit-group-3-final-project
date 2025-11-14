@@ -280,11 +280,18 @@ class CommandService(ICommandService):
 
     @command_handler_decorator
     def set_address(self, arguments: list[str]) -> str:
-        # очікуємо: name, address
-        name, address = [arg.strip() for arg in arguments]
+        if len(arguments) < 2:
+            raise InvalidException("Usage: set-address [name] [address]")
+        
+        name = arguments[0].strip()
+        address = " ".join(arg.strip() for arg in arguments[1:])
 
         contact = (
-            self.record_service.get_by_name(name).update().set_address(address).build()
+            self.record_service
+            .get_by_name(name)
+            .update()
+            .set_address(address)
+            .build()
         )
         self.record_service.update(name, contact)
 

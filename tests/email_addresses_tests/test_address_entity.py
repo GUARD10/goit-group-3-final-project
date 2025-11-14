@@ -11,6 +11,7 @@ def test_address_valid_simple():
 
 def test_address_strips_spaces():
     addr = Address("   вул. Шевченка, 10, Київ   ")
+    # перевіряємо, що обрізало тільки краї
     assert addr.value == "вул. Шевченка, 10, Київ"
 
 
@@ -31,6 +32,22 @@ def test_address_none_raises_value_error():
         Address(None)  # type: ignore[arg-type]
 
 
-def test_address_int_raises_value_error():
-    with pytest.raises(Exception):
+def test_address_int_raises_type_error():
+    with pytest.raises(TypeError):
         Address(123)  # type: ignore[arg-type]
+
+
+def test_address_only_digits_raises_value_error():
+    with pytest.raises(ValueError):
+        Address("123123")
+
+
+def test_address_without_letters_raises_value_error():
+    with pytest.raises(ValueError):
+        Address("12345-6789 #1")
+
+
+def test_address_with_invalid_character_raises_value_error():
+    with pytest.raises(ValueError):
+        Address("Kyiv\tKhreshchatyk 1")
+
