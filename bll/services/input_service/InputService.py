@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from prompt_toolkit import prompt
+from prompt_toolkit.shortcuts import checkboxlist_dialog, radiolist_dialog
 
 from bll.services.input_service.IInputService import IInputService
 from dal.exceptions.InvalidException import InvalidException
@@ -83,3 +84,24 @@ class InputService(IInputService):
             return None
 
         return result
+
+    def choose_from_list(
+        self, title: str, text: str, options: list[tuple[str, str]]
+    ) -> str | None:
+        if not options:
+            return None
+
+        dialog = radiolist_dialog(title=title, text=text, values=options)
+        return dialog.run()
+
+    def choose_multiple_from_list(
+        self, title: str, text: str, options: list[tuple[str, str]]
+    ) -> list[str] | None:
+        if not options:
+            return []
+
+        dialog = checkboxlist_dialog(title=title, text=text, values=options)
+        result = dialog.run()
+        if result is None:
+            return []
+        return [value for value in result]

@@ -5,6 +5,8 @@ from bll.services.command_service.CommandService import CommandService
 from bll.services.record_service.RecordService import RecordService
 from bll.services.note_service.NoteService import NoteService
 from dal.storages.AddressBookStorage import AddressBookStorage
+from dal.entities.Note import Note
+from dal.entities.Tag import Tag
 from dal.storages.NoteStorage import NoteStorage
 from dal.exceptions.ExitBotException import ExitBotException
 from bll.registries.FileServiceRegistry import FileServiceRegistry
@@ -39,6 +41,62 @@ class FakeFileService:
         """Return the list of saved files."""
         return list(self.files.keys()) or ["autosave_test"]
 
+
+class FakeNoteService:
+    def __init__(self):
+        self.notes = {}
+
+    def add(self, name: str, title: str, content: str) -> Note:
+        note = Note(name, title, content)
+        self.notes[name] = note
+        return note
+
+    def get_by_name(self, name: str) -> Note:
+        return self.notes[name]
+
+    def update(self, old_name: str, updated_note: Note) -> None:
+        self.notes[old_name] = updated_note
+
+    def has(self, name: str) -> bool:
+        return name in self.notes
+
+    def add_tags(self, note_name: str, tags: list[tuple[str, str | None]]):
+        note = self.get_by_name(note_name)
+        existing = {tag.value.lower(): tag for tag in note.tags}
+        for name, color in tags:
+            existing[name.lower()] = Tag(name, color)
+        note.tags = list(existing.values())
+        return note
+
+    def remove_tag(self, note_name: str, tag_name: str):
+        note = self.get_by_name(note_name)
+        note.tags = [tag for tag in note.tags if tag.value.lower() != tag_name.lower()]
+        return note
+
+    def get_distinct_tags(self):
+        seen: dict[str, Tag] = {}
+        for note in self.notes.values():
+            for tag in note.tags:
+                key = tag.value.lower()
+                if key not in seen:
+                    seen[key] = Tag(tag.value, tag.color)
+        return sorted(seen.values(), key=lambda t: t.value.lower())
+
+    def get_all_sorted_by_tags(self, tag_name: str | None = None):
+        notes = list(self.notes.values())
+        if tag_name:
+            normalized = tag_name.lower()
+            notes = [
+                note
+                for note in notes
+                if any(tag.value.lower() == normalized for tag in note.tags)
+            ]
+        return notes
+
+
+# =========================
+# Fixtures
+# =========================
     def get_latest_file_name(self):
         """Simulate getting the latest file name."""
         if self.files:
@@ -104,6 +162,18 @@ def test_full_bot_flow(full_bot):
     assert "available" in run("help").lower()
     assert "help" in run("hello").lower()
 
+    # =============================
+    # Notes subsystem tests 📝
+    # =============================
+
+    # 9️⃣ Add note
+    # monkeypatch input in read_value + read_multiline
+    # but test full flow → simulate values directly
+    note_inputs = iter(["My Title", ""])
+    command_service.input_service.read_value = lambda *a, **k: next(note_inputs, "")
+    command_service.input_service.read_multiline = lambda *a, **k: "My content here"
+    command_service.input_service.choose_multiple_from_list = lambda *a, **k: []
+    command_service.input_service.choose_from_list = lambda *a, **k: "__auto__"
     #
     # NOTES
     #
