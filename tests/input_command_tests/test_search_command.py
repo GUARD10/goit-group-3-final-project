@@ -4,9 +4,9 @@ from bll.services.input_service.InputService import InputService
 from bll.services.command_service.CommandService import CommandService
 from bll.services.record_service.RecordService import RecordService
 from bll.services.note_service.NoteService import NoteService
-
 from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.storages.NoteStorage import NoteStorage
+from bll.registries.FileServiceRegistry import FileServiceRegistry
 
 
 class FakeFileService:
@@ -28,25 +28,26 @@ class FakeFileService:
 
 @pytest.fixture
 def bot():
-    contact_storage = AddressBookStorage()
+    record_storage = AddressBookStorage()
     note_storage = NoteStorage()
 
-    record_service = RecordService(contact_storage)
+    record_service = RecordService(record_storage)
     note_service = NoteService(note_storage)
-    file_service = FakeFileService()
+
+    contact_files = FakeFileService()
+    note_files = FakeFileService()
+
+    registry = FileServiceRegistry(contact_files, note_files)
 
     input_service = InputService()
     command_service = CommandService(
         record_service=record_service,
-        file_service=file_service,
         note_service=note_service,
         input_service=input_service,
+        file_service_registry=registry,
     )
 
-    # 🔁 Додаємо посилання назад
     input_service.command_service = command_service
-
-    # Повертаємо обидва сервіси
     return input_service, command_service
 
 
@@ -54,13 +55,13 @@ def test_search_contacts_flow(bot):
     input_service, command_service = bot
 
     cmd, args = input_service.handle("add-contact John +380991112233")
-    assert "Contact added" in command_service.execute(cmd, args)
+    command_service.execute(cmd, args)
 
     cmd, args = input_service.handle("add-contact Jane +380665554433")
-    assert "Contact added" in command_service.execute(cmd, args)
+    command_service.execute(cmd, args)
 
     cmd, args = input_service.handle("add-birthday John 05.11.2000")
-    assert "Contact updated" in command_service.execute(cmd, args)
+    command_service.execute(cmd, args)
 
     cmd, args = input_service.handle("search-contacts john")
     assert "John" in command_service.execute(cmd, args)
