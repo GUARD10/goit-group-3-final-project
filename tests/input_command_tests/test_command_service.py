@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from dal.entities.Record import Record
 from dal.entities.Birthday import Birthday
 from dal.exceptions.ExitBotException import ExitBotException
+from dal.entities.Tag import Tag
 
 
 class FakeField:
@@ -22,6 +23,7 @@ class FakeNote:
         self.name = FakeField(name)
         self.title = FakeField(title)
         self.content = FakeField(content)
+        self.tags: list[Tag] = []
 
         self.created_at = datetime.now()
         self.updated_at = None
@@ -74,6 +76,39 @@ class FakeNoteService:
 
     def update(self, name, note):
         self.notes[name] = note
+
+    def add_tags(self, note_name, tags):
+        note = self.get_by_name(note_name)
+        existing = {tag.value.lower(): tag for tag in note.tags}
+        for name, color in tags:
+            existing[name.lower()] = Tag(name, color)
+        note.tags = list(existing.values())
+        return note
+
+    def remove_tag(self, note_name, tag_name):
+        note = self.get_by_name(note_name)
+        note.tags = [tag for tag in note.tags if tag.value.lower() != tag_name.lower()]
+        return note
+
+    def get_distinct_tags(self):
+        seen: dict[str, Tag] = {}
+        for note in self.notes.values():
+            for tag in note.tags:
+                key = tag.value.lower()
+                if key not in seen:
+                    seen[key] = Tag(tag.value, tag.color)
+        return sorted(seen.values(), key=lambda t: t.value.lower())
+
+    def get_all_sorted_by_tags(self, tag_name=None):
+        notes = list(self.notes.values())
+        if tag_name:
+            normalized = tag_name.lower()
+            notes = [
+                note
+                for note in notes
+                if any(tag.value.lower() == normalized for tag in note.tags)
+            ]
+        return notes
 
 
 class FakeRecordService:
@@ -138,14 +173,29 @@ class FakeFileService:
 
 class FakeInputService:
     def __init__(self):
-        self.next_value = None
-        self.next_multiline = None
+        self.value_queue: list[str | None] = []
+        self.next_value: str | None = ""
+        self.next_multiline: str | None = None
+        self.single_choice_queue: list[str | None] = []
+        self.multi_choice_queue: list[list[str]] = []
 
     def read_value(self, *args, **kwargs):
+        if self.value_queue:
+            return self.value_queue.pop(0)
         return self.next_value
 
     def read_multiline(self, *args, **kwargs):
         return self.next_multiline
+
+    def choose_from_list(self, *args, **kwargs):
+        if self.single_choice_queue:
+            return self.single_choice_queue.pop(0)
+        return "__auto__"
+
+    def choose_multiple_from_list(self, *args, **kwargs):
+        if self.multi_choice_queue:
+            return self.multi_choice_queue.pop(0)
+        return []
 
 
 @pytest.fixture
@@ -332,7 +382,7 @@ def test_get_command_missing(command_service):
 
 
 def test_add_note(command_service, fake_note_service, fake_input_service):
-    fake_input_service.next_value = "My Title"
+    fake_input_service.value_queue = ["My Title", ""]
     fake_input_service.next_multiline = "Content is long enough"
 
     result = command_service.add_note(["my_note"])

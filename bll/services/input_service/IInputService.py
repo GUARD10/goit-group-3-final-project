@@ -26,3 +26,15 @@ class IInputService(ABC):
         show_existing: str | None = None,
     ) -> str | None:
         pass
+
+    @abstractmethod
+    def choose_from_list(
+        self, title: str, text: str, options: list[tuple[str, str]]
+    ) -> str | None:
+        pass
+
+    @abstractmethod
+    def choose_multiple_from_list(
+        self, title: str, text: str, options: list[tuple[str, str]]
+    ) -> list[str] | None:
+        pass
