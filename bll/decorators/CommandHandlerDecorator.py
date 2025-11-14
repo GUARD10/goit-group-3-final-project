@@ -29,14 +29,7 @@ def command_handler_decorator(func: Callable) -> Callable:
 
         except ValueError as e:
             msg = str(e).strip()
-            if msg:
-                raise InvalidException(msg)
-            else:
-                raise InvalidException(
-                    "Invalid data format. Please make sure you entered the correct number of arguments "
-                    "and separated them with spaces.\n"
-                    "Tip: Use 'help' to see how to use each command properly."
-                )
+            raise InvalidException(msg)
 
         except TypeError:
             raise InvalidException(
