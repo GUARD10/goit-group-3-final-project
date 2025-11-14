@@ -85,13 +85,13 @@ class CommandService(ICommandService):
                 self.load_contact_state,
                 "Load state from file: load [name]",
             ),
-            "delete-file": Command(
-                "delete-file",
+            "delete-contact-file": Command(
+                "delete-contact-file",
                 self.delete_contact_file,
                 "Delete the data file: delete-file [name]",
             ),
-            "show-all-files": Command(
-                "show-all-files", self.show_contact_files, "Show all data files"
+            "show-all-contacts-files": Command(
+                "show-all-contacts-files", self.show_contact_files, "Show all data files"
             ),
             "search-contacts": Command(
                 "search-contacts",
@@ -270,7 +270,7 @@ class CommandService(ICommandService):
                     "search-contacts",
                 ],
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
-                "Files": ["save", "load", "delete-file", "show-all-files"],
+                "Files": [""],
                 "System": ["hello", "help", "exit", "close"],
                 "Notes": [
                     "add-note",
