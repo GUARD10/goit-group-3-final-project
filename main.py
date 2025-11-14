@@ -1,8 +1,12 @@
+from pathlib import Path
+
 from bll.services.command_service.CommandService import CommandService
 from bll.services.input_service.InputService import InputService
 from bll.services.pickle_file_service.PickleFileService import PickleFileService
 from bll.services.record_service.RecordService import RecordService
 from bll.services.note_service.NoteService import NoteService
+from bll.registries.FileServiceRegistry import FileServiceRegistry
+
 from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
 from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.exceptions.AlreadyExistException import AlreadyExistException
@@ -11,40 +15,53 @@ from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.NotFoundException import NotFoundException
 from dal.storages.NoteStorage import NoteStorage
 from dal.entities.Record import Record
+from dal.entities.Note import Note
+
+from colorama import Fore as cf
+from colorama import Style as cs
 
 
 def main() -> None:
     book_storage = AddressBookStorage()
-    record_service = RecordService(book_storage)
+    note_storage = NoteStorage()
 
-    record_file_manager = PickleFileManager[dict[str, Record]]()
-    record_file_service = PickleFileService[dict[str, Record]](
-        record_file_manager, book_storage
+    contact_file_manager = PickleFileManager[dict[str, Record]](Path("files/contacts"))
+    note_file_manager = PickleFileManager[dict[str, Note]](Path("files/notes"))
+
+    contact_file_service = PickleFileService[dict[str, Record]](
+        contact_file_manager, book_storage
+    )
+    note_file_service = PickleFileService[dict[str, Note]](
+        note_file_manager, note_storage
     )
 
-    note_storage = NoteStorage()
+    record_service = RecordService(book_storage)
     note_service = NoteService(note_storage)
 
+    file_service_registry = FileServiceRegistry(contact_file_service, note_file_service)
+
     input_service = InputService()
+
     command_service = CommandService(
         record_service=record_service,
-        file_service=record_file_service,
+        file_service_registry=file_service_registry,
         note_service=note_service,
         input_service=input_service,
     )
 
     print("\n🤖 Welcome to the Assistant Bot!")
-    print("Type 'help' to see available commands.\n")
+    print(f"Type '{cf.CYAN}help{cs.RESET_ALL}' to see available commands.\n")
 
-    try:
-        latest_file_name = record_file_service.get_latest_file_name()
-        if latest_file_name:
-            record_file_service.load_by_name(latest_file_name)
-            print(f"📂 Loaded last saved state from '{latest_file_name}'")
-        else:
-            print("📂 No saved state found, starting with empty address book.")
-    except Exception as e:
-        print(f"⚠️ Could not load previous state: {e}")
+    for key, service in file_service_registry.get_all().items():
+        try:
+            latest_file_name = service.get_latest_file_name()
+            if latest_file_name:
+                service.load_by_name(latest_file_name)
+                print(f"📂 {key} loaded last saved state from '{latest_file_name}'")
+            else:
+                print(f"📂 {key} no saved state found — starting empty.")
+        except Exception as e:
+            print(f"⚠️ {key} could not load previous state: {e}")
 
     while True:
         try:
@@ -58,25 +75,25 @@ def main() -> None:
             print(result)
 
         except InvalidException as ic:
-            print(ic)
+            print(f"{cf.RED}{ic}{cs.RESET_ALL}")
             continue
         except AlreadyExistException as aee:
-            print(aee)
+            print(f"{cf.RED}{aee}{cs.RESET_ALL}")
         except NotFoundException as nf:
-            print(nf)
+            print(f"{cf.RED}{nf}{cs.RESET_ALL}")
         except KeyboardInterrupt:
             try:
                 result = command_service.execute("exit", [])
                 if result:
                     print(result)
             except ExitBotException as eb:
-                print(eb)
+                print(f"{cf.RED}{eb}{cs.RESET_ALL}")
             break
         except ExitBotException as eb:
-            print(eb)
+            print(f"{cf.RED}{eb}{cs.RESET_ALL}")
             break
         except Exception as ex:
-            print(f"💥 Unexpected error: {ex}")
+            print(f"💥 {cf.RED}Unexpected error: {ex}{cs.RESET_ALL}")
             break
 
 
