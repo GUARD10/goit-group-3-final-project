@@ -29,6 +29,7 @@ class FakeFileService:
 
 class FakeRegistry:
     """Емуляція FileServiceRegistry"""
+
     def __init__(self):
         self._services = {
             "contacts": FakeFileService(),
@@ -43,10 +44,17 @@ class FakeRegistry:
 
 
 class FakeInputService:
-    def read_value(self, *a, **k): return None
-    def read_multiline(self, *a, **k): return None
-    def choose_from_list(self, *a, **k): return None
-    def choose_multiple_from_list(self, *a, **k): return []
+    def read_value(self, *a, **k):
+        return None
+
+    def read_multiline(self, *a, **k):
+        return None
+
+    def choose_from_list(self, *a, **k):
+        return None
+
+    def choose_multiple_from_list(self, *a, **k):
+        return []
 
 
 @pytest.fixture

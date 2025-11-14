@@ -48,17 +48,14 @@ class CommandService(ICommandService):
                 self.show_phone,
                 "Show a contact's phone by name",
             ),
-            "all-contacts": Command(
-                "all-contacts", self.show_all, "Show all contacts"
-            ),
+            "all-contacts": Command("all-contacts", self.show_all, "Show all contacts"),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
             "add-birthday": Command(
                 "add-birthday [name] [birthday]",
                 self.add_birthday,
-                "Add birthday to contact."
-                "Note it will replace birthday if exist",
+                "Add birthday to contact.Note it will replace birthday if exist",
             ),
             "show-birthday": Command(
                 "show-birthday [name]",
@@ -78,7 +75,7 @@ class CommandService(ICommandService):
             "save-contact": Command(
                 "save-contact [name]?",
                 self.save_contact_state,
-                'Save current state to file. NOTE save without name for autosave',
+                "Save current state to file. NOTE save without name for autosave",
             ),
             "load-contact": Command(
                 "load-contact [name]",
@@ -144,7 +141,7 @@ class CommandService(ICommandService):
             "save-note": Command(
                 "save-note [name]?",
                 self.save_note_state,
-                'Save current notes state to file. NOTE save without name for autosave',
+                "Save current notes state to file. NOTE save without name for autosave",
             ),
             "load-note": Command(
                 "load-note [name]",
@@ -278,7 +275,8 @@ class CommandService(ICommandService):
                     "save-note",
                     "load-note",
                     "delete-note-file",
-                    "note-files"],
+                    "note-files",
+                ],
                 "System": ["hello", "help", "exit", "close"],
                 "Notes": [
                     "add-note",
