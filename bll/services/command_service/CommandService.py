@@ -34,130 +34,130 @@ class CommandService(ICommandService):
         self.commands: dict[str, Command] = {
             "hello": Command("hello", self.hello, "Greet the bot"),
             "add-contact": Command(
-                "add-contact",
+                "add-contact [name] [phone]",
                 self.add_contact,
-                "Add a new contact: add-contact [name] [phone]",
+                "Add a new contact",
             ),
             "add-phone": Command(
-                "add-phone",
+                "add-phone [name] [new_phone]",
                 self.add_phone,
-                "Add new phone to contact: add-phone [name] [new_phone].",
+                "Add new phone to contact.",
             ),
             "show-phone": Command(
-                "show-phone",
+                "show-phone [name]",
                 self.show_phone,
-                "Show a contact's phone by name: show-phone [name]",
+                "Show a contact's phone by name",
             ),
-            "show-all-contacts": Command(
-                "show-all-contacts", self.show_all, "Show all contacts"
+            "all-contacts": Command(
+                "all-contacts", self.show_all, "Show all contacts"
             ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
             "add-birthday": Command(
-                "add-birthday",
+                "add-birthday [name] [birthday]",
                 self.add_birthday,
-                "Add birthday to contact: add-birthday [name] [birthday]. "
+                "Add birthday to contact."
                 "Note it will replace birthday if exist",
             ),
             "show-birthday": Command(
-                "show-birthday",
+                "show-birthday [name]",
                 self.show_birthday,
-                "Show birthday to contact: show-birthday [name]",
+                "Show birthday to contact",
             ),
             "upcoming-birthdays": Command(
-                "upcoming-birthdays",
+                "upcoming-birthdays [days]",
                 self.birthdays,
-                "Show upcoming birthdays for next N days (default 7): upcoming-birthdays [days]",
+                "Show upcoming birthdays for next N days (default 7)",
             ),
             "delete-contact": Command(
-                "delete-contact",
+                "delete-contact [name]",
                 self.delete_contact,
-                "Delete a contact: delete-contact [name]",
+                "Delete a contact",
             ),
             "save-contact": Command(
-                "save-contact",
+                "save-contact [name]?",
                 self.save_contact_state,
-                'Save current state to file: save [name] or "save" without name for autosave',
+                'Save current state to file. NOTE save without name for autosave',
             ),
             "load-contact": Command(
-                "load-contact",
+                "load-contact [name]",
                 self.load_contact_state,
-                "Load state from file: load [name]",
+                "Load state from file",
             ),
             "delete-contact-file": Command(
-                "delete-contact-file",
+                "delete-contact-file [name]",
                 self.delete_contact_file,
-                "Delete the data file: delete-file [name]",
+                "Delete the data file",
             ),
-            "show-all-contacts-files": Command(
-                "show-all-contacts-files", self.show_contact_files, "Show all data files"
+            "contacts-files": Command(
+                "contacts-files", self.show_contact_files, "Show all contact files"
             ),
             "search-contacts": Command(
-                "search-contacts",
+                "search-contacts [text]",
                 self.search_contacts,
-                "Search contacts by any field: search-contacts [text]",
+                "Search contacts by any field",
             ),
             "add-note": Command(
-                "add-note",
+                "add-note [name]",
                 self.add_note,
-                "Add a new note: add-note [name]",
+                "Add a new note",
             ),
             "edit-note-title": Command(
-                "edit-note-title",
+                "edit-note-title [name]",
                 self.edit_note_title,
-                "Edit note title: edit-note-title [name]",
+                "Edit note title",
             ),
             "edit-note-content": Command(
-                "edit-note-content",
+                "edit-note-content [name]",
                 self.edit_note_content,
-                "Edit note content: edit-note-content [name]",
+                "Edit note content",
             ),
             "delete-note": Command(
-                "delete-note",
+                "delete-note [name]",
                 self.delete_note,
-                "Delete a note: delete-note [name]",
+                "Delete a note",
             ),
             "show-all-notes": Command(
                 "show-all-notes", self.show_all_notes, "Show all notes"
             ),
             "search-notes": Command(
-                "search-notes",
+                "search-notes [text]",
                 self.search_notes,
-                "Search notes by any field: search-notes [text]",
+                "Search notes by any field",
             ),
             "add-note-tags": Command(
-                "add-note-tags",
+                "add-note-tags [name] [tag[:color] ...]",
                 self.add_note_tags,
-                "Attach tags to a note: add-note-tags [name] [tag[:color] ...]",
+                "Attach tags to a note",
             ),
             "remove-note-tag": Command(
-                "remove-note-tag",
+                "remove-note-tag [name] [tag]",
                 self.remove_note_tag,
-                "Remove tag from a note: remove-note-tag [name] [tag]",
+                "Remove tag from a note",
             ),
             "show-notes-by-tag": Command(
-                "show-notes-by-tag",
+                "show-notes-by-tag [tag]",
                 self.show_notes_by_tag,
-                "Show notes filtered/sorted by tag: show-notes-by-tag [tag]",
+                "Show notes filtered/sorted by tag",
             ),
             "save-note": Command(
-                "save-note",
+                "save-note [name]?",
                 self.save_note_state,
-                'Save current notes state to file: save-note [name] or "save-note" without name for autosave',
+                'Save current notes state to file. NOTE save without name for autosave',
             ),
             "load-note": Command(
-                "load-note",
+                "load-note [name]",
                 self.load_note_state,
-                "Load notes state from file: load-note [name]",
+                "Load notes state from file",
             ),
             "delete-note-file": Command(
-                "delete-note-file",
+                "delete-note-file [name]",
                 self.delete_note_file,
-                "Delete the notes data file: delete-note-file [name]",
+                "Delete the notes data file",
             ),
-            "show-all-note-files": Command(
-                "show-all-note-files", self.show_note_files, "Show all notes data files"
+            "note-files": Command(
+                "show-all-note-files", self.show_note_files, "Show all notes files"
             ),
         }
 
@@ -270,7 +270,15 @@ class CommandService(ICommandService):
                     "search-contacts",
                 ],
                 "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
-                "Files": [""],
+                "Files": [
+                    "save-contact",
+                    "load-contact",
+                    "delete-contact-file",
+                    "contacts-files",
+                    "save-note",
+                    "load-note",
+                    "delete-note-file",
+                    "note-files"],
                 "System": ["hello", "help", "exit", "close"],
                 "Notes": [
                     "add-note",
