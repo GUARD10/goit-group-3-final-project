@@ -4,7 +4,9 @@ from typing import Union
 from dal.entities.Record import Record
 from dal.entities.Name import Name
 from dal.entities.Phone import Phone
+from dal.entities.Email import Email
 from dal.entities.Birthday import Birthday
+from dal.entities.Address import Address
 from dal.exceptions.InvalidException import InvalidException
 from dal.exceptions.AlreadyExistException import AlreadyExistException
 from dal.exceptions.NotFoundException import NotFoundException
@@ -64,4 +66,62 @@ class RecordBuilder:
 
     def clear_birthday(self) -> "RecordBuilder":
         self._record.birthday = None
+        return self
+
+    def add_email(self, email: str | Email) -> "RecordBuilder":
+        email_obj = email if isinstance(email, Email) else Email(email)
+
+        if self._record.emails is None:
+            self._record.emails = []
+
+        if email_obj in self._record.emails:
+            raise AlreadyExistException(
+                f"Record {self._record.name} already has email {email_obj.value}"
+            )
+
+        self._record.emails.append(email_obj)
+        return self
+
+    def update_email(
+        self, old_email: str | Email, new_email: str | Email
+    ) -> "RecordBuilder":
+        old_email_obj = old_email if isinstance(old_email, Email) else Email(old_email)
+        new_email_obj = new_email if isinstance(new_email, Email) else Email(new_email)
+
+        if old_email_obj not in self._record.emails:
+            raise NotFoundException(
+                f"Record {self._record.name} does not have email {old_email_obj.value}"
+            )
+
+        if new_email_obj in self._record.emails:
+            raise AlreadyExistException(
+                f"Record {self._record.name} already has email {new_email_obj.value}"
+            )
+
+        self._record.emails = [
+            new_email_obj if e == old_email_obj else e for e in self._record.emails
+        ]
+        return self
+
+    def remove_email(self, email: str | Email) -> "RecordBuilder":
+        email_obj = email if isinstance(email, Email) else Email(email)
+
+        if email_obj not in self._record.emails:
+            raise NotFoundException(
+                f"Record {self._record.name} does not have email {email_obj.value}"
+            )
+
+        self._record.emails = [e for e in self._record.emails if e != email_obj]
+        return self
+
+    def set_address(self, address: str | Address) -> "RecordBuilder":
+        addr_obj = address if isinstance(address, Address) else Address(address)
+        self._record.address = addr_obj
+        return self
+
+    def clear_address(self) -> "RecordBuilder":
+        if self._record.address is None:
+            raise NotFoundException(f"Record {self._record.name} does not have address")
+
+        self._record.address = None
         return self

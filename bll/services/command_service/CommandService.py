@@ -51,7 +51,31 @@ class CommandService(ICommandService):
                 self.show_phone,
                 "Show a contact's phone by name",
             ),
-            "all-contacts": Command("all-contacts", self.show_all, "Show all contacts"),
+            "add-email": Command(
+                "add-email",
+                self.add_email,
+                "Add new Email to contact: add-email [name] [new_email].",
+            ),
+            "update-email": Command(
+                "update-email",
+                self.update_email,
+                "Update Email for contact: update-email [name] [old_email] [new_email].",
+            ),
+            "delete-email": Command(
+                "delete-email",
+                self.delete_email,
+                "Delete Email for contact: delete-email [name] [email].",
+            ),
+            "set-address": Command(
+                "set-address",
+                self.set_address,
+                "Set address for contact: set-address [name] [address].",
+            ),
+            "delete-address": Command(
+                "delete-address",
+                self.delete_address,
+                "Delete address for contact: delete-address [name].",
+            ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
             "close": Command("close", self.exit_bot, "Close the program"),
@@ -257,6 +281,74 @@ class CommandService(ICommandService):
         )
 
     @command_handler_decorator
+    def add_email(self, arguments: list[str]) -> str:
+        name, new_email = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service.get_by_name(name).update().add_email(new_email).build()
+        )
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def update_email(self, arguments: list[str]) -> str:
+        # очікуємо: name, old_email, new_email
+        name, old_email, new_email = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service.get_by_name(name)
+            .update()
+            .update_email(old_email, new_email)
+            .build()
+        )
+
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def delete_email(self, arguments: list[str]) -> str:
+        # очікуємо: name, email_to_delete
+        name, email_to_delete = [arg.strip() for arg in arguments]
+
+        contact = (
+            self.record_service.get_by_name(name)
+            .update()
+            .remove_email(email_to_delete)
+            .build()
+        )
+
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def set_address(self, arguments: list[str]) -> str:
+        if len(arguments) < 2:
+            raise InvalidException("Usage: set-address [name] [address]")
+
+        name = arguments[0].strip()
+        address = " ".join(arg.strip() for arg in arguments[1:])
+
+        contact = (
+            self.record_service.get_by_name(name).update().set_address(address).build()
+        )
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
+    def delete_address(self, arguments: list[str]) -> str:
+        # очікуємо: тільки name
+        (name,) = [arg.strip() for arg in arguments]
+
+        contact = self.record_service.get_by_name(name).update().clear_address().build()
+        self.record_service.update(name, contact)
+
+        return f"Contact updated. {contact}"
+
+    @command_handler_decorator
     def hello(self) -> str:
         return "How can I help you?"
 
@@ -268,6 +360,11 @@ class CommandService(ICommandService):
                     "add-contact",
                     "add-phone",
                     "show-phone",
+                    "add-email",
+                    "update-email",
+                    "delete-email",
+                    "set-address",
+                    "delete-address",
                     "delete-contact",
                     "show-all-contacts",
                     "search-contacts",

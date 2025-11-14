@@ -30,12 +30,9 @@ def command_handler_decorator(func: Callable) -> Callable:
                 f"Tip: Use '{cf.CYAN}help{cs.RESET_ALL}' to see how to use each command properly."
             )
 
-        except ValueError:
-            raise InvalidException(
-                f"{cf.RED}Invalid data format. Please make sure you entered the correct number of arguments "
-                f"and separated them with spaces.{cs.RESET_ALL}\n"
-                f"Tip: Use '{cf.CYAN}help{cs.RESET_ALL}' to see how to use each command properly."
-            )
+        except ValueError as e:
+            msg = str(e).strip()
+            raise InvalidException(msg)
 
         except TypeError:
             raise InvalidException(
