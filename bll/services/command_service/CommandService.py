@@ -16,6 +16,7 @@ from dal.exceptions.InvalidException import InvalidException
 from colorama import Fore as cf
 from colorama import Style as cs
 
+
 class CommandService(ICommandService):
     def __init__(
         self,
@@ -163,7 +164,9 @@ class CommandService(ICommandService):
     def delete_contact(self, arguments: list[str]) -> str:
         name = arguments[0]
         self.record_service.delete(name)
-        return f"{cf.GREEN}Contact '{cf.MAGENTA}{name}{cf.GREEN}' deleted.{cs.RESET_ALL}"
+        return (
+            f"{cf.GREEN}Contact '{cf.MAGENTA}{name}{cf.GREEN}' deleted.{cs.RESET_ALL}"
+        )
 
     @command_handler_decorator
     def show_all(self) -> str:
@@ -246,7 +249,9 @@ class CommandService(ICommandService):
                 for cmd in cmds:
                     if cmd in self.commands:
                         c = self.commands[cmd]
-                        lines.append(f" - {cf.CYAN}{c.name}{cs.RESET_ALL}: {c.description}")
+                        lines.append(
+                            f" - {cf.CYAN}{c.name}{cs.RESET_ALL}: {c.description}"
+                        )
             self._help_text = "Available commands:\n" + "\n".join(lines)
         return self._help_text
 

@@ -8,6 +8,7 @@ from dal.exceptions.NotFoundException import NotFoundException
 from colorama import Fore as cf
 from colorama import Style as cs
 
+
 def command_handler_decorator(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args, **kwargs):

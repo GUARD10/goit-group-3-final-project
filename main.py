@@ -15,6 +15,7 @@ from dal.entities.Record import Record
 from colorama import Fore as cf
 from colorama import Style as cs
 
+
 def main() -> None:
     book_storage = AddressBookStorage()
     record_service = RecordService(book_storage)
