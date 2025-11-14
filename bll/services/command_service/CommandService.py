@@ -6,26 +6,26 @@ from bll.decorators.CommandHandlerDecorator import command_handler_decorator
 from bll.services.command_service.ICommandService import ICommandService
 from bll.services.input_service.IInputService import IInputService
 from bll.services.note_service.INoteService import INoteService
-from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
 from bll.services.record_service.IRecordService import IRecordService
 from dal.entities.Command import Command
 from dal.entities.Record import Record
 from dal.exceptions.ExitBotException import ExitBotException
 from dal.exceptions.InvalidException import InvalidException
+from bll.registries.IRegistry import IRegistry
 
 
 class CommandService(ICommandService):
     def __init__(
         self,
         record_service: IRecordService,
-        file_service: IPickleFileService,
         note_service: INoteService,
         input_service: IInputService,
+        file_service_registry: IRegistry,
     ) -> None:
         self.record_service = record_service
-        self.file_service = file_service
         self.note_service = note_service
         self.input_service = input_service
+        self.file_service_registry = file_service_registry
         self._help_text: str | None = None
 
         self.commands: dict[str, Command] = {
@@ -72,21 +72,23 @@ class CommandService(ICommandService):
                 self.delete_contact,
                 "Delete a contact: delete-contact [name]",
             ),
-            "save": Command(
-                "save",
-                self.save_state,
+            "save-contact": Command(
+                "save-contact",
+                self.save_contact_state,
                 'Save current state to file: save [name] or "save" without name for autosave',
             ),
-            "load": Command(
-                "load", self.load_state, "Load state from file: load [name]"
+            "load-contact": Command(
+                "load-contact",
+                self.load_contact_state,
+                "Load state from file: load [name]",
             ),
             "delete-file": Command(
                 "delete-file",
-                self.delete_file,
+                self.delete_contact_file,
                 "Delete the data file: delete-file [name]",
             ),
             "show-all-files": Command(
-                "show-all-files", self.show_all_files, "Show all data files"
+                "show-all-files", self.show_contact_files, "Show all data files"
             ),
             "search-contacts": Command(
                 "search-contacts",
@@ -115,6 +117,24 @@ class CommandService(ICommandService):
             ),
             "show-all-notes": Command(
                 "show-all-notes", self.show_all_notes, "Show all notes"
+            ),
+            "save-note": Command(
+                "save-note",
+                self.save_note_state,
+                'Save current notes state to file: save-note [name] or "save-note" without name for autosave',
+            ),
+            "load-note": Command(
+                "load-note",
+                self.load_note_state,
+                "Load notes state from file: load-note [name]",
+            ),
+            "delete-note-file": Command(
+                "delete-note-file",
+                self.delete_note_file,
+                "Delete the notes data file: delete-note-file [name]",
+            ),
+            "show-all-note-files": Command(
+                "show-all-note-files", self.show_note_files, "Show all notes data files"
             ),
         }
 
@@ -249,37 +269,41 @@ class CommandService(ICommandService):
 
     @command_handler_decorator
     def exit_bot(self) -> None:
-        if self.file_service.is_save_able():
-            saved_file_name = self.file_service.save_with_name()
-            print(f"State saved to {saved_file_name}")
+        self._save_all_states()
+
         raise ExitBotException("\nGood bye!")
 
     @command_handler_decorator
-    def save_state(self, arguments: list[str]) -> str:
-        try:
-            file_name = arguments[0]
-        except IndexError:
-            file_name = "autosave"
-
-        self.file_service.save_with_name(file_name)
-        return f"State saved to file '{file_name}'."
+    def save_contact_state(self, arguments: list[str]) -> str:
+        return self._save_state(arguments, "contacts")
 
     @command_handler_decorator
-    def load_state(self, arguments: list[str]) -> str:
-        file_name = arguments[0]
-        self.file_service.load_by_name(file_name)
-        return f"State loaded from file '{file_name}'."
+    def load_contact_state(self, arguments: list[str]) -> str:
+        return self._load_state(arguments, "contacts")
 
     @command_handler_decorator
-    def delete_file(self, arguments: list[str]) -> str:
-        file_name = arguments[0]
-        self.file_service.delete_by_name(file_name)
-        return f"File '{file_name}' deleted."
+    def save_note_state(self, arguments: list[str]) -> str:
+        return self._save_state(arguments, "notes")
 
     @command_handler_decorator
-    def show_all_files(self) -> str:
-        file_names = self.file_service.get_file_list()
-        return "Available files:\n" + "\n".join(file_names)
+    def load_note_state(self, arguments: list[str]) -> str:
+        return self._load_state(arguments, "notes")
+
+    @command_handler_decorator
+    def delete_contact_file(self, arguments: list[str]) -> str:
+        return self._delete_state(arguments, "contacts")
+
+    @command_handler_decorator
+    def delete_note_file(self, arguments: list[str]) -> str:
+        return self._delete_state(arguments, "notes")
+
+    @command_handler_decorator
+    def show_contact_files(self) -> str:
+        return self._show_all_state_files("contacts")
+
+    @command_handler_decorator
+    def show_note_files(self) -> str:
+        return self._show_all_state_files("notes")
 
     @command_handler_decorator
     def add_note(self, arguments: list[str]) -> str:
@@ -373,3 +397,43 @@ class CommandService(ICommandService):
             return "No matching contacts found."
 
         return "\n".join([f"{contact}" for contact in matches])
+
+    def _save_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+
+        try:
+            file_name = arguments[0]
+        except IndexError:
+            file_name = "autosave"
+
+        file_service.save_with_name(file_name)
+        return f"{key} state saved to file '{file_name}'."
+
+    def _load_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+
+        file_name = arguments[0]
+        file_service.load_by_name(file_name)
+
+        return f"{key} state loaded from file '{file_name}'."
+
+    def _delete_state(self, arguments: list[str], key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+        file_name = arguments[0]
+        file_service.delete_by_name(file_name)
+        return f"File '{file_name}' deleted."
+
+    def _show_all_state_files(self, key: str) -> str:
+        file_service = self.file_service_registry.get(key)
+        file_names = file_service.get_file_list()
+
+        if not file_names:
+            return "No files found."
+
+        return "Available files:\n" + "\n".join(file_names)
+
+    def _save_all_states(self) -> None:
+        for key, service in self.file_service_registry.get_all().items():
+            if service.is_save_able():
+                saved_file = service.save_with_name()
+                print(f"[{key}] state saved to {saved_file}")
