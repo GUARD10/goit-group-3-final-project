@@ -59,16 +59,74 @@ python main.py
 ```
 Після старту бот автоматично намагається підвантажити останній збережений стан контактів і нотаток, якщо файли є у директорії `files/`.
 
-### 5. Використання
-- Наберіть `help`, щоб побачити список команд.
-- Основні сценарії:
-  - **Контакти:** `add-contact`, `add-phone`, `delete-contact`, `search-contacts`, `upcoming-birthdays` тощо.
-  - **Нотатки:** `add-note`, `edit-note-title`, `add-note-tags`, `show-notes-by-tag`, `search-notes`.
-  - **Файли:** `save-contact`, `load-contact`, `save-note`, `load-note`, `contacts-files`, `note-files`.
-  - **Система:** `hello`, `help`, `exit`.
-- Команди зчитують аргументи з CLI або, за потреби, запускають інтерактивні діалоги (наприклад, при додаванні нотаток).
-- Для безпечного виходу використовуйте `exit` або `close` — перед завершенням бот збереже всі дані.
+## 5. Список команд
 
+### 🟦 Базові
+| Команда | Опис |
+|--------|------|
+| `hello` | 👋 Привітання |
+| `help` | ❓ Показати всі команди |
+| `exit` | 👋 Зберегти стан і вийти |
+| `close` | 👋 Те саме, що `exit` |
+| `calendar [month]? [year]?` | 📅 Календар з днями народження |
+
+---
+
+### 🟩 Контакти
+| Команда | Опис |
+|--------|------|
+| `add-contact [contact-name] [phone]` | ➕ Додати контакт |
+| `delete-contact [contact-name]` | 🗑️ Видалити контакт |
+| `show-contact [contact-name]` | 👁️ Показати деталі |
+| `all-contacts` | 📋 Усі контакти |
+| `add-phone [contact-name] [phone]` | 📞 Додати телефон |
+| `delete-phone [contact-name] [phone]` | 🗑️ Видалити телефон |
+| `add-email [contact-name] [email]` | 📧 Додати email |
+| `delete-email [contact-name] [email]` | 🗑️ Видалити email |
+| `set-address [contact-name] [address...]` | 🏠 Встановити адресу |
+| `clear-address [contact-name]` | 🗑️ Очистити адресу |
+| `add-birthday [contact-name] [DD.MM.YYYY]` | 🎂 Додати/замінити день народження |
+| `clear-birthday [contact-name]` | 🗑️ Видалити день народження |
+| `upcoming-birthdays [days]?` | 🎁 Найближчі дні народження |
+| `search-contacts [text]` | 🔍 Пошук контактів |
+
+---
+
+### 🟨 Файли контактів
+| Команда | Опис |
+|--------|------|
+| `save-contact [file-name]?` | 💾 Зберегти контакти |
+| `load-contact [file-name]` | 📂 Завантажити контакти |
+| `delete-contact-file [file-name]` | 🗑️ Видалити файл |
+| `contacts-files` | 📁 Список файлів |
+
+---
+
+### 🟧 Нотатки
+| Команда | Опис |
+|--------|------|
+| `add-note [note-name]` | 📝 Створити ноту |
+| `delete-note [note-name]` | 🗑️ Видалити ноту |
+| `show-note [note-name]` | 👁️ Показати ноту |
+| `all-notes` | 📚 Усі ноти |
+| `search-notes [text]` | 🔍 Пошук |
+| `edit-note-title [note-name]` | ✏️ Редагувати заголовок |
+| `edit-note-content [note-name]` | 📄 Редагувати контент |
+| `add-note-tags [note-name] [tag:color]...` | 🏷️ Додати теги |
+| `remove-note-tag [note-name] [tag]` | ❌ Видалити тег |
+| `show-notes-by-tag [tag]?` | 🏷️ Фільтр за тегом |
+
+---
+
+### 🟪 Файли нотаток
+| Команда | Опис |
+|--------|------|
+| `save-note [file-name]?` | 💾 Зберегти |
+| `load-note [file-name]` | 📂 Завантажити |
+| `delete-note-file [file-name]` | 🗑️ Видалити файл |
+| `note-files` | 📁 Список файлів |
+
+---
 ### 6. Конфігурація (опціонально)
 Ви можете налаштувати директорії для збереження файлів за допомогою змінних середовища:
 
@@ -144,15 +202,72 @@ python main.py
 ```
 On startup the bot tries to load the most recent contacts/notes snapshot from the `files/` directory when available.
 
-### 5. Usage
-- Type `help` to see the full command list.
-- Common flows:
-  - **Contacts:** `add-contact`, `add-phone`, `delete-contact`, `search-contacts`, `upcoming-birthdays`, etc.
-  - **Notes:** `add-note`, `edit-note-title`, `add-note-tags`, `show-notes-by-tag`, `search-notes`.
-  - **Files:** `save-contact`, `load-contact`, `save-note`, `load-note`, `contacts-files`, `note-files`.
-  - **System:** `hello`, `help`, `exit`.
-- Commands accept CLI arguments or launch interactive dialogs when extra input is required (e.g., composing a note).
-- Use `exit` or `close` to quit safely—both trigger state persistence before shutting down.
+## 5. Command List
+
+### 🟦 Basic
+| Command | Description |
+|--------|-------------|
+| `hello` | 👋 Say hello |
+| `help` | ❓ Show all commands |
+| `exit` | 👋 Save & exit |
+| `close` | 👋 Alias for exit |
+| `calendar [month]? [year]?` | 📅 Calendar with birthdays |
+
+---
+
+### 🟩 Contacts
+| Command | Description |
+|--------|-------------|
+| `add-contact [name] [phone]` | ➕ Create contact |
+| `delete-contact [name]` | 🗑️ Delete contact |
+| `show-contact [name]` | 👁️ Show details |
+| `all-contacts` | 📋 List all contacts |
+| `add-phone [name] [phone]` | 📞 Add phone |
+| `delete-phone [name] [phone]` | 🗑️ Remove phone |
+| `add-email [name] [email]` | 📧 Add email |
+| `delete-email [name] [email]` | 🗑️ Remove email |
+| `set-address [name] [address...]` | 🏠 Set address |
+| `clear-address [name]` | 🗑️ Clear address |
+| `add-birthday [name] [DD.MM.YYYY]` | 🎂 Add birthday |
+| `clear-birthday [name]` | 🗑️ Clear birthday |
+| `upcoming-birthdays [days]?` | 🎁 Birthdays in next N days |
+| `search-contacts [text]` | 🔍 Search contacts |
+
+---
+
+### 🟨 Contact Files
+| Command | Description |
+|--------|-------------|
+| `save-contact [file]?` | 💾 Save contacts |
+| `load-contact [file]` | 📂 Load contacts |
+| `delete-contact-file [file]` | 🗑️ Delete file |
+| `contacts-files` | 📁 List files |
+
+---
+
+### 🟧 Notes
+| Command | Description |
+|--------|-------------|
+| `add-note [name]` | 📝 Create note |
+| `delete-note [name]` | 🗑️ Delete note |
+| `show-note [name]` | 👁️ Show note |
+| `all-notes` | 📚 List notes |
+| `search-notes [text]` | 🔍 Search notes |
+| `edit-note-title [name]` | ✏️ Edit title |
+| `edit-note-content [name]` | 📄 Edit content |
+| `add-note-tags [name] [tag:color]...` | 🏷️ Add tags |
+| `remove-note-tag [name] [tag]` | ❌ Remove tag |
+| `show-notes-by-tag [tag]?` | 🏷️ Filter by tag |
+
+---
+
+### 🟪 Note Files
+| Command | Description |
+|--------|-------------|
+| `save-note [file]?` | 💾 Save notes |
+| `load-note [file]` | 📂 Load notes |
+| `delete-note-file [file]` | 🗑️ Delete note file |
+| `note-files` | 📁 List files |
 
 ### 6. Configuration (optional)
 You can customize file storage directories using environment variables:
