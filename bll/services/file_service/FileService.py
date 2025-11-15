@@ -1,12 +1,12 @@
 import pickle
 from datetime import datetime
-from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
+from bll.services.file_service.IFileService import IFileService
 from dal.exceptions.InvalidException import InvalidException
 from dal.file_managers.IFileManager import IFileManager
 from dal.storages.ISerializableStorage import ISerializableStorage
 
 
-class PickleFileService[Data](IPickleFileService):
+class FileService[Data](IFileService):
     def __init__(
         self, file_manager: IFileManager[Data], storage: ISerializableStorage[Data]
     ) -> None:

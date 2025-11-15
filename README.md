@@ -86,6 +86,17 @@ assistant-bot
 - Контакти: `files/contacts`
 - Нотатки: `files/notes`
 
+### 7. Вибір бекенду збереження (опціонально)
+За замовчуванням використовується формат Pickle. Ви можете увімкнути JSON-бекенд:
+
+```pwsh
+# Windows PowerShell
+$env:ASSISTANT_BACKEND="json"; assistant-bot
+
+# Linux/macOS
+export ASSISTANT_BACKEND="json"; assistant-bot
+```
+
 ---
 
 ## EN · English
@@ -168,3 +179,13 @@ assistant-bot
 - Contacts: `files/contacts`
 - Notes: `files/notes`
 
+### 7. Select persistence backend (optional)
+Pickle is used by default. To use JSON backend:
+
+```pwsh
+# Windows PowerShell
+$env:ASSISTANT_BACKEND="json"; assistant-bot
+
+# Linux/macOS
+export ASSISTANT_BACKEND="json"; assistant-bot
+```

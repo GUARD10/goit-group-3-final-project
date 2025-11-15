@@ -1,12 +1,15 @@
+from pathlib import Path
+
 from bll.configs.config import get_config
 from bll.services.command_service.CommandService import CommandService
 from bll.services.input_service.InputService import InputService
-from bll.services.pickle_file_service.PickleFileService import PickleFileService
+from bll.services.file_service.FileService import FileService
 from bll.services.record_service.RecordService import RecordService
 from bll.services.note_service.NoteService import NoteService
 from bll.registries.FileServiceRegistry import FileServiceRegistry
 
 from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
+from dal.file_managers.json_file_manager.JsonFileManager import JsonFileManager
 from dal.storages.AddressBookStorage import AddressBookStorage
 from dal.exceptions.AlreadyExistException import AlreadyExistException
 from dal.exceptions.ExitBotException import ExitBotException
@@ -26,13 +29,18 @@ def main() -> None:
     book_storage = AddressBookStorage()
     note_storage = NoteStorage()
 
-    contact_file_manager = PickleFileManager[dict[str, Record]](config.contacts_dir)
-    note_file_manager = PickleFileManager[dict[str, Note]](config.notes_dir)
+    # Choose backend per config
+    if config.backend == "json":
+        contact_file_manager = JsonFileManager[dict[str, Record]](config.contacts_dir)
+        note_file_manager = JsonFileManager[dict[str, Note]](config.notes_dir)
+    else:
+        contact_file_manager = PickleFileManager[dict[str, Record]](config.contacts_dir)
+        note_file_manager = PickleFileManager[dict[str, Note]](config.notes_dir)
 
-    contact_file_service = PickleFileService[dict[str, Record]](
+    contact_file_service = FileService[dict[str, Record]](
         contact_file_manager, book_storage
     )
-    note_file_service = PickleFileService[dict[str, Note]](
+    note_file_service = FileService[dict[str, Note]](
         note_file_manager, note_storage
     )
 

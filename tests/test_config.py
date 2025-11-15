@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from configs.config import Config, get_config, reset_config
+from bll.configs.config import Config, get_config, reset_config
 
 
 class TestConfig:

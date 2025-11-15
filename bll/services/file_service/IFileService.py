@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class IPickleFileService(ABC):
+class IFileService(ABC):
     @abstractmethod
     def save_with_name(self, name: str = "autosave") -> str:
         pass

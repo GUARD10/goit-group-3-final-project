@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from dal.exceptions.InvalidException import InvalidException
-from bll.services.pickle_file_service.PickleFileService import PickleFileService
+from bll.services.file_service.FileService import FileService
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def mock_storage():
 
 @pytest.fixture
 def service(mock_file_manager, mock_storage):
-    return PickleFileService(mock_file_manager, mock_storage)
+    return FileService(mock_file_manager, mock_storage)
 
 
 # --- SAVE_WITH_NAME --- #
@@ -113,8 +113,8 @@ def test_get_file_list_empty_raises(service, mock_file_manager):
 @pytest.mark.parametrize("bad_name", [None, 123, "   ", ""])
 def test_validate_name_invalid(bad_name):
     with pytest.raises(InvalidException):
-        PickleFileService._validate_name(bad_name)
+        FileService._validate_name(bad_name)
 
 
 def test_validate_name_valid():
-    PickleFileService._validate_name("valid_name.pkl")
+    FileService._validate_name("valid_name.pkl")

@@ -1,5 +1,5 @@
 from bll.registries.IRegistry import IRegistry
-from bll.services.pickle_file_service.IPickleFileService import IPickleFileService
+from bll.services.file_service.IFileService import IFileService
 
 
 class FileServiceRegistry(IRegistry):
@@ -9,7 +9,7 @@ class FileServiceRegistry(IRegistry):
             "notes": note_file_service,
         }
 
-    def get(self, key: str) -> IPickleFileService:
+    def get(self, key: str) -> IFileService:
         key = key.lower().strip()
 
         if key not in self._services:
@@ -17,5 +17,5 @@ class FileServiceRegistry(IRegistry):
 
         return self._services[key]
 
-    def get_all(self) -> dict[str, IPickleFileService]:
+    def get_all(self) -> dict[str, IFileService]:
         return self._services
