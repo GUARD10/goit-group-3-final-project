@@ -68,6 +68,10 @@ class CommandService(ICommandService):
                 self.show_all,
                 "📋 Show all your contacts",
             ),
+            "show-contact": Command(
+                "show-contact [name]",
+                self.show_contact,
+                "👁️ View contact details"),
             "add-phone": Command(
                 "add-phone [name] [phone]",
                 self.add_phone,

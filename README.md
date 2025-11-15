@@ -5,7 +5,6 @@
 - [EN · English](#en--english)
 
 ---
-
 ## UA · Українська
 
 ### 1. Опис
@@ -88,17 +87,6 @@ assistant-bot
 **За замовчуванням:**
 - Контакти: `files/contacts`
 - Нотатки: `files/notes`
-
-### 7. Вибір типу збереження (опціонально)
-За замовчуванням використовується формат Pickle. Ви можете увімкнути JSON:
-
-```pwsh
-# Windows PowerShell
-$env:ASSISTANT_BACKEND="json"; assistant-bot
-
-# Linux/macOS
-export ASSISTANT_BACKEND="json"; assistant-bot
-```
 
 ---
 
@@ -184,14 +172,3 @@ assistant-bot
 **Defaults:**
 - Contacts: `files/contacts`
 - Notes: `files/notes`
-
-### 7. Select persistence type (optional)
-Pickle is used by default. You can switch to the JSON:
-
-```pwsh
-# Windows PowerShell
-$env:ASSISTANT_BACKEND="json"; assistant-bot
-
-# Linux/macOS
-export ASSISTANT_BACKEND="json"; assistant-bot
-```
