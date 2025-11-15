@@ -10,7 +10,14 @@ from bll.services.note_service.INoteService import INoteService
 from bll.services.record_service.IRecordService import IRecordService
 from bll.helpers.TagPalette import TAG_COLORS
 from bll.helpers.CalendarRenderer import render_calendar_with_clock
+from bll.helpers.TableRenderer import (
+    render_contact_details,
+    render_contacts_table,
+    render_note_details,
+    render_notes_table,
+)
 from dal.entities.Command import Command
+from dal.entities.Note import Note
 from dal.entities.Record import Record
 from dal.exceptions.ExitBotException import ExitBotException
 from dal.exceptions.InvalidException import InvalidException
@@ -52,6 +59,11 @@ class CommandService(ICommandService):
                 "show-phone [name]",
                 self.show_phone,
                 "Show a contact's phone by name",
+            ),
+            "show-all-contacts": Command(
+                "show-all-contacts",
+                self.show_all,
+                "Display all contacts in a table view",
             ),
             "add-email": Command(
                 "add-email",
@@ -212,7 +224,10 @@ class CommandService(ICommandService):
         new_contact = Record(name, phone)
         self.record_service.save(new_contact)
 
-        return f"{cf.GREEN}Contact added.{cs.RESET_ALL}{new_contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact added.{cs.RESET_ALL}",
+            new_contact,
+        )
 
     @command_handler_decorator
     def add_phone(self, arguments: list[str]) -> str:
@@ -223,13 +238,21 @@ class CommandService(ICommandService):
         )
         self.record_service.update(name, contact)
 
-        return f"{cf.GREEN}Contact updated.{cs.RESET_ALL}{contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def show_phone(self, arguments: list[str]) -> str:
         name = arguments[0]
         contact = self.record_service.get_by_name(name)
-        return ", ".join(p.value for p in contact.phones)
+        phones = ", ".join(p.value for p in contact.phones) or "—"
+        message = (
+            f"{cf.CYAN}Phones for {cf.MAGENTA}{name}{cs.RESET_ALL}: "
+            f"{cf.GREEN}{phones}{cs.RESET_ALL}"
+        )
+        return self._contact_response(message, contact)
 
     @command_handler_decorator
     def delete_contact(self, arguments: list[str]) -> str:
@@ -243,8 +266,10 @@ class CommandService(ICommandService):
     def show_all(self) -> str:
         contacts = self.record_service.get_all()
         if not contacts:
-            return "No contacts found."
-        return "\n".join([f"{contact}" for contact in contacts])
+            return f"{cf.RED}No contacts found.{cs.RESET_ALL}"
+
+        title = f"Contacts ({len(contacts)})"
+        return render_contacts_table(contacts, title=title)
 
     @command_handler_decorator
     def add_birthday(self, arguments: list[str]) -> str:
@@ -256,13 +281,19 @@ class CommandService(ICommandService):
             .build()
         )
         self.record_service.update(name, updated_contact)
-        return f"{cf.GREEN}Contact updated. {cs.RESET_ALL}{name}"
+        message = (
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL} "
+            f"Birthday updated for {cf.MAGENTA}{name}{cs.RESET_ALL}"
+        )
+        return self._contact_response(message, updated_contact)
 
     @command_handler_decorator
     def show_birthday(self, arguments: list[str]) -> str:
         name = arguments[0]
         contact = self.record_service.get_by_name(name)
-        return f"Contact birthday: {contact.birthday}"
+        birthday_value = str(contact.birthday) if contact.birthday else "—"
+        message = f"Birthday for {cf.MAGENTA}{name}{cs.RESET_ALL}: {cf.YELLOW}{birthday_value}{cs.RESET_ALL}"
+        return self._contact_response(message, contact)
 
     @command_handler_decorator
     def birthdays(self, arguments: list[str] | None = None) -> str:
@@ -282,10 +313,17 @@ class CommandService(ICommandService):
         if not contacts_with_upcoming_birthdays:
             return f"No birthdays in the next {days} days 🎂"
 
-        return "\n".join(
-            f"Contact: {contact.name} - {contact.birthday}"
+        summary_lines = [
+            f"{contact.name.value} - {contact.birthday}"
             for contact in contacts_with_upcoming_birthdays
+        ]
+        title = f"Upcoming birthdays (next {days} days)"
+        table = render_contacts_table(
+            contacts_with_upcoming_birthdays,
+            title=title,
         )
+        summary = "\n".join(summary_lines)
+        return f"{summary}\n{table}"
 
     @command_handler_decorator
     def show_calendar(self, arguments: list[str] | None = None) -> str:
@@ -302,7 +340,10 @@ class CommandService(ICommandService):
         )
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def update_email(self, arguments: list[str]) -> str:
@@ -318,7 +359,10 @@ class CommandService(ICommandService):
 
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def delete_email(self, arguments: list[str]) -> str:
@@ -334,7 +378,10 @@ class CommandService(ICommandService):
 
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def set_address(self, arguments: list[str]) -> str:
@@ -349,7 +396,10 @@ class CommandService(ICommandService):
         )
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def delete_address(self, arguments: list[str]) -> str:
@@ -359,7 +409,10 @@ class CommandService(ICommandService):
         contact = self.record_service.get_by_name(name).update().clear_address().build()
         self.record_service.update(name, contact)
 
-        return f"Contact updated. {contact}"
+        return self._contact_response(
+            f"{cf.GREEN}Contact updated.{cs.RESET_ALL}",
+            contact,
+        )
 
     @command_handler_decorator
     def hello(self) -> str:
@@ -498,7 +551,10 @@ class CommandService(ICommandService):
             ),
         )
 
-        return f"{cf.GREEN}Note added successfully.{cs.RESET_ALL}\n{new_note}"
+        return self._note_response(
+            f"{cf.GREEN}Note added successfully.{cs.RESET_ALL}",
+            new_note,
+        )
 
     @command_handler_decorator
     def edit_note_title(self, arguments: list[str]) -> str:
@@ -516,7 +572,10 @@ class CommandService(ICommandService):
         updated_note = note.update().set_title(new_title).build()
         self.note_service.update(note_name, updated_note)
 
-        return f"{cf.GREEN}Note title updated. New title: {cf.MAGENTA}{updated_note.title}{cs.RESET_ALL}"
+        return self._note_response(
+            f"{cf.GREEN}Note title updated.{cs.RESET_ALL}",
+            updated_note,
+        )
 
     @command_handler_decorator
     def edit_note_content(self, arguments: list[str]) -> str:
@@ -540,7 +599,10 @@ class CommandService(ICommandService):
         updated_note = note.update().set_content(new_content).build()
         self.note_service.update(note_name, updated_note)
 
-        return f"{cf.GREEN}Note content updated successfully.{cs.RESET_ALL}"
+        return self._note_response(
+            f"{cf.GREEN}Note content updated successfully.{cs.RESET_ALL}",
+            updated_note,
+        )
 
     @command_handler_decorator
     def delete_note(self, arguments: list[str]) -> str:
@@ -553,7 +615,8 @@ class CommandService(ICommandService):
         notes = self.note_service.get_all_sorted_by_tags()
         if not notes:
             return f"{cf.RED}No notes found.{cs.RESET_ALL}"
-        return "\n".join([f"{note}" for note in notes])
+        title = f"Notes ({len(notes)})"
+        return render_notes_table(notes, title=title)
 
     @command_handler_decorator
     def search_contacts(self, arguments: list[str]) -> str:
@@ -563,7 +626,8 @@ class CommandService(ICommandService):
         if not matches:
             return f"{cf.RED}No matching contacts found.{cs.RESET_ALL}"
 
-        return "\n".join([f"{contact}" for contact in matches])
+        title = f"Contacts matching '{query}'" if query else "Matching contacts"
+        return render_contacts_table(matches, title=title)
 
     @command_handler_decorator
     def search_notes(self, arguments: list[str]) -> str:
@@ -571,9 +635,10 @@ class CommandService(ICommandService):
         matches = self.note_service.search(query)
 
         if not matches:
-            return "No matching notes found."
+            return f"{cf.RED}No matching notes found.{cs.RESET_ALL}"
 
-        return "\n".join([f"{note}" for note in matches])
+        title = f"Notes matching '{query}'" if query else "Matching notes"
+        return render_notes_table(matches, title=title)
 
     def _collect_tags_interactively(self) -> list[tuple[str, str | None]]:
         tags: list[tuple[str, str | None]] = []
@@ -687,7 +752,10 @@ class CommandService(ICommandService):
 
         updated_note = self.note_service.add_tags(note_name, tags)
 
-        return f"Tags updated. Current tags: {', '.join(updated_note.tag_names())}"
+        return self._note_response(
+            f"{cf.GREEN}Tags updated. Current tags: {', '.join(updated_note.tag_names())}{cs.RESET_ALL}",
+            updated_note,
+        )
 
     @command_handler_decorator
     def remove_note_tag(self, arguments: list[str]) -> str:
@@ -696,9 +764,12 @@ class CommandService(ICommandService):
 
         note_name = arguments[0].strip()
         tag_name = arguments[1].strip()
-        self.note_service.remove_tag(note_name, tag_name)
+        updated_note = self.note_service.remove_tag(note_name, tag_name)
 
-        return f"Tag '{tag_name}' removed from note '{note_name}'."
+        return self._note_response(
+            f"Tag '{tag_name}' removed from note '{note_name}'.",
+            updated_note,
+        )
 
     @command_handler_decorator
     def show_notes_by_tag(self, arguments: list[str]) -> str:
@@ -712,11 +783,20 @@ class CommandService(ICommandService):
                 return f"No notes found with tag '{tag_name}'."
             return "No notes found."
 
-        heading = (
-            f"Notes with tag '{tag_name}':" if tag_name else "Notes sorted by tags:"
-        )
-        rendered = "\n".join([f"{note}" for note in notes])
-        return f"{heading}\n{rendered}"
+        title = f"Notes with tag '{tag_name}'" if tag_name else "Notes sorted by tags"
+        return render_notes_table(notes, title=title)
+
+    def _contact_response(
+        self, message: str, contact: Record, *, title: str | None = None
+    ) -> str:
+        table = render_contact_details(contact, title=title)
+        return f"{message}\n{table}"
+
+    def _note_response(
+        self, message: str, note: Note, *, title: str | None = None
+    ) -> str:
+        table = render_note_details(note, title=title)
+        return f"{message}\n{table}"
 
     def _resolve_calendar_arguments(
         self, arguments: list[str]
