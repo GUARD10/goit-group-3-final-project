@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, List
 
 from prompt_toolkit.completion import Completer, Completion
 
@@ -18,17 +18,84 @@ class PromptCompleter(Completer):
         self._record_service = record_service
         self._note_service = note_service
 
+    # ======== ХЕЛПЕРИ ==================================================
+
+    def _get_contact_names(self) -> List[str]:
+        names = []
+        for rec in self._record_service.get_all():
+            name = getattr(getattr(rec, "name", None), "value", None)
+            if name:
+                names.append(str(name))
+        return sorted(set(names))
+
+    def _get_record_by_name(self, name: str):
+        for rec in self._record_service.get_all():
+            rec_name = getattr(getattr(rec, "name", None), "value", None)
+            if rec_name == name:
+                return rec
+        return None
+
+    def _get_contact_emails(self, contact_name: str) -> List[str]:
+        rec = self._get_record_by_name(contact_name)
+        if not rec:
+            return []
+
+        emails = []
+        # варіант 1: список емейлів
+        if hasattr(rec, "emails"):
+            for e in getattr(rec, "emails", []):
+                value = getattr(e, "value", str(e))
+                if value:
+                    emails.append(str(value))
+        # варіант 2: один емейл
+        elif hasattr(rec, "email"):
+            value = getattr(rec.email, "value", str(rec.email))
+            if value:
+                emails.append(str(value))
+
+        return sorted(set(emails))
+
+    def _get_note_names(self) -> List[str]:
+        names = []
+        for note in self._note_service.get_all():
+            name = getattr(getattr(note, "name", None), "value", None)
+            if name:
+                names.append(str(name))
+        return sorted(set(names))
+
+    def _get_contact_files(self) -> List[str]:
+        # Підлаштуй під свій RecordService, якщо інші назви методів:
+        if hasattr(self._record_service, "list_contact_files"):
+            files = self._record_service.list_contact_files()
+        elif hasattr(self._record_service, "get_contact_files"):
+            files = self._record_service.get_contact_files()
+        else:
+            files = []
+        return sorted(str(f) for f in files)
+
+    def _get_note_files(self) -> List[str]:
+        # Підлаштуй під свій NoteService, якщо інші назви методів:
+        if hasattr(self._note_service, "list_note_files"):
+            files = self._note_service.list_note_files()
+        elif hasattr(self._note_service, "get_note_files"):
+            files = self._note_service.get_note_files()
+        else:
+            files = []
+        return sorted(str(f) for f in files)
+
+    # ======== ОСНОВНИЙ МЕТОД ===========================================
+
     def get_completions(self, document, complete_event) -> Iterable[Completion]:
         text = document.text_before_cursor
         parts = text.split()
 
-        # Нічого не введено → пропонуємо всі команди
+        # 1. Нічого не введено → всі команди
         if len(parts) == 0:
             for name in self._command_service.commands.keys():
                 yield Completion(name, start_position=0)
             return
 
-        # Доповнення імені команди (перше слово)
+        # 2. Доповнення імені команди (перше слово)
         if len(parts) == 1 and not text.endswith(" "):
             prefix = parts[0]
             for name in self._command_service.commands.keys():
@@ -36,69 +103,234 @@ class PromptCompleter(Completer):
                     yield Completion(name, start_position=-len(prefix))
             return
 
+        # Далі працюємо тільки з аргументами (команда вже є)
         cmd = parts[0]
 
-        # # Якщо це тег (слово, що починається з "#") — підказуємо теги
-        # last_token = parts[-1]
-        # if last_token.startswith("#"):
-        #     tag_prefix = last_token[1:]  # без '#'
+        # Визначаємо, який саме аргумент зараз доповнюємо
+        if text.endswith(" "):
+            # курсор після пробілу → починаємо НОВИЙ аргумент
+            arg_index = len(parts)  # 0 - команда, 1 - перший аргумент і т.д.
+            prefix = ""
+        else:
+            # курсор всередині останнього токена
+            arg_index = len(parts) - 1
+            prefix = parts[-1]
 
-        #     # збираємо всі теги з нотаток
-        #     all_tags: set[str] = set()
-        #     for note in self._note_service.get_all():
-        #         # припускаю, що note.tags — ітерований список/сет Tag
-        #         tags = getattr(note, "tags", []) or []
-        #         for tag in tags:
-        #             tag_value = getattr(tag, "value", str(tag))
-        #             all_tags.add(tag_value)
+        # =========================================================
+        #        КОМАНДИ ДЛЯ КОНТАКТІВ
+        # =========================================================
 
-        #     for tag in sorted(all_tags):
-        #         if tag.startswith(tag_prefix):
-        #             # підставляємо всю штуку разом з '#'
-        #             yield Completion("#" + tag, start_position=-len(last_token))
-        #     return
+        # add-contact [name] [phone] → тільки назва команди, аргументи не доповнюємо
+        if cmd == "add-contact":
+            return
 
-        # Основні команди: підказуємо імена контактів
-        contact_commands = {
-            "show-phone",
-            "add-phone",
-            "add-email",
-            "update-email",
-            "delete-email",
-            "set-address",
-            "delete-address",
-            "add-birthday",
-            "show-birthday",
-            "delete-contact",
-            "search-contacts",
-        }
+        # add-phone [name] [phone]
+        # - якщо контакт існує, підказуємо ім'я (1-й аргумент)
+        if cmd == "add-phone":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            # phone не доповнюємо
+            return
 
-        if cmd in contact_commands:
-            # перший аргумент після команди — ім'я контакту
-            if len(parts) == 2 and not text.endswith(" "):
-                prefix = parts[1]
-                for rec in self._record_service.get_all():
-                    name = rec.name.value
+        # show-phone [name] → підказуємо існуючі імена
+        if cmd == "show-phone":
+            if arg_index == 1:
+                for name in self._get_contact_names():
                     if name.startswith(prefix):
                         yield Completion(name, start_position=-len(prefix))
             return
 
-        # Команди для нотаток: підказуємо назви нотаток
+        # add-email [name] [new_email] → тільки ім'я
+        if cmd == "add-email":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            # new_email не доповнюємо
+            return
+
+        # update-email [name] [old_email] [new_email]
+        # - 1-й аргумент → ім'я
+        # - 2-й аргумент → існуючий емейл контактa
+        if cmd == "update-email":
+            if arg_index == 1:
+                # ім'я контакту
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            elif arg_index == 2:
+                # old_email
+                contact_name = parts[1]
+                for email in self._get_contact_emails(contact_name):
+                    if email.startswith(prefix):
+                        yield Completion(email, start_position=-len(prefix))
+            # new_email не доповнюємо
+            return
+
+        # delete-email [name] [email]
+        # - 1-й аргумент → ім'я
+        # - 2-й аргумент → емейл цього контакту
+        if cmd == "delete-email":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            elif arg_index == 2:
+                contact_name = parts[1]
+                for email in self._get_contact_emails(contact_name):
+                    if email.startswith(prefix):
+                        yield Completion(email, start_position=-len(prefix))
+            return
+
+        # set-address [name] [address] → тільки ім'я
+        if cmd == "set-address":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            # address не доповнюємо
+            return
+
+        # delete-address [name] → ім'я
+        if cmd == "delete-address":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
+        # delete-contact [name] → ім'я
+        if cmd == "delete-contact":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
+        # show-all-contacts → нічого не доповнюємо
+        if cmd == "show-all-contacts":
+            return
+
+        # search-contacts [text] → нічого не доповнюємо
+        if cmd == "search-contacts":
+            return
+
+        # add-birthday [name] [birthday] → тільки ім'я
+        if cmd == "add-birthday":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            # birthday не доповнюємо
+            return
+
+        # show-birthday [name] → ім'я
+        if cmd == "show-birthday":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
+        # upcoming-birthdays [days] → нічого не доповнюємо
+        if cmd == "upcoming-birthdays":
+            return
+
+        # calendar [month]? [year]? → нічого не доповнюємо
+        if cmd == "calendar":
+            return
+
+        # save-contact [name]? → нічого не доповнюємо (тільки сама команда)
+        if cmd == "save-contact":
+            return
+
+        # load-contact [name] → підказуємо імена файлів
+        if cmd == "load-contact":
+            if arg_index == 1:
+                for fname in self._get_contact_files():
+                    if fname.startswith(prefix):
+                        yield Completion(fname, start_position=-len(prefix))
+            return
+
+        # delete-contact-file [name] → підказуємо імена файлів
+        if cmd == "delete-contact-file":
+            if arg_index == 1:
+                for fname in self._get_contact_files():
+                    if fname.startswith(prefix):
+                        yield Completion(fname, start_position=-len(prefix))
+            return
+
+        # contacts-files → тільки команда, 2-й параметр не доповнюємо
+        if cmd == "contacts-files":
+            return
+
+        # =========================================================
+        #        КОМАНДИ ДЛЯ НОТАТОК
+        # =========================================================
+
+        # add-note [name] → тільки команда, ім'я не підказуємо (створення)
+        if cmd == "add-note":
+            return
+
+        # Команди, де 1-й аргумент — назва існуючої нотатки
         note_title_commands = {
             "edit-note-title",
             "edit-note-content",
             "delete-note",
+            "add-note-tags",
+            "remove-note-tag",
         }
 
         if cmd in note_title_commands:
-            # перший аргумент — назва нотатки
-            if len(parts) == 2 and not text.endswith(" "):
-                prefix = parts[1]
-                for note in self._note_service.get_all():
-                    # припускаю, що note.title.value
-                    title = getattr(note.title, "value", str(note.title))
-                    if title.startswith(prefix):
-                        yield Completion(title, start_position=-len(prefix))
+            if arg_index == 1:
+                for name in self._get_note_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
+        # show-all-notes → нічого
+        if cmd == "show-all-notes":
+            return
+
+        # search-notes [text] → нічого
+        if cmd == "search-notes":
+            return
+
+        # show-notes-by-tag [tag] → поки що нічого (можна буде прикрутити теги)
+        if cmd == "show-notes-by-tag":
+            return
+
+        # save-note [name]? → тільки команда
+        if cmd == "save-note":
+            return
+
+        # load-note [name] → імена файлів
+        if cmd == "load-note":
+            if arg_index == 1:
+                for fname in self._get_note_files():
+                    if fname.startswith(prefix):
+                        yield Completion(fname, start_position=-len(prefix))
+            return
+
+        # delete-note-file [name] → імена файлів
+        if cmd == "delete-note-file":
+            if arg_index == 1:
+                for fname in self._get_note_files():
+                    if fname.startswith(prefix):
+                        yield Completion(fname, start_position=-len(prefix))
+            return
+
+        # note-files → тільки команда
+        if cmd == "note-files":
+            return
+
+        # =========================================================
+        #        SYSTEM-КОМАНДИ
+        # =========================================================
+        # hello, help, exit, close → без аргументів, нічого не підказуємо
+        if cmd in {"hello", "help", "exit", "close"}:
             return
 
         # Для інших команд поки не доповнюємо нічого

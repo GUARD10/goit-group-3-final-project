@@ -27,6 +27,8 @@ class FakeCommandService:
             "edit-note-title",
             "edit-note-content",
             "delete-note",
+            "add-note-tags",
+            "remove-note-tag",
             "help",
             "exit",
         ]
@@ -54,9 +56,11 @@ class FakeRecordService:
 
 
 class FakeNote:
-    def __init__(self, title: str):
-        # емулюємо note.title.value
-        self.title = type("T", (), {"value": title})
+    def __init__(self, name: str, title: str | None = None):
+        # емулюємо note.name.value та note.title.value
+        self.name = type("N", (), {"value": name})
+        # title нам зараз не критично, але нехай буде для сумісності
+        self.title = type("T", (), {"value": title or name})
 
 
 class FakeNoteService:
@@ -119,10 +123,11 @@ def test_contact_commands_suggest_contact_names():
     assert "John" not in completions
 
 
-def test_note_title_commands_suggest_note_titles():
+def test_note_title_commands_suggest_note_names():
     """
-    Для note_title_commands (edit-note-title, edit-note-content, delete-note)
-    другий аргумент має доповнюватися назвами нотаток.
+    Для note_title_commands (edit-note-title, edit-note-content, delete-note,
+    add-note-tags, remove-note-tag)
+    перший аргумент має доповнюватися іменами нотаток (name), а не title.
     """
     completer = PromptCompleter(
         command_service=FakeCommandService(),
@@ -133,7 +138,8 @@ def test_note_title_commands_suggest_note_titles():
     # Користувач пише: "edit-note-title Ro"
     completions = collect_completions(completer, "edit-note-title Ro")
 
-    # Має запропонувати заголовок "Roman study plan"
+    # Має запропонувати ім'я нотатки, яке починається на "Ro"
+    # (FakeNoteService повертає нотатку з name = "Roman study plan")
     assert "Roman study plan" in completions
 
     # А, наприклад, "Shopping list" не підходить під префікс "Ro"
