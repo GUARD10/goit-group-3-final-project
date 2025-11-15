@@ -18,8 +18,6 @@ class PromptCompleter(Completer):
         self._record_service = record_service
         self._note_service = note_service
 
-    # ======== ХЕЛПЕРИ ==================================================
-
     def _get_contact_names(self) -> List[str]:
         names = []
         for rec in self._record_service.get_all():
@@ -64,7 +62,6 @@ class PromptCompleter(Completer):
         return sorted(set(names))
 
     def _get_contact_files(self) -> List[str]:
-        # Підлаштуй під свій RecordService, якщо інші назви методів:
         if hasattr(self._record_service, "list_contact_files"):
             files = self._record_service.list_contact_files()
         elif hasattr(self._record_service, "get_contact_files"):
@@ -74,7 +71,6 @@ class PromptCompleter(Completer):
         return sorted(str(f) for f in files)
 
     def _get_note_files(self) -> List[str]:
-        # Підлаштуй під свій NoteService, якщо інші назви методів:
         if hasattr(self._note_service, "list_note_files"):
             files = self._note_service.list_note_files()
         elif hasattr(self._note_service, "get_note_files"):
@@ -83,13 +79,11 @@ class PromptCompleter(Completer):
             files = []
         return sorted(str(f) for f in files)
 
-    # ======== ОСНОВНИЙ МЕТОД ===========================================
-
     def get_completions(self, document, complete_event) -> Iterable[Completion]:
         text = document.text_before_cursor
         parts = text.split()
 
-        # 1. Нічого не введено → всі команди
+        # 1. Нічого не введено - всі команди
         if len(parts) == 0:
             for name in self._command_service.commands.keys():
                 yield Completion(name, start_position=0)
@@ -108,7 +102,7 @@ class PromptCompleter(Completer):
 
         # Визначаємо, який саме аргумент зараз доповнюємо
         if text.endswith(" "):
-            # курсор після пробілу → починаємо НОВИЙ аргумент
+            # курсор після пробілу - починаємо НОВИЙ аргумент
             arg_index = len(parts)  # 0 - команда, 1 - перший аргумент і т.д.
             prefix = ""
         else:
@@ -120,7 +114,7 @@ class PromptCompleter(Completer):
         #        КОМАНДИ ДЛЯ КОНТАКТІВ
         # =========================================================
 
-        # add-contact [name] [phone] → тільки назва команди, аргументи не доповнюємо
+        # add-contact [name] [phone] - тільки назва команди, аргументи не доповнюємо
         if cmd == "add-contact":
             return
 
@@ -134,7 +128,7 @@ class PromptCompleter(Completer):
             # phone не доповнюємо
             return
 
-        # show-phone [name] → підказуємо існуючі імена
+        # show-phone [name] - підказуємо існуючі імена
         if cmd == "show-phone":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -142,7 +136,7 @@ class PromptCompleter(Completer):
                         yield Completion(name, start_position=-len(prefix))
             return
 
-        # add-email [name] [new_email] → тільки ім'я
+        # add-email [name] [new_email] - тільки ім'я
         if cmd == "add-email":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -152,8 +146,8 @@ class PromptCompleter(Completer):
             return
 
         # update-email [name] [old_email] [new_email]
-        # - 1-й аргумент → ім'я
-        # - 2-й аргумент → існуючий емейл контактa
+        # - 1-й аргумент - ім'я
+        # - 2-й аргумент - існуючий емейл контактa
         if cmd == "update-email":
             if arg_index == 1:
                 # ім'я контакту
@@ -170,8 +164,8 @@ class PromptCompleter(Completer):
             return
 
         # delete-email [name] [email]
-        # - 1-й аргумент → ім'я
-        # - 2-й аргумент → емейл цього контакту
+        # - 1-й аргумент - ім'я
+        # - 2-й аргумент - емейл цього контакту
         if cmd == "delete-email":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -184,7 +178,7 @@ class PromptCompleter(Completer):
                         yield Completion(email, start_position=-len(prefix))
             return
 
-        # set-address [name] [address] → тільки ім'я
+        # set-address [name] [address] - тільки ім'я
         if cmd == "set-address":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -193,7 +187,7 @@ class PromptCompleter(Completer):
             # address не доповнюємо
             return
 
-        # delete-address [name] → ім'я
+        # delete-address [name] - ім'я
         if cmd == "delete-address":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -209,15 +203,15 @@ class PromptCompleter(Completer):
                         yield Completion(name, start_position=-len(prefix))
             return
 
-        # show-all-contacts → нічого не доповнюємо
+        # show-all-contacts - нічого не доповнюємо
         if cmd == "show-all-contacts":
             return
 
-        # search-contacts [text] → нічого не доповнюємо
+        # search-contacts [text] - нічого не доповнюємо
         if cmd == "search-contacts":
             return
 
-        # add-birthday [name] [birthday] → тільки ім'я
+        # add-birthday [name] [birthday] - тільки ім'я
         if cmd == "add-birthday":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -226,7 +220,7 @@ class PromptCompleter(Completer):
             # birthday не доповнюємо
             return
 
-        # show-birthday [name] → ім'я
+        # show-birthday [name] - ім'я
         if cmd == "show-birthday":
             if arg_index == 1:
                 for name in self._get_contact_names():
@@ -234,19 +228,19 @@ class PromptCompleter(Completer):
                         yield Completion(name, start_position=-len(prefix))
             return
 
-        # upcoming-birthdays [days] → нічого не доповнюємо
+        # upcoming-birthdays [days] - нічого не доповнюємо
         if cmd == "upcoming-birthdays":
             return
 
-        # calendar [month]? [year]? → нічого не доповнюємо
+        # calendar [month] [year] - нічого не доповнюємо
         if cmd == "calendar":
             return
 
-        # save-contact [name]? → нічого не доповнюємо (тільки сама команда)
+        # save-contact [name] - нічого не доповнюємо (тільки сама команда)
         if cmd == "save-contact":
             return
 
-        # load-contact [name] → підказуємо імена файлів
+        # load-contact [name] - підказуємо імена файлів
         if cmd == "load-contact":
             if arg_index == 1:
                 for fname in self._get_contact_files():
@@ -262,7 +256,7 @@ class PromptCompleter(Completer):
                         yield Completion(fname, start_position=-len(prefix))
             return
 
-        # contacts-files → тільки команда, 2-й параметр не доповнюємо
+        # contacts-files - тільки команда, 2-й параметр не доповнюємо
         if cmd == "contacts-files":
             return
 
@@ -270,7 +264,7 @@ class PromptCompleter(Completer):
         #        КОМАНДИ ДЛЯ НОТАТОК
         # =========================================================
 
-        # add-note [name] → тільки команда, ім'я не підказуємо (створення)
+        # add-note [name] - тільки команда, ім'я не підказуємо (створення)
         if cmd == "add-note":
             return
 
@@ -290,23 +284,23 @@ class PromptCompleter(Completer):
                         yield Completion(name, start_position=-len(prefix))
             return
 
-        # show-all-notes → нічого
+        # show-all-notes - нічого
         if cmd == "show-all-notes":
             return
 
-        # search-notes [text] → нічого
+        # search-notes [text] - нічого
         if cmd == "search-notes":
             return
 
-        # show-notes-by-tag [tag] → поки що нічого (можна буде прикрутити теги)
+        # show-notes-by-tag [tag] - поки що нічого (можна буде прикрутити теги)
         if cmd == "show-notes-by-tag":
             return
 
-        # save-note [name]? → тільки команда
+        # save-note [name]? - тільки команда
         if cmd == "save-note":
             return
 
-        # load-note [name] → імена файлів
+        # load-note [name] - імена файлів
         if cmd == "load-note":
             if arg_index == 1:
                 for fname in self._get_note_files():
@@ -314,7 +308,7 @@ class PromptCompleter(Completer):
                         yield Completion(fname, start_position=-len(prefix))
             return
 
-        # delete-note-file [name] → імена файлів
+        # delete-note-file [name] - імена файлів
         if cmd == "delete-note-file":
             if arg_index == 1:
                 for fname in self._get_note_files():
@@ -322,14 +316,14 @@ class PromptCompleter(Completer):
                         yield Completion(fname, start_position=-len(prefix))
             return
 
-        # note-files → тільки команда
+        # note-files - тільки команда
         if cmd == "note-files":
             return
 
         # =========================================================
         #        SYSTEM-КОМАНДИ
         # =========================================================
-        # hello, help, exit, close → без аргументів, нічого не підказуємо
+        # hello, help, exit, close - без аргументів, нічого не підказуємо
         if cmd in {"hello", "help", "exit", "close"}:
             return
 
