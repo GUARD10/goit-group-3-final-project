@@ -1,7 +1,8 @@
 import pytest
-from dal.entities.Field import Field
-from dal.entities.Name import Name
-from dal.entities.Phone import Phone
+
+from dal.entities.field import Field
+from dal.entities.name import Name
+from dal.entities.phone import Phone
 
 
 def test_field_equality():
@@ -34,3 +35,12 @@ def test_phone_validation():
         Phone("abc")
     with pytest.raises(ValueError):
         Phone("12345")
+
+
+
+
+
+
+
+
+

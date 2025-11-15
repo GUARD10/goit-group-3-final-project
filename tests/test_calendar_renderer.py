@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
-from bll.helpers.CalendarRenderer import render_calendar_with_clock
-from dal.entities.Record import Record
+from bll.helpers.calendar_renderer import render_calendar_with_clock
+from dal.entities.record import Record
 
 
 def test_render_calendar_includes_birthdays_and_time_without_summary():
@@ -41,3 +41,12 @@ def test_render_calendar_defaults_to_current_month():
     assert "January 2024" not in result
     assert "December 2024" not in result
     assert "Carol" in result
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,5 @@
 """Tests for configuration module."""
+
 import os
 from pathlib import Path
 
@@ -81,4 +82,12 @@ class TestConfig:
         override_path = Path("/override/contacts")
         config.set_contacts_dir(override_path)
         assert config.contacts_dir == override_path
+
+
+
+
+
+
+
+
 

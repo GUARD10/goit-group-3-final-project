@@ -1,12 +1,12 @@
-import pytest
 from datetime import date
 
-from dal.entities.Record import Record
-from dal.entities.Phone import Phone
-from dal.entities.Birthday import Birthday
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.NotFoundException import NotFoundException
+import pytest
 
+from dal.entities.birthday import Birthday
+from dal.entities.phone import Phone
+from dal.entities.record import Record
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
 
 # --- BASIC INITIALIZATION --- #
 
@@ -63,7 +63,7 @@ def test_has_phone_success():
 
 def test_has_phone_raises_on_none():
     record = Record("John")
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         record.has_phone(None)
 
 
@@ -76,7 +76,7 @@ def test_find_phone_returns_phone_object():
 
 def test_find_phone_raises_if_missing():
     record = Record("John", "+380991112233")
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         record.find_phone("+380931234567")
 
 
@@ -86,7 +86,16 @@ def test_find_phone_raises_if_missing():
 def test_update_returns_record_builder_instance():
     record = Record("John", "+380991112233")
     builder = record.update()
-    from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+    from bll.entity_builders.record_builder.record_builder import RecordBuilder
 
     assert isinstance(builder, RecordBuilder)
     assert builder._record is record
+
+
+
+
+
+
+
+
+

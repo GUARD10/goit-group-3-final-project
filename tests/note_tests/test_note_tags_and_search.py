@@ -1,7 +1,7 @@
 import pytest
 
-from bll.services.note_service.NoteService import NoteService
-from dal.storages.NoteStorage import NoteStorage
+from bll.services.note_service.note_service import NoteService
+from dal.storages.note_storage import NoteStorage
 
 
 @pytest.fixture
@@ -80,3 +80,12 @@ def test_search_by_title_content_and_tag(note_service):
     res2 = note_service.search("quarterly")
     names2 = sorted(n.name.value for n in res2)
     assert names2 == ["n1", "n2"]
+
+
+
+
+
+
+
+
+

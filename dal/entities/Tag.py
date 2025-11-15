@@ -1,4 +1,4 @@
-from dal.entities.Field import Field
+from dal.entities.field import Field
 
 
 class Tag(Field):
@@ -31,3 +31,12 @@ class Tag(Field):
 
     def __hash__(self) -> int:
         return hash((self.value, self.color))
+
+
+
+
+
+
+
+
+

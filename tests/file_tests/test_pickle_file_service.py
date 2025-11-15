@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
-from dal.exceptions.InvalidException import InvalidException
-from bll.services.file_service.FileService import FileService
+
+import pytest
+
+from bll.services.file_service.file_service import FileService
+from dal.exceptions.invalid_error import InvalidError
 
 
 @pytest.fixture
@@ -48,14 +50,14 @@ def test_save_with_name_uses_default_name(service, mock_file_manager):
 
 def test_save_with_name_empty_data_raises(service, mock_storage):
     mock_storage.export_state.return_value = {}
-    with pytest.raises(InvalidException, match="Data to save cannot be None or empty"):
+    with pytest.raises(InvalidError, match="Data to save cannot be None or empty"):
         service.save_with_name("test")
 
 
 def test_save_with_name_pickle_error(service, mock_storage):
     # lambda неможливо серіалізувати
     mock_storage.export_state.return_value = {"bad": lambda x: x}
-    with pytest.raises(InvalidException, match="Cannot serialize data"):
+    with pytest.raises(InvalidError, match="Cannot serialize data"):
         service.save_with_name("broken")
 
 
@@ -74,7 +76,7 @@ def test_load_by_name_success(service, mock_file_manager, mock_storage):
 
 def test_load_by_name_missing_file(service, mock_file_manager):
     mock_file_manager.has_file_with_name.return_value = False
-    with pytest.raises(InvalidException, match="does not exist"):
+    with pytest.raises(InvalidError, match="does not exist"):
         service.load_by_name("missing.pkl")
 
 
@@ -89,7 +91,7 @@ def test_delete_by_name_success(service, mock_file_manager):
 
 def test_delete_by_name_missing_file_raises(service, mock_file_manager):
     mock_file_manager.has_file_with_name.return_value = False
-    with pytest.raises(InvalidException, match="does not exist"):
+    with pytest.raises(InvalidError, match="does not exist"):
         service.delete_by_name("ghost.pkl")
 
 
@@ -103,7 +105,7 @@ def test_get_file_list_returns_names(service, mock_file_manager):
 
 def test_get_file_list_empty_raises(service, mock_file_manager):
     mock_file_manager.get_all_names.return_value = []
-    with pytest.raises(InvalidException, match="No files available"):
+    with pytest.raises(InvalidError, match="No files available"):
         service.get_file_list()
 
 
@@ -112,9 +114,18 @@ def test_get_file_list_empty_raises(service, mock_file_manager):
 
 @pytest.mark.parametrize("bad_name", [None, 123, "   ", ""])
 def test_validate_name_invalid(bad_name):
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         FileService._validate_name(bad_name)
 
 
 def test_validate_name_valid():
     FileService._validate_name("valid_name.pkl")
+
+
+
+
+
+
+
+
+

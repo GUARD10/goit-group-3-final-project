@@ -1,11 +1,12 @@
-from dal.entities.Birthday import Birthday
-from dal.entities.Name import Name
-from dal.entities.Phone import Phone
-from dal.entities.Email import Email
-from dal.entities.Address import Address
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.NotFoundException import NotFoundException
-from datetime import datetime, date
+from datetime import date, datetime
+
+from dal.entities.address import Address
+from dal.entities.birthday import Birthday
+from dal.entities.email import Email
+from dal.entities.name import Name
+from dal.entities.phone import Phone
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
 
 
 class Record:
@@ -60,13 +61,13 @@ class Record:
 
     def has_phone(self, phone: str | Phone) -> bool:
         if not phone:
-            raise InvalidException("Phone cannot be None")
+            raise InvalidError("Phone cannot be None")
 
         return phone in self.phones
 
     def find_phone(self, phone: str | Phone) -> Phone | None:
         if not self.has_phone(phone):
-            raise NotFoundException(f"Record {self.name} do not have {phone} phone")
+            raise NotFoundError(f"Record {self.name} do not have {phone} phone")
 
         return next((p for p in self.phones if p == phone), None)
 
@@ -75,11 +76,11 @@ class Record:
 
     def find_email(self, email: str | Email) -> Email | None:
         if not self.has_email(email):
-            raise NotFoundException(f"Record {self.name} do not have {email} box")
+            raise NotFoundError(f"Record {self.name} do not have {email} box")
 
         return next((e for e in self.emails if e == email), None)
 
     def update(self):
-        from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+        from bll.entity_builders.record_builder.record_builder import RecordBuilder
 
         return RecordBuilder(self)

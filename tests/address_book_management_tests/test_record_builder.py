@@ -1,13 +1,14 @@
-import pytest
 from datetime import date, datetime
 
-from dal.entities.Record import Record
-from dal.entities.Phone import Phone
-from dal.entities.Birthday import Birthday
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.NotFoundException import NotFoundException
-from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+import pytest
+
+from bll.entity_builders.record_builder.record_builder import RecordBuilder
+from dal.entities.birthday import Birthday
+from dal.entities.phone import Phone
+from dal.entities.record import Record
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
 
 
 @pytest.fixture
@@ -32,7 +33,7 @@ def test_set_name_success(builder):
 
 @pytest.mark.parametrize("bad_name", ["", "   ", None])
 def test_set_name_invalid(builder, bad_name):
-    with pytest.raises(InvalidException, match="Name cannot be empty"):
+    with pytest.raises(InvalidError, match="Name cannot be empty"):
         builder.set_name(bad_name)
 
 
@@ -47,9 +48,7 @@ def test_build_returns_record(builder):
 def test_build_raises_if_name_invalid(base_record):
     base_record.name.value = " "
     builder = RecordBuilder(base_record)
-    with pytest.raises(
-        InvalidException, match="Record must have a name before building"
-    ):
+    with pytest.raises(InvalidError, match="Record must have a name before building"):
         builder.build()
 
 
@@ -69,7 +68,7 @@ def test_add_phone_object(builder):
 
 def test_add_phone_duplicate_raises(builder):
     existing_phone = builder._record.phones[0].value
-    with pytest.raises(AlreadyExistException, match="already has phone"):
+    with pytest.raises(AlreadyExistsError, match="already has phone"):
         builder.add_phone(existing_phone)
 
 
@@ -84,7 +83,7 @@ def test_update_phone_success(builder):
 
 
 def test_update_phone_not_found_raises(builder):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.update_phone("999999", "000000")
 
 
@@ -98,7 +97,7 @@ def test_remove_phone_success(builder):
 
 
 def test_remove_phone_not_found(builder):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.remove_phone("nope")
 
 
@@ -137,3 +136,12 @@ def test_clear_birthday(builder):
     builder.set_birthday("1990-01-01")
     builder.clear_birthday()
     assert builder._record.birthday is None
+
+
+
+
+
+
+
+
+

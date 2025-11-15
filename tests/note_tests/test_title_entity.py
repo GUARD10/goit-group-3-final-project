@@ -1,5 +1,6 @@
 import pytest
-from dal.entities.Title import Title
+
+from dal.entities.title import Title
 
 
 def test_title_valid():
@@ -18,3 +19,12 @@ def test_title_empty_raises():
 def test_title_wrong_type_raises():
     with pytest.raises(TypeError):
         Title(123)
+
+
+
+
+
+
+
+
+

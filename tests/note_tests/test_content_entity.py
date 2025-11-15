@@ -1,5 +1,6 @@
 import pytest
-from dal.entities.Content import Content
+
+from dal.entities.content import Content
 
 
 def test_content_valid():
@@ -15,3 +16,12 @@ def test_content_too_short():
 def test_content_wrong_type():
     with pytest.raises(TypeError):
         Content(123)
+
+
+
+
+
+
+
+
+

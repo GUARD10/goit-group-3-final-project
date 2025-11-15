@@ -1,12 +1,12 @@
 import pytest
 
-from bll.services.input_service.InputService import InputService
-from bll.services.command_service.CommandService import CommandService
-from bll.services.record_service.RecordService import RecordService
-from bll.services.note_service.NoteService import NoteService
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.storages.NoteStorage import NoteStorage
-from bll.registries.FileServiceRegistry import FileServiceRegistry
+from bll.registries.file_service_registry import FileServiceRegistry
+from bll.services.command_service.command_service import CommandService
+from bll.services.input_service.input_service import InputService
+from bll.services.note_service.note_service import NoteService
+from bll.services.record_service.record_service import RecordService
+from dal.storages.address_book_storage import AddressBookStorage
+from dal.storages.note_storage import NoteStorage
 
 
 class FakeFileService:
@@ -73,4 +73,13 @@ def test_search_contacts_flow(bot):
     assert "John" in command_service.execute(cmd, args)
 
     cmd, args = input_service.handle("search-contacts not-found")
-    assert "No matching contacts" in command_service.execute(cmd, args)
+    assert "No contacts found" in command_service.execute(cmd, args)
+
+
+
+
+
+
+
+
+

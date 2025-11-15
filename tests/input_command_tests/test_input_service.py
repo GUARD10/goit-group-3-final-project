@@ -1,6 +1,7 @@
 import pytest
-from bll.services.input_service.InputService import InputService
-from dal.exceptions.InvalidException import InvalidException
+
+from bll.services.input_service.input_service import InputService
+from dal.exceptions.invalid_error import InvalidError
 
 
 def test_handle_no_args():
@@ -19,7 +20,7 @@ def test_handle_with_args():
 
 def test_handle_invalid_empty():
     svc = InputService()
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         svc.handle("")
 
 
@@ -27,3 +28,12 @@ def test_parse_input_static():
     cmd, args = InputService._parse_input("add John 12345")
     assert cmd == "add"
     assert args == ["John", "12345"]
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-from dal.entities.Note import Note
-from dal.storages.NoteStorage import NoteStorage
+from dal.entities.note import Note
+from dal.storages.note_storage import NoteStorage
 
 
 def test_note_storage_add_and_find():
@@ -54,3 +54,12 @@ def test_note_storage_filter():
 
     result = storage.filter(lambda n: n.title.value == "World")
     assert result == [n2]
+
+
+
+
+
+
+
+
+

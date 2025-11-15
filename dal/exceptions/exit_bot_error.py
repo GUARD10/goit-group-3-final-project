@@ -1,0 +1,11 @@
+class ExitBotError(Exception):
+    pass
+
+
+
+
+
+
+
+
+

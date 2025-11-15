@@ -1,5 +1,6 @@
-from dal.entities.Field import Field
 import re
+
+from dal.entities.field import Field
 
 
 class Email(Field):
@@ -38,3 +39,12 @@ class Email(Field):
         normalized = f"{local}@{domain.lower()}"
 
         super().__init__(normalized)
+
+
+
+
+
+
+
+
+

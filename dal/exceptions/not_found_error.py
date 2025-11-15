@@ -1,0 +1,11 @@
+class NotFoundError(Exception):
+    pass
+
+
+
+
+
+
+
+
+

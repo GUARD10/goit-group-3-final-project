@@ -18,8 +18,10 @@ Assistant Bot — це консольний застосунок для керу
 
 ### 2. Системні вимоги
 1. **Операційна система:** Windows, macOS або Linux.
-2. **Python:** версія 3.11+.
+2. **Python:** версія **3.12+** (обов'язково!).
 3. **pip:** встановлений менеджер пакетів Python.
+
+> ⚠️ **Важливо:** Проект використовує Python 3.12+. Версії 3.10 та 3.11 не підтримуються.
 
 ### 3. Встановлення
 
@@ -112,8 +114,10 @@ Assistant Bot is a command-line application for managing contacts and notes. It 
 
 ### 2. Prerequisites
 1. **Operating System:** Windows, macOS, or Linux.
-2. **Python:** version 3.11 or newer.
+2. **Python:** version **3.12 or newer** (required!).
 3. **pip:** Python package manager installed.
+
+> ⚠️ **Important:** This project uses Python 3.12+. Python 3.10 and 3.11 are not supported.
 
 ### 3. Installation
 

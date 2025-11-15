@@ -1,7 +1,8 @@
 import pytest
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
-from dal.exceptions.InvalidException import InvalidException
+
+from dal.entities.record import Record
+from dal.exceptions.invalid_error import InvalidError
+from dal.storages.address_book_storage import AddressBookStorage
 
 
 @pytest.fixture
@@ -82,5 +83,14 @@ def test_export_and_import_state(storage):
 
 
 def test_import_invalid_state_type_raises(storage):
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         storage.import_state(["not", "a", "dict"])
+
+
+
+
+
+
+
+
+

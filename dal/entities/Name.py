@@ -1,4 +1,4 @@
-from dal.entities.Field import Field
+from dal.entities.field import Field
 
 
 class Name(Field):
@@ -10,3 +10,12 @@ class Name(Field):
             raise ValueError("Name value cannot be empty")
 
         super().__init__(value)
+
+
+
+
+
+
+
+
+

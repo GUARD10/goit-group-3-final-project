@@ -1,6 +1,6 @@
-from bll.services.record_service.RecordService import RecordService
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
+from bll.services.record_service.record_service import RecordService
+from dal.entities.record import Record
+from dal.storages.address_book_storage import AddressBookStorage
 
 
 def test_end_to_end_scenario():
@@ -45,3 +45,12 @@ def test_end_to_end_scenario():
     all_records = service.get_all()
     assert len(all_records) == 1
     assert all_records[0].name.value == "Johnny"
+
+
+
+
+
+
+
+
+

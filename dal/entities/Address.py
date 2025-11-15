@@ -1,4 +1,4 @@
-from dal.entities.Field import Field
+from dal.entities.field import Field
 
 
 class Address(Field):
@@ -43,3 +43,12 @@ class Address(Field):
         normalized = " ".join(raw.split())
 
         super().__init__(normalized)
+
+
+
+
+
+
+
+
+

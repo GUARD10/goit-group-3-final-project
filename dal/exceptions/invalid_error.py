@@ -1,0 +1,11 @@
+class InvalidError(Exception):
+    pass
+
+
+
+
+
+
+
+
+

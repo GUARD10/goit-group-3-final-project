@@ -1,14 +1,13 @@
-import pytest
 from datetime import date
 
-from dal.entities.Record import Record
-from dal.entities.Note import Note
+import pytest
 
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.storages.NoteStorage import NoteStorage
-
-from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
-from bll.services.file_service.FileService import FileService
+from bll.services.file_service.file_service import FileService
+from dal.entities.note import Note
+from dal.entities.record import Record
+from dal.file_managers.pickle_file_manager.pickle_file_manager import PickleFileManager
+from dal.storages.address_book_storage import AddressBookStorage
+from dal.storages.note_storage import NoteStorage
 
 
 @pytest.fixture
@@ -71,3 +70,12 @@ def test_contacts_and_notes_save_load(temp_dirs):
 
     loaded_n1 = note_storage.data["note1"]
     assert loaded_n1.content.value.startswith("Content AAAA")
+
+
+
+
+
+
+
+
+

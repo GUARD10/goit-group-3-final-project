@@ -1,8 +1,8 @@
 import pytest
 
-from bll.services.command_service.CommandService import CommandService
-from bll.services.note_service.NoteService import NoteService
-from dal.storages.NoteStorage import NoteStorage
+from bll.services.command_service.command_service import CommandService
+from bll.services.note_service.note_service import NoteService
+from dal.storages.note_storage import NoteStorage
 
 
 class FakeRecordService:
@@ -110,3 +110,12 @@ def test_show_all_notes_sorted_and_filtered(command_service):
     # Filtering by specific tag
     filtered_notes = ns.get_all_sorted_by_tags("a")
     assert [n.name.value for n in filtered_notes] == ["n2"]
+
+
+
+
+
+
+
+
+

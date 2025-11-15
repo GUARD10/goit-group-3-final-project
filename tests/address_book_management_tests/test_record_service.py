@@ -1,12 +1,13 @@
 from datetime import date, timedelta
 
 import pytest
-from bll.services.record_service.RecordService import RecordService
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.NotFoundException import NotFoundException
+
+from bll.services.record_service.record_service import RecordService
+from dal.entities.record import Record
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
+from dal.storages.address_book_storage import AddressBookStorage
 
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def test_save_and_get_by_name(service):
 def test_save_duplicate_raises(service):
     record = Record("John", "1234567890")
     service.save(record)
-    with pytest.raises(AlreadyExistException):
+    with pytest.raises(AlreadyExistsError):
         service.save(Record("John", "1112223333"))
 
 
@@ -39,7 +40,7 @@ def test_update_record(service):
 
 
 def test_update_not_found_raises(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.update("Ghost", Record("Ghost", "1111111111"))
 
 
@@ -63,7 +64,7 @@ def test_delete_record(service):
 
 
 def test_delete_nonexistent(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.delete("Ghost")
 
 
@@ -76,9 +77,9 @@ def test_get_all_records(service):
 
 
 def test_has_validation(service):
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.has(None)
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.has(123)
 
 
@@ -109,3 +110,12 @@ def test_get_with_upcoming_birthdays_days_param(service):
     upcoming5 = service.get_with_upcoming_birthdays(days=5)
     names5 = [r.name.value for r in upcoming5]
     assert "Near" in names5 and "Far" not in names5
+
+
+
+
+
+
+
+
+

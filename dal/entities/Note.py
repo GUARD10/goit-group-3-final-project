@@ -1,10 +1,10 @@
 from datetime import datetime
-
-from dal.entities.Content import Content
-from dal.entities.Name import Name
-from dal.entities.Title import Title
-from dal.entities.Tag import Tag
 from typing import Sequence
+
+from dal.entities.content import Content
+from dal.entities.name import Name
+from dal.entities.tag import Tag
+from dal.entities.title import Title
 
 
 class Note:
@@ -42,11 +42,13 @@ class Note:
 
     def __str__(self):
         header = f"📓 {self.title}"
-        meta = (
-            f"Name: {self.name} | "
-            f"Created at: {self.created_at.strftime(self.DATETIME_FORMAT)} | "
-            f"Updated at: {self.updated_at.strftime(self.DATETIME_FORMAT) if self.updated_at else 'Never'}"
+        created = self.created_at.strftime(self.DATETIME_FORMAT)
+        updated = (
+            self.updated_at.strftime(self.DATETIME_FORMAT)
+            if self.updated_at
+            else "Never"
         )
+        meta = f"Name: {self.name} | Created at: {created} | Updated at: {updated}"
         tags_line = "Tags: " + (
             ", ".join(str(tag) for tag in self.tags) if self.tags else "None"
         )
@@ -56,7 +58,7 @@ class Note:
         return f"\n{header}\n{meta}\n{tags_line}\n{divider}\n{body}\n{divider}\n"
 
     def update(self):
-        from dal.entity_builders.note_builder.NoteBuilder import NoteBuilder
+        from bll.entity_builders.note_builder.note_builder import NoteBuilder
 
         return NoteBuilder(self)
 
@@ -131,3 +133,12 @@ class Note:
 
     def _sort_tags(self) -> None:
         self.tags.sort(key=lambda tag: tag.value.lower())
+
+
+
+
+
+
+
+
+

@@ -2,13 +2,13 @@
 
 import pytest
 
-from bll.services.input_service.InputService import InputService
-from bll.services.command_service.CommandService import CommandService
-from bll.services.record_service.RecordService import RecordService
-from bll.services.note_service.NoteService import NoteService
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.storages.NoteStorage import NoteStorage
-from bll.registries.FileServiceRegistry import FileServiceRegistry
+from bll.registries.file_service_registry import FileServiceRegistry
+from bll.services.command_service.command_service import CommandService
+from bll.services.input_service.input_service import InputService
+from bll.services.note_service.note_service import NoteService
+from bll.services.record_service.record_service import RecordService
+from dal.storages.address_book_storage import AddressBookStorage
+from dal.storages.note_storage import NoteStorage
 
 
 class FakeFileService:
@@ -66,3 +66,12 @@ def full_bot():
     input_service.command_service = command_service
 
     return input_service, command_service, record_service, note_service, registry
+
+
+
+
+
+
+
+
+

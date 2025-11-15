@@ -1,13 +1,14 @@
-import pytest
 from datetime import date, datetime
 
-from dal.entities.Record import Record
-from dal.entities.Email import Email
-from dal.entities.Address import Address
-from dal.entities.Birthday import Birthday
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.NotFoundException import NotFoundException
-from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+import pytest
+
+from bll.entity_builders.record_builder.record_builder import RecordBuilder
+from dal.entities.address import Address
+from dal.entities.birthday import Birthday
+from dal.entities.email import Email
+from dal.entities.record import Record
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.not_found_error import NotFoundError
 
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def test_add_email_as_email_object(builder):
 
 def test_add_email_duplicate_raises(builder):
     builder.add_email("roman@example.com")
-    with pytest.raises(AlreadyExistException):
+    with pytest.raises(AlreadyExistsError):
         builder.add_email("roman@example.com")
 
 
@@ -68,14 +69,14 @@ def test_update_email_with_email_objects(builder):
 
 def test_update_email_old_not_found_raises(builder):
     builder.add_email("some@example.com")
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.update_email("ghost@example.com", "new@example.com")
 
 
 def test_update_email_new_already_exists_raises(builder):
     builder.add_email("first@example.com")
     builder.add_email("second@example.com")
-    with pytest.raises(AlreadyExistException):
+    with pytest.raises(AlreadyExistsError):
         builder.update_email("first@example.com", "second@example.com")
 
 
@@ -104,7 +105,7 @@ def test_remove_email_with_email_object(builder):
 
 def test_remove_nonexistent_email_raises(builder):
     builder.add_email("existing@example.com")
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.remove_email("ghost@example.com")
 
 
@@ -137,7 +138,7 @@ def test_clear_existing_address(builder):
 
 def test_clear_address_not_set_raises(builder):
     # address із самого початку None
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.clear_address()
 
 
@@ -160,3 +161,12 @@ def test_set_birthday_from_datetime(builder):
     dt = datetime(1990, 1, 1, 10, 0)
     builder.set_birthday(dt)
     assert builder._record.birthday.value == date(1990, 1, 1)
+
+
+
+
+
+
+
+
+

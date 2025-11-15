@@ -1,4 +1,4 @@
-from dal.entities.Field import Field
+from dal.entities.field import Field
 
 
 class Content(Field):
@@ -10,3 +10,12 @@ class Content(Field):
             raise ValueError("Content value must be at least 10 characters long")
 
         super().__init__(value)
+
+
+
+
+
+
+
+
+
