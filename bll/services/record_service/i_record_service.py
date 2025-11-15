@@ -5,7 +5,7 @@ from dal.entities.record import Record
 
 class IRecordService(ABC):
     @abstractmethod
-    def save(self, new_record:Record) -> Record:
+    def save(self, new_record: Record) -> Record:
         pass
 
     @abstractmethod

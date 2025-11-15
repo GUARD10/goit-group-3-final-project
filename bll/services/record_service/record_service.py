@@ -107,7 +107,6 @@ class RecordService(IRecordService):
         return self.storage.filter(is_match)
 
     def _validate_record_arguments(self, record_name: str, record_phone: str) -> None:
-
         self._validate_record_name(record_name)
 
         if not isinstance(record_phone, str):
@@ -126,7 +125,6 @@ class RecordService(IRecordService):
 
         if not isinstance(record_name, str):
             raise InvalidError("Record name has invalid type")
-
 
     @staticmethod
     def _validate_record(record: Record) -> None:

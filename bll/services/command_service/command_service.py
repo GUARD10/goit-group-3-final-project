@@ -72,7 +72,8 @@ class CommandService(ICommandService):
             "show-contact": Command(
                 "show-contact [contact-name]",
                 self.show_contact,
-                "👁️ View contact details"),
+                "👁️ View contact details",
+            ),
             "add-phone": Command(
                 "add-phone [contact-name] [phone]",
                 self.add_phone,
@@ -153,9 +154,7 @@ class CommandService(ICommandService):
                 "🗑️ Remove note",
             ),
             "show-note": Command(
-                "show-note [note-name]",
-                self.show_contact,
-                "👁️ View note details"
+                "show-note [note-name]", self.show_contact, "👁️ View note details"
             ),
             "all-notes": Command("all-notes", self.show_all_notes, "📚 View all notes"),
             "search-notes": Command(
@@ -226,8 +225,6 @@ class CommandService(ICommandService):
     @command_handler_decorator
     def add_contact(self, arguments: list[str]) -> str:
         name, phone = [arg.strip() for arg in arguments]
-
-
 
         if not PhoneValidationPolicy.validate(phone):
             PhoneValidationPolicy.error_message(phone)
