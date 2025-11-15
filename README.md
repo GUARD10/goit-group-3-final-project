@@ -13,7 +13,8 @@ Assistant Bot — це консольний застосунок для керу
 - додавати, редагувати та шукати контакти з телефонами й днями народження;
 - вести нотатки з тегами та кольоровими мітками;
 - зберігати й відновлювати стан із файлів (ручні збереження та автозбереження);
-- спілкуватися через дружній CLI з інтерактивними підказками.
+- спілкуватися через дружній CLI з інтерактивними підказками;
+- переглядати форматовані таблиці та календар з днями народження (Rich-rendering).
 
 ### 2. Системні вимоги
 1. **Операційна система:** Windows, macOS або Linux.
@@ -86,8 +87,8 @@ assistant-bot
 - Контакти: `files/contacts`
 - Нотатки: `files/notes`
 
-### 7. Вибір бекенду збереження (опціонально)
-За замовчуванням використовується формат Pickle. Ви можете увімкнути JSON-бекенд:
+### 7. Вибір типу збереження (опціонально)
+За замовчуванням використовується формат Pickle. Ви можете увімкнути JSON:
 
 ```pwsh
 # Windows PowerShell
@@ -106,7 +107,8 @@ Assistant Bot is a command-line application for managing contacts and notes. It 
 - add, edit, and search contacts with phones and birthdays;
 - maintain tagged notes with color-coded labels;
 - persist and restore state from files (manual saves plus autosaves);
-- interact via a friendly CLI with interactive prompts.
+- interact via a friendly CLI with interactive prompts;
+- view rich-formatted tables and a calendar highlighting birthdays.
 
 ### 2. Prerequisites
 1. **Operating System:** Windows, macOS, or Linux.
@@ -179,8 +181,8 @@ assistant-bot
 - Contacts: `files/contacts`
 - Notes: `files/notes`
 
-### 7. Select persistence backend (optional)
-Pickle is used by default. To use JSON backend:
+### 7. Select persistence type (optional)
+Pickle is used by default. You can switch to the JSON:
 
 ```pwsh
 # Windows PowerShell
