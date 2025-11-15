@@ -24,39 +24,33 @@ Assistant Bot — це консольний застосунок для керу
 
 ### 3. Встановлення
 
-#### Варіант А: Встановлення як пакет (рекомендовано)
+Встановлення як пакет 
+**Клонування репозиторію**
 ```pwsh
-# Клонування репозиторію
 git clone <url>
 cd goit-group-3-final-project
+```
 
-# Створення та активація середовища (рекомендовано)
+**Створення та активація середовища (рекомендовано)**
+```pwsh
 python -m venv .venv
 .\.venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
+```
 
-# Встановлення у режимі редагування
+**Встановлення у режимі редагування**
+```pwsh
 pip install -e .
 ```
 
-#### Варіант Б: Запуск без встановлення
-```pwsh
-# Клонування та активація середовища (як вище)
-# Встановлення лише залежностей
-pip install -r requirements.txt
-```
 
 ### 4. Запуск
 
-#### Якщо встановлено як пакет (Варіант А):
+#### Якщо встановлено як пакет:
 ```pwsh
 assistant-bot
 ```
 
-#### Якщо запускаєте без встановлення (Варіант Б):
-```pwsh
-python main.py
-```
 Після старту бот автоматично намагається підвантажити останній збережений стан контактів і нотаток, якщо файли є у директорії `files/`.
 
 ## 5. Список команд
@@ -167,26 +161,23 @@ Assistant Bot is a command-line application for managing contacts and notes. It 
 
 ### 3. Installation
 
-#### Option A: Install as package (recommended)
+### Install as package
+
+**Clone the repository**
 ```pwsh
-# Clone the repository
 git clone <url>
 cd goit-group-3-final-project
-
-# Create & activate a virtual environment (recommended)
+```
+**Create & activate a virtual environment (recommended)**
+```pwsh
 python -m venv .venv
 .\.venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
-
-# Install in editable mode
-pip install -e .
 ```
 
-#### Option B: Run without installation
+**Install in editable mode**
 ```pwsh
-# Clone and activate environment (as above)
-# Install dependencies only
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ### 4. Run
@@ -196,10 +187,6 @@ pip install -r requirements.txt
 assistant-bot
 ```
 
-#### If running without installation (Option B):
-```pwsh
-python main.py
-```
 On startup the bot tries to load the most recent contacts/notes snapshot from the `files/` directory when available.
 
 ## 5. Command List
