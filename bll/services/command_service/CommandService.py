@@ -66,29 +66,29 @@ class CommandService(ICommandService):
                 "Display all contacts in a table view",
             ),
             "add-email": Command(
-                "add-email",
+                "add-email [name] [email]",
                 self.add_email,
-                "Add new Email to contact: add-email [name] [new_email].",
+                "Add new Email to contact.",
             ),
             "update-email": Command(
-                "update-email",
+                "update-email [name] [old_email] [new_email]",
                 self.update_email,
-                "Update Email for contact: update-email [name] [old_email] [new_email].",
+                "Update Email for contact.",
             ),
             "delete-email": Command(
-                "delete-email",
+                "delete-email [name] [email]",
                 self.delete_email,
-                "Delete Email for contact: delete-email [name] [email].",
+                "Delete Email for contact.",
             ),
             "set-address": Command(
-                "set-address",
+                "set-address [name] [address]",
                 self.set_address,
-                "Set address for contact: set-address [name] [address].",
+                "Set address for contact.",
             ),
             "delete-address": Command(
-                "delete-address",
+                "delete-address [name]",
                 self.delete_address,
-                "Delete address for contact: delete-address [name].",
+                "Delete address for contact.",
             ),
             "calendar": Command(
                 "calendar [month]? [year]?",
@@ -200,7 +200,7 @@ class CommandService(ICommandService):
                 "Delete the notes data file",
             ),
             "note-files": Command(
-                "show-all-note-files", self.show_note_files, "Show all notes files"
+                "note-files", self.show_note_files, "Show all notes files"
             ),
         }
 
@@ -774,6 +774,7 @@ class CommandService(ICommandService):
     @command_handler_decorator
     def show_notes_by_tag(self, arguments: list[str]) -> str:
         tag_name = arguments[0].strip() if arguments else None
+
         if tag_name == "":
             tag_name = None
         notes = self.note_service.get_all_sorted_by_tags(tag_name)
