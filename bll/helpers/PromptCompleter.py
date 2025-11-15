@@ -2,9 +2,9 @@ from typing import Iterable, List
 
 from prompt_toolkit.completion import Completer, Completion
 
-from bll.services.command_service.CommandService import CommandService
-from bll.services.record_service.RecordService import RecordService
-from bll.services.note_service.NoteService import NoteService
+from bll.services.command_service.command_service import CommandService
+from bll.services.record_service.record_service import RecordService
+from bll.services.note_service.note_service import NoteService
 
 
 class PromptCompleter(Completer):

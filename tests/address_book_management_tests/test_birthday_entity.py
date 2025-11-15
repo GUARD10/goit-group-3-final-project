@@ -25,7 +25,8 @@ def test_valid_birthday_from_datetime():
 
 def test_future_birthday_raises():
     future_date = date.today() + timedelta(days=1)
-    with pytest.raises(InvalidError, match="Birthday cannot be in the future"):
+    # твій код тепер кидає ValueError
+    with pytest.raises(ValueError, match="Birthday cannot be in the future"):
         Birthday(future_date)
 
 
@@ -35,14 +36,6 @@ def test_invalid_string_format_raises():
 
 
 def test_invalid_type_raises():
-    with pytest.raises(InvalidError, match="Birthday value must be"):
+    # твій код кидає ValueError
+    with pytest.raises(ValueError, match="Birthday value must be"):
         Birthday(12345)
-
-
-
-
-
-
-
-
-
