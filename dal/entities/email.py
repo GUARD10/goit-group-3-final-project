@@ -22,14 +22,14 @@ class Email(Field):
         if not v:
             raise ValueError("Email cannot be empty")
 
+        # Спочатку перевіряємо '..'
+        if ".." in v:
+            raise ValueError("Email cannot contain consecutive dots '..'")
+
         if not self._RE.match(v):
             raise ValueError(f"Email has invalid format: {v}")
 
-        # додаткові перевірки
         local, domain = v.split("@", 1)
-
-        if ".." in local or ".." in domain:
-            raise ValueError("Email cannot contain consecutive dots '..'")
 
         # обмеження довжини
         if len(v) > 254 or len(local) > 64:
