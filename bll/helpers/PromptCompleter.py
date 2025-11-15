@@ -79,6 +79,29 @@ class PromptCompleter(Completer):
             files = []
         return sorted(str(f) for f in files)
 
+    def _get_all_tags(self) -> list[str]:
+        tags: set[str] = set()
+        for note in self._note_service.get_all():
+            raw_tags = getattr(note, "tags", []) or []
+            for tag in raw_tags:
+                tag_value = getattr(tag, "value", str(tag))
+                if tag_value:
+                    tags.add(str(tag_value))
+        return sorted(tags)
+
+    def _get_tags_for_note(self, note_name: str) -> list[str]:
+        for note in self._note_service.get_all():
+            n = getattr(getattr(note, "name", None), "value", None)
+            if n == note_name:
+                raw_tags = getattr(note, "tags", []) or []
+                tags = []
+                for tag in raw_tags:
+                    tag_value = getattr(tag, "value", str(tag))
+                    if tag_value:
+                        tags.append(str(tag_value))
+                return sorted(set(tags))
+        return []
+
     def get_completions(self, document, complete_event) -> Iterable[Completion]:
         text = document.text_before_cursor
         parts = text.split()
@@ -278,10 +301,29 @@ class PromptCompleter(Completer):
         }
 
         if cmd in note_title_commands:
+            # Перший аргумент: ім'я нотатки
             if arg_index == 1:
                 for name in self._get_note_names():
                     if name.startswith(prefix):
                         yield Completion(name, start_position=-len(prefix))
+
+            # =========================================================
+            #        АВТОКОМПЛІТ ДЛЯ ТЕГІВ
+            # =========================================================
+
+            # add-note-tags [name] [tag]
+            if cmd == "add-note-tags" and arg_index >= 2:
+                for tag in self._get_all_tags():
+                    if tag.startswith(prefix):
+                        yield Completion(tag, start_position=-len(prefix))
+
+            # remove-note-tag [name] [tag]
+            if cmd == "remove-note-tag" and arg_index == 2:
+                note_name = parts[1]
+                for tag in self._get_tags_for_note(note_name):
+                    if tag.startswith(prefix):
+                        yield Completion(tag, start_position=-len(prefix))
+
             return
 
         # show-all-notes - нічого
@@ -292,11 +334,15 @@ class PromptCompleter(Completer):
         if cmd == "search-notes":
             return
 
-        # show-notes-by-tag [tag] - поки що нічого (можна буде прикрутити теги)
+        # show-notes-by-tag [tag]
         if cmd == "show-notes-by-tag":
+            if arg_index == 1:
+                for tag in self._get_all_tags():
+                    if tag.startswith(prefix):
+                        yield Completion(tag, start_position=-len(prefix))
             return
 
-        # save-note [name]? - тільки команда
+        # save-note [name] - тільки команда
         if cmd == "save-note":
             return
 
