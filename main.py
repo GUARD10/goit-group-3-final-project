@@ -19,6 +19,9 @@ from dal.file_managers.pickle_file_manager.pickle_file_manager import PickleFile
 from dal.storages.address_book_storage import AddressBookStorage
 from dal.storages.note_storage import NoteStorage
 
+from prompt_toolkit import PromptSession
+from bll.helpers.PromptCompleter import PromptCompleter
+
 
 def main() -> None:
     colorama_init(autoreset=False)
@@ -53,6 +56,14 @@ def main() -> None:
         input_service=input_service,
     )
 
+    completer = PromptCompleter(
+        command_service=command_service,
+        record_service=record_service,
+        note_service=note_service,
+    )
+
+    session: PromptSession = PromptSession(completer=completer)
+
     print("\n🤖 Welcome to the Assistant Bot!")
     print(f"Type '{Fore.CYAN}help{Style.RESET_ALL}' to see available commands.\n")
 
@@ -69,14 +80,15 @@ def main() -> None:
 
     while True:
         try:
-            user_input = input("Enter a command: ").strip()
+            user_input = session.prompt("Enter a command: ")
 
-            if not user_input:
+            if not user_input or not user_input.strip():
                 continue
 
             command_name, arguments = input_service.handle(user_input)
             result = command_service.execute(command_name, arguments)
-            print(result)
+            if result is not None:
+                print(result)
 
         except InvalidError as ic:
             print(f"{Fore.RED}{ic}{Style.RESET_ALL}")
@@ -103,12 +115,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-

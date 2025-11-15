@@ -85,7 +85,7 @@ class CommandService(ICommandService):
                 "🗑️ Remove phone from contact",
             ),
             "add-email": Command(
-                "add-email [name] [email]",
+                "add-email",
                 self.add_email,
                 "📧 Add email to contact",
             ),
