@@ -62,22 +62,36 @@ class PromptCompleter(Completer):
         return sorted(set(names))
 
     def _get_contact_files(self) -> List[str]:
-        if hasattr(self._record_service, "list_contact_files"):
-            files = self._record_service.list_contact_files()
-        elif hasattr(self._record_service, "get_contact_files"):
-            files = self._record_service.get_contact_files()
-        else:
-            files = []
-        return sorted(str(f) for f in files)
+        registry = getattr(self._command_service, "file_service_registry", None)
+        if registry is None:
+            return []
+
+        file_service = registry.get("contacts")
+        if file_service is None:
+            return []
+
+        try:
+            file_names = file_service.get_file_list()
+        except Exception:
+            return []
+
+        return sorted(str(name) for name in file_names)
 
     def _get_note_files(self) -> List[str]:
-        if hasattr(self._note_service, "list_note_files"):
-            files = self._note_service.list_note_files()
-        elif hasattr(self._note_service, "get_note_files"):
-            files = self._note_service.get_note_files()
-        else:
-            files = []
-        return sorted(str(f) for f in files)
+        registry = getattr(self._command_service, "file_service_registry", None)
+        if registry is None:
+            return []
+
+        file_service = registry.get("notes")
+        if file_service is None:
+            return []
+
+        try:
+            file_names = file_service.get_file_list()
+        except Exception:
+            return []
+
+        return sorted(str(name) for name in file_names)
 
     def _get_all_tags(self) -> list[str]:
         tags: set[str] = set()
