@@ -138,4 +138,3 @@ def test_note_title_commands_suggest_note_titles():
 
     # А, наприклад, "Shopping list" не підходить під префікс "Ro"
     assert "Shopping list" not in completions
-
