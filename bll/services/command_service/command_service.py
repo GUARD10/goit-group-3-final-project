@@ -63,11 +63,6 @@ class CommandService(ICommandService):
                 self.delete_contact,
                 "🗑️ Remove contact completely",
             ),
-            "show-contact": Command(
-                "show-phone [name]",
-                self.show_contact,
-                "📱 View contact's phones",
-            ),
             "all-contacts": Command(
                 "all-contacts",
                 self.show_all,

@@ -151,38 +151,12 @@ class PromptCompleter(Completer):
             # phone не доповнюємо
             return
 
-        # show-phone [name] - підказуємо існуючі імена
-        if cmd == "show-phone":
-            if arg_index == 1:
-                for name in self._get_contact_names():
-                    if name.startswith(prefix):
-                        yield Completion(name, start_position=-len(prefix))
-            return
-
         # add-email [name] [new_email] - тільки ім'я
         if cmd == "add-email":
             if arg_index == 1:
                 for name in self._get_contact_names():
                     if name.startswith(prefix):
                         yield Completion(name, start_position=-len(prefix))
-            # new_email не доповнюємо
-            return
-
-        # update-email [name] [old_email] [new_email]
-        # - 1-й аргумент - ім'я
-        # - 2-й аргумент - існуючий емейл контактa
-        if cmd == "update-email":
-            if arg_index == 1:
-                # ім'я контакту
-                for name in self._get_contact_names():
-                    if name.startswith(prefix):
-                        yield Completion(name, start_position=-len(prefix))
-            elif arg_index == 2:
-                # old_email
-                contact_name = parts[1]
-                for email in self._get_contact_emails(contact_name):
-                    if email.startswith(prefix):
-                        yield Completion(email, start_position=-len(prefix))
             # new_email не доповнюємо
             return
 

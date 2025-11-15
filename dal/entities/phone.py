@@ -1,4 +1,3 @@
-import re
 
 from dal.entities.field import Field
 
