@@ -29,6 +29,7 @@ class FakeCommandService:
             "delete-note",
             "add-note-tags",
             "remove-note-tag",
+            "show-notes-by-tag",  # додали, бо є логіка для тегів
             "help",
             "exit",
         ]
@@ -56,19 +57,25 @@ class FakeRecordService:
 
 
 class FakeNote:
-    def __init__(self, name: str, title: str | None = None):
+    def __init__(
+        self, name: str, title: str | None = None, tags: list[str] | None = None
+    ):
         # емулюємо note.name.value та note.title.value
         self.name = type("N", (), {"value": name})
         # title нам зараз не критично, але нехай буде для сумісності
         self.title = type("T", (), {"value": title or name})
+        # емулюємо note.tags (список тегів без #)
+        self.tags = tags or []
 
 
 class FakeNoteService:
     def __init__(self):
         self._notes = [
-            FakeNote("Shopping list"),
-            FakeNote("Work tasks"),
-            FakeNote("Roman study plan"),
+            FakeNote("Shopping list", tags=["groceries", "todo"]),
+            FakeNote("Work tasks", tags=["work", "urgent"]),
+            FakeNote("Roman study plan", tags=["study", "todo"]),
+            # окрема нота з простим name без пробілів, щоб зручно тестувати remove-note-tag
+            FakeNote("Roman", tags=["roman-tag", "todo"]),
         ]
 
     def get_all(self):
@@ -144,3 +151,66 @@ def test_note_title_commands_suggest_note_names():
 
     # А, наприклад, "Shopping list" не підходить під префікс "Ro"
     assert "Shopping list" not in completions
+
+
+def test_add_note_tags_suggests_all_tags_by_prefix():
+    """
+    Для add-note-tags [name] [tag] другий та наступні аргументи
+    мають доповнюватися всіма відомими тегами по префіксу.
+    """
+    completer = PromptCompleter(
+        command_service=FakeCommandService(),
+        record_service=FakeRecordService(),
+        note_service=FakeNoteService(),
+    )
+
+    # Користувач пише: "add-note-tags Roman study plan t"
+    # parts = ["add-note-tags", "Roman", "study", "plan", "t"]
+    completions = collect_completions(completer, "add-note-tags Roman study plan t")
+
+    # У всіх нотатках є теги: groceries, todo, work, urgent, study, roman-tag
+    # За префіксом "t" очікуємо "todo"
+    assert "todo" in completions
+    # А, наприклад, "urgent" не має з'являтися, бо не починається на "t"
+    assert "urgent" not in completions
+
+
+def test_remove_note_tag_suggests_tags_for_specific_note():
+    """
+    Для remove-note-tag [name] [tag] теги мають підказуватися
+    тільки з обраної нотатки.
+    """
+    completer = PromptCompleter(
+        command_service=FakeCommandService(),
+        record_service=FakeRecordService(),
+        note_service=FakeNoteService(),
+    )
+
+    # Використаємо нотатку з простим name "Roman", щоб не ламатися на пробілах
+    # parts = ["remove-note-tag", "Roman", "t"]
+    completions = collect_completions(completer, "remove-note-tag Roman t")
+
+    # У нотатки "Roman" теги: ["roman-tag", "todo"]
+    # Префікс "t" → очікуємо "todo"
+    assert "todo" in completions
+    # "roman-tag" не підходить під префікс "t"
+    assert "roman-tag" not in completions
+
+
+def test_show_notes_by_tag_suggests_all_tags():
+    """
+    Для show-notes-by-tag [tag] автокомпліт має пропонувати список усіх тегів.
+    """
+    completer = PromptCompleter(
+        command_service=FakeCommandService(),
+        record_service=FakeRecordService(),
+        note_service=FakeNoteService(),
+    )
+
+    # Користувач пише: "show-notes-by-tag t"
+    completions = collect_completions(completer, "show-notes-by-tag t")
+
+    # За префіксом "t" очікуємо тег "todo"
+    assert "todo" in completions
+    # Тег "work" не має підходити під префікс "t"
+    assert "work" not in completions
