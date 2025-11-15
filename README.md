@@ -21,6 +21,8 @@ Assistant Bot — це консольний застосунок для керу
 3. **pip:** встановлений менеджер пакетів Python.
 
 ### 3. Встановлення
+
+#### Варіант А: Встановлення як пакет (рекомендовано)
 ```pwsh
 # Клонування репозиторію
 git clone <url>
@@ -31,11 +33,25 @@ python -m venv .venv
 .\.venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
 
-# Встановлення залежностей
+# Встановлення у режимі редагування
+pip install -e .
+```
+
+#### Варіант Б: Запуск без встановлення
+```pwsh
+# Клонування та активація середовища (як вище)
+# Встановлення лише залежностей
 pip install -r requirements.txt
 ```
 
 ### 4. Запуск
+
+#### Якщо встановлено як пакет (Варіант А):
+```pwsh
+assistant-bot
+```
+
+#### Якщо запускаєте без встановлення (Варіант Б):
 ```pwsh
 python main.py
 ```
@@ -50,6 +66,25 @@ python main.py
   - **Система:** `hello`, `help`, `exit`.
 - Команди зчитують аргументи з CLI або, за потреби, запускають інтерактивні діалоги (наприклад, при додаванні нотаток).
 - Для безпечного виходу використовуйте `exit` або `close` — перед завершенням бот збереже всі дані.
+
+### 6. Конфігурація (опціонально)
+Ви можете налаштувати директорії для збереження файлів за допомогою змінних середовища:
+
+```pwsh
+# Windows PowerShell
+$env:ASSISTANT_CONTACTS_DIR="C:\MyData\contacts"
+$env:ASSISTANT_NOTES_DIR="C:\MyData\notes"
+assistant-bot
+
+# Linux/macOS
+export ASSISTANT_CONTACTS_DIR="/home/user/data/contacts"
+export ASSISTANT_NOTES_DIR="/home/user/data/notes"
+assistant-bot
+```
+
+**За замовчуванням:**
+- Контакти: `files/contacts`
+- Нотатки: `files/notes`
 
 ---
 
@@ -68,6 +103,8 @@ Assistant Bot is a command-line application for managing contacts and notes. It 
 3. **pip:** Python package manager installed.
 
 ### 3. Installation
+
+#### Option A: Install as package (recommended)
 ```pwsh
 # Clone the repository
 git clone <url>
@@ -78,11 +115,25 @@ python -m venv .venv
 .\.venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
 
-# Install dependencies
+# Install in editable mode
+pip install -e .
+```
+
+#### Option B: Run without installation
+```pwsh
+# Clone and activate environment (as above)
+# Install dependencies only
 pip install -r requirements.txt
 ```
 
 ### 4. Run
+
+#### If installed as package (Option A):
+```pwsh
+assistant-bot
+```
+
+#### If running without installation (Option B):
 ```pwsh
 python main.py
 ```
@@ -97,4 +148,23 @@ On startup the bot tries to load the most recent contacts/notes snapshot from th
   - **System:** `hello`, `help`, `exit`.
 - Commands accept CLI arguments or launch interactive dialogs when extra input is required (e.g., composing a note).
 - Use `exit` or `close` to quit safely—both trigger state persistence before shutting down.
+
+### 6. Configuration (optional)
+You can customize file storage directories using environment variables:
+
+```pwsh
+# Windows PowerShell
+$env:ASSISTANT_CONTACTS_DIR="C:\MyData\contacts"
+$env:ASSISTANT_NOTES_DIR="C:\MyData\notes"
+assistant-bot
+
+# Linux/macOS
+export ASSISTANT_CONTACTS_DIR="/home/user/data/contacts"
+export ASSISTANT_NOTES_DIR="/home/user/data/notes"
+assistant-bot
+```
+
+**Defaults:**
+- Contacts: `files/contacts`
+- Notes: `files/notes`
 

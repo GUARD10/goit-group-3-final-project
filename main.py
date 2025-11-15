@@ -1,5 +1,4 @@
-from pathlib import Path
-
+from bll.configs.config import get_config
 from bll.services.command_service.CommandService import CommandService
 from bll.services.input_service.InputService import InputService
 from bll.services.pickle_file_service.PickleFileService import PickleFileService
@@ -22,11 +21,13 @@ from colorama import Style as cs
 
 
 def main() -> None:
+    config = get_config()
+
     book_storage = AddressBookStorage()
     note_storage = NoteStorage()
 
-    contact_file_manager = PickleFileManager[dict[str, Record]](Path("files/contacts"))
-    note_file_manager = PickleFileManager[dict[str, Note]](Path("files/notes"))
+    contact_file_manager = PickleFileManager[dict[str, Record]](config.contacts_dir)
+    note_file_manager = PickleFileManager[dict[str, Note]](config.notes_dir)
 
     contact_file_service = PickleFileService[dict[str, Record]](
         contact_file_manager, book_storage
