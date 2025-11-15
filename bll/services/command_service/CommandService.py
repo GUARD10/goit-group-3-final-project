@@ -1,5 +1,6 @@
 from typing import Optional
 
+import calendar
 import inspect
 
 from bll.decorators.CommandHandlerDecorator import command_handler_decorator
@@ -8,6 +9,7 @@ from bll.services.input_service.IInputService import IInputService
 from bll.services.note_service.INoteService import INoteService
 from bll.services.record_service.IRecordService import IRecordService
 from bll.helpers.TagPalette import TAG_COLORS
+from bll.helpers.CalendarRenderer import render_calendar_with_clock
 from bll.helpers.TableRenderer import (
     render_contact_details,
     render_contacts_table,
@@ -87,6 +89,11 @@ class CommandService(ICommandService):
                 "delete-address",
                 self.delete_address,
                 "Delete address for contact: delete-address [name].",
+            ),
+            "calendar": Command(
+                "calendar [month]? [year]?",
+                self.show_calendar,
+                "Show calendar(s) with birthdays and current time (defaults to full year)",
             ),
             "help": Command("help", self.help_command, "Show this help message"),
             "exit": Command("exit", self.exit_bot, "Exit the program"),
@@ -319,6 +326,12 @@ class CommandService(ICommandService):
         return f"{summary}\n{table}"
 
     @command_handler_decorator
+    def show_calendar(self, arguments: list[str] | None = None) -> str:
+        month, year = self._resolve_calendar_arguments(arguments or [])
+        contacts = self.record_service.get_all() or []
+        return render_calendar_with_clock(contacts, month=month, year=year)
+
+    @command_handler_decorator
     def add_email(self, arguments: list[str]) -> str:
         name, new_email = [arg.strip() for arg in arguments]
 
@@ -422,7 +435,12 @@ class CommandService(ICommandService):
                     "show-all-contacts",
                     "search-contacts",
                 ],
-                "Birthdays": ["add-birthday", "show-birthday", "upcoming-birthdays"],
+                "Birthdays": [
+                    "add-birthday",
+                    "show-birthday",
+                    "upcoming-birthdays",
+                    "calendar",
+                ],
                 "Files": [
                     "save-contact",
                     "load-contact",
@@ -779,6 +797,79 @@ class CommandService(ICommandService):
     ) -> str:
         table = render_note_details(note, title=title)
         return f"{message}\n{table}"
+
+    def _resolve_calendar_arguments(
+        self, arguments: list[str]
+    ) -> tuple[int | None, int | None]:
+        if not arguments:
+            return None, None
+
+        if len(arguments) == 1:
+            single = arguments[0].strip()
+            if self._is_year_token(single):
+                return None, self._parse_year_argument(single)
+            return self._parse_month_argument(single), None
+
+        if len(arguments) == 2:
+            month_value = self._parse_month_argument(arguments[0])
+            year_value = self._parse_year_argument(arguments[1])
+            return month_value, year_value
+
+        raise InvalidException(
+            "Usage: calendar [month] [year]\n"
+            "Examples: calendar March, calendar 12 2025, calendar 2024"
+        )
+
+    def _parse_month_argument(self, token: str) -> int:
+        cleaned = token.strip()
+        if not cleaned:
+            raise InvalidException("Month cannot be empty.")
+
+        try:
+            month_value = int(cleaned)
+        except ValueError:
+            month_lookup = self._month_lookup()
+            normalized = cleaned.lower()
+            if normalized in month_lookup:
+                return month_lookup[normalized]
+            raise InvalidException(
+                "Invalid month. Use numbers 1-12 or month names like 'March'."
+            )
+
+        if 1 <= month_value <= 12:
+            return month_value
+
+        raise InvalidException("Month must be between 1 and 12.")
+
+    @staticmethod
+    def _parse_year_argument(token: str) -> int:
+        cleaned = token.strip()
+        if not cleaned or not cleaned.isdigit():
+            raise InvalidException("Year must be a positive number, e.g. 2025.")
+
+        year_value = int(cleaned)
+        if year_value < 1900 or year_value > 9999:
+            raise InvalidException("Year must be between 1900 and 9999.")
+
+        return year_value
+
+    @staticmethod
+    def _is_year_token(token: str) -> bool:
+        stripped = token.strip()
+        return stripped.isdigit() and len(stripped) == 4
+
+    @staticmethod
+    def _month_lookup() -> dict[str, int]:
+        lookup: dict[str, int] = {}
+        for idx, name in enumerate(calendar.month_name):
+            if not name:
+                continue
+            lookup[name.lower()] = idx
+        for idx, name in enumerate(calendar.month_abbr):
+            if not name:
+                continue
+            lookup[name.lower()] = idx
+        return lookup
 
     def _save_state(self, arguments: list[str], key: str) -> str:
         file_service = self.file_service_registry.get(key)
