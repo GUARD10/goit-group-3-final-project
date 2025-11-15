@@ -231,8 +231,8 @@ class PromptCompleter(Completer):
             # birthday не доповнюємо
             return
 
-        # show-birthday [name] - ім'я
-        if cmd == "show-birthday":
+        # show-contact [name] - ім'я
+        if cmd == "show-contact":
             if arg_index == 1:
                 for name in self._get_contact_names():
                     if name.startswith(prefix):
