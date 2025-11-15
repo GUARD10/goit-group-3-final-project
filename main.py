@@ -58,7 +58,7 @@ def main() -> None:
         note_service=note_service,
     )
 
-    session = PromptSession(completer=completer)
+    session: PromptSession = PromptSession(completer=completer)
 
     print("\n🤖 Welcome to the Assistant Bot!")
     print(f"Type '{cf.CYAN}help{cs.RESET_ALL}' to see available commands.\n")
@@ -95,7 +95,7 @@ def main() -> None:
 
         except NotFoundException as nf:
             print(f"{cf.RED}{nf}{cs.RESET_ALL}")
-            
+
         except KeyboardInterrupt:
             try:
                 result = command_service.execute("exit", [])

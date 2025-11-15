@@ -775,9 +775,6 @@ class CommandService(ICommandService):
     def show_notes_by_tag(self, arguments: list[str]) -> str:
         tag_name = arguments[0].strip() if arguments else None
 
-        if tag_name.startswith("#"):
-            tag_name = tag_name[1:]
-
         if tag_name == "":
             tag_name = None
         notes = self.note_service.get_all_sorted_by_tags(tag_name)

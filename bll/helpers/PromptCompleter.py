@@ -58,7 +58,7 @@ class PromptCompleter(Completer):
         #             yield Completion("#" + tag, start_position=-len(last_token))
         #     return
 
-        # Основні команди: підказуємо імена контактів 
+        # Основні команди: підказуємо імена контактів
         contact_commands = {
             "show-phone",
             "add-phone",
