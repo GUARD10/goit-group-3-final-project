@@ -672,7 +672,10 @@ class CommandService(ICommandService):
 
         selected = self.input_service.choose_multiple_from_list(
             "🏷️ Tags",
-            "Select existing tags (use TAB + ↑↓ and Enter to select) or type new ones (use name:#hex for custom color)",
+            (
+                "Select existing tags (use TAB + ↑↓ and Enter) or type new ones "
+                "(use name:#hex for custom color)"
+            ),
             choices,
             allow_custom=True,
         )
