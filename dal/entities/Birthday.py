@@ -24,12 +24,12 @@ class Birthday(Field):
                 )
         else:
             type_name = type(value).__name__
-            raise InvalidError(
+            raise ValueError(
                 f"Birthday value must be str, datetime, or date, not {type_name}"
             )
 
         if value > date.today():
-            raise InvalidError("Birthday cannot be in the future")
+            raise ValueError("Birthday cannot be in the future")
 
         super().__init__(value)
 

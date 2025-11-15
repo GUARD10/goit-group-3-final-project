@@ -17,6 +17,9 @@ def command_handler_decorator(func: Callable) -> Callable:
         except ExitBotError:
             raise
 
+        except InvalidError:
+            raise
+
         except KeyError as ex:
             missing = str(ex).strip("'") if ex.args else "Unknown"
             raise NotFoundError(
@@ -33,16 +36,20 @@ def command_handler_decorator(func: Callable) -> Callable:
                 f"to see how to use each command properly."
             )
 
-        except ValueError as e:
-            msg = str(e).strip()
-            raise InvalidError(msg)
+        except ValueError:
+            raise InvalidError(
+                f"{Fore.RED}Invalid command format. "
+                f"Missing required argument or separator.{Style.RESET_ALL}\n"
+                f"Tip: Use '{Fore.CYAN}help{Style.RESET_ALL}' "
+                f"to see the correct command format."
+            )
 
         except TypeError:
             raise InvalidError(
                 f"{Fore.RED}This command was used incorrectly. "
                 f"Some arguments may be missing or extra."
                 f"{Style.RESET_ALL}\n"
-                f"Tip: Use '{Fore.CYAN}help{Style.RESET_ALL}' "
+                f"{Fore.YELLOW} Tip: Use '{Fore.CYAN}help{Style.RESET_ALL}' "
                 f"to see how to use each command properly."
             )
 

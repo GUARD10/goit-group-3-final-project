@@ -8,7 +8,7 @@ class PhoneValidationPolicy:
     _PATTERNS: Dict[str, Pattern[str]] = {
         # Ukraine: +380XX XXX XX XX or 0XX XXX XX XX
         "UA": re.compile(
-            r"^(?:\+?380|0)(?:[ \-]?\(?\d{2}\)?[ \-]?\d{3}[ \-]?\d{2}[ \-]?\d{2})$"
+            r"^(?:\+380|380|0)(?:[ \-]?\d{2})(?:[ \-]?\d{3})(?:[ \-]?\d{2})(?:[ \-]?\d{2})$"
         ),
         # United States: optional +1/1, separators and parentheses
         "US": re.compile(r"^(?:\+?1[ \-]?)?(?:\(?\d{3}\)?[ \-]?)?\d{3}[ \-]?\d{4}$"),
