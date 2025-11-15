@@ -6,6 +6,7 @@ from colorama import Fore, Style
 from dal.exceptions.exit_bot_error import ExitBotError
 from dal.exceptions.invalid_error import InvalidError
 from dal.exceptions.not_found_error import NotFoundError
+from dal.exceptions.already_exists_error import AlreadyExistsError
 
 
 def command_handler_decorator(func: Callable) -> Callable:
@@ -18,6 +19,12 @@ def command_handler_decorator(func: Callable) -> Callable:
             raise
 
         except InvalidError:
+            raise
+
+        except NotFoundError:
+            raise
+
+        except AlreadyExistsError:
             raise
 
         except KeyError as ex:
