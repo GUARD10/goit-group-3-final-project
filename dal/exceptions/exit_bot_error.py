@@ -1,0 +1,2 @@
+class ExitBotError(Exception):
+    pass

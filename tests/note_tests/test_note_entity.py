@@ -1,5 +1,6 @@
-from dal.entities.Note import Note
 from datetime import datetime
+
+from dal.entities.note import Note
 
 
 def test_note_init_creates_valid_entities():

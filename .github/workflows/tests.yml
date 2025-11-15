@@ -2,9 +2,9 @@ name: 🧪 Unit Tests
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, main-beta ]
   push:
-    branches: [ main ]
+    branches: [ main, main-beta ]
 
 jobs:
   run-tests:
@@ -23,7 +23,7 @@ jobs:
       - name: 📦 Встановлення залежностей
         run: |
           pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt
 
       - name: 🧪 Запуск pytest
         run: |

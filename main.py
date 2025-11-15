@@ -1,42 +1,44 @@
-from pathlib import Path
-
-from bll.services.command_service.CommandService import CommandService
-from bll.services.input_service.InputService import InputService
-from bll.services.pickle_file_service.PickleFileService import PickleFileService
-from bll.services.record_service.RecordService import RecordService
-from bll.services.note_service.NoteService import NoteService
-from bll.registries.FileServiceRegistry import FileServiceRegistry
-
-from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.ExitBotException import ExitBotException
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.NotFoundException import NotFoundException
-from dal.storages.NoteStorage import NoteStorage
-from dal.entities.Record import Record
-from dal.entities.Note import Note
-
-from colorama import Fore as cf
-from colorama import Style as cs
-
+from colorama import Fore, Style
+from colorama import init as colorama_init
 from prompt_toolkit import PromptSession
-from bll.helpers.PromptCompleter import PromptCompleter
+
+from bll.configs.config import get_config
+from bll.helpers.prompt_completer import PromptCompleter
+from bll.registries.file_service_registry import FileServiceRegistry
+from bll.services.command_service.command_service import CommandService
+from bll.services.file_service.file_service import FileService
+from bll.services.input_service.input_service import InputService
+from bll.services.note_service.note_service import NoteService
+from bll.services.record_service.record_service import RecordService
+from bll.validation_policies.phone_validation_policy import PhoneValidationPolicy
+from dal.entities.note import Note
+from dal.entities.record import Record
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.exit_bot_error import ExitBotError
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
+from dal.file_managers.pickle_file_manager.pickle_file_manager import PickleFileManager
+from dal.storages.address_book_storage import AddressBookStorage
+from dal.storages.note_storage import NoteStorage
 
 
 def main() -> None:
+    colorama_init(autoreset=False)
+
+    config = get_config()
+
+    PhoneValidationPolicy.set_region(config.phone_region)
+
     book_storage = AddressBookStorage()
     note_storage = NoteStorage()
 
-    contact_file_manager = PickleFileManager[dict[str, Record]](Path("files/contacts"))
-    note_file_manager = PickleFileManager[dict[str, Note]](Path("files/notes"))
+    contact_file_manager = PickleFileManager[dict[str, Record]](config.contacts_dir)
+    note_file_manager = PickleFileManager[dict[str, Note]](config.notes_dir)
 
-    contact_file_service = PickleFileService[dict[str, Record]](
+    contact_file_service = FileService[dict[str, Record]](
         contact_file_manager, book_storage
     )
-    note_file_service = PickleFileService[dict[str, Note]](
-        note_file_manager, note_storage
-    )
+    note_file_service = FileService[dict[str, Note]](note_file_manager, note_storage)
 
     record_service = RecordService(book_storage)
     note_service = NoteService(note_storage)
@@ -61,7 +63,7 @@ def main() -> None:
     session: PromptSession = PromptSession(completer=completer)
 
     print("\n🤖 Welcome to the Assistant Bot!")
-    print(f"Type '{cf.CYAN}help{cs.RESET_ALL}' to see available commands.\n")
+    print(f"Type '{Fore.CYAN}help{Style.RESET_ALL}' to see available commands.\n")
 
     for key, service in file_service_registry.get_all().items():
         try:
@@ -86,29 +88,26 @@ def main() -> None:
             if result is not None:
                 print(result)
 
-        except InvalidException as ic:
-            print(f"{cf.RED}{ic}{cs.RESET_ALL}")
+        except InvalidError as ic:
+            print(f"{Fore.RED}{ic}{Style.RESET_ALL}")
             continue
-
-        except AlreadyExistException as aee:
-            print(f"{cf.RED}{aee}{cs.RESET_ALL}")
-
-        except NotFoundException as nf:
-            print(f"{cf.RED}{nf}{cs.RESET_ALL}")
-
+        except AlreadyExistsError as aee:
+            print(f"{Fore.RED}{aee}{Style.RESET_ALL}")
+        except NotFoundError as nf:
+            print(f"{Fore.RED}{nf}{Style.RESET_ALL}")
         except KeyboardInterrupt:
             try:
                 result = command_service.execute("exit", [])
                 if result:
                     print(result)
-            except ExitBotException as eb:
-                print(f"{cf.RED}{eb}{cs.RESET_ALL}")
+            except ExitBotError as eb:
+                print(f"{Fore.RED}{eb}{Style.RESET_ALL}")
             break
-        except ExitBotException as eb:
-            print(f"{cf.RED}{eb}{cs.RESET_ALL}")
+        except ExitBotError as eb:
+            print(f"{Fore.RED}{eb}{Style.RESET_ALL}")
             break
         except Exception as ex:
-            print(f"💥 {cf.RED}Unexpected error: {ex}{cs.RESET_ALL}")
+            print(f"💥 {Fore.RED}Unexpected error: {ex}{Style.RESET_ALL}")
             break
 
 

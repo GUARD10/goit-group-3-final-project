@@ -1,2 +1,0 @@
-class AlreadyExistException(Exception):
-    pass

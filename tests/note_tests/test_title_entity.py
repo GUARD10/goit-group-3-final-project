@@ -1,5 +1,6 @@
 import pytest
-from dal.entities.Title import Title
+
+from dal.entities.title import Title
 
 
 def test_title_valid():

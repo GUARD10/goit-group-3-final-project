@@ -1,10 +1,11 @@
 import pytest
-from dal.entities.Note import Note
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.NotFoundException import NotFoundException
-from dal.storages.NoteStorage import NoteStorage
-from bll.services.note_service.NoteService import NoteService
+
+from bll.services.note_service.note_service import NoteService
+from dal.entities.note import Note
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
+from dal.storages.note_storage import NoteStorage
 
 
 @pytest.fixture
@@ -19,18 +20,18 @@ def test_add_note_success(service):
 
 def test_add_note_duplicate_raises(service):
     service.add("n", "T", "1234567890")
-    with pytest.raises(AlreadyExistException):
+    with pytest.raises(AlreadyExistsError):
         service.add("n", "T", "1234567890")
 
 
 def test_add_note_invalid_fields(service):
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.add("", "T", "1234567890")
 
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.add("name", "", "1234567890")
 
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.add("name", "T", 123)  # wrong type
 
 
@@ -43,7 +44,7 @@ def test_update_note(service):
 
 
 def test_update_nonexistent_note(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.update("x", Note("x", "T", "1234567890"))
 
 
@@ -54,7 +55,7 @@ def test_get_by_name_success(service):
 
 
 def test_get_by_name_missing(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.get_by_name("missing")
 
 
@@ -67,7 +68,7 @@ def test_rename_note(service):
 
 
 def test_rename_missing(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.rename("x", "y")
 
 
@@ -78,5 +79,5 @@ def test_delete_note(service):
 
 
 def test_delete_missing(service):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         service.delete("nope")

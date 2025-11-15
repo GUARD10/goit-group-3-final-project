@@ -1,7 +1,7 @@
 import pytest
 
-from bll.services.note_service.NoteService import NoteService
-from dal.storages.NoteStorage import NoteStorage
+from bll.services.note_service.note_service import NoteService
+from dal.storages.note_storage import NoteStorage
 
 
 @pytest.fixture

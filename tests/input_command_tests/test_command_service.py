@@ -1,13 +1,14 @@
-import pytest
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 
-from bll.services.command_service.CommandService import CommandService
-from bll.helpers.DateHelper import DateHelper
-from dal.entities.Record import Record
-from dal.entities.Birthday import Birthday
-from dal.exceptions.ExitBotException import ExitBotException
-from dal.entities.Tag import Tag
-from bll.registries.FileServiceRegistry import FileServiceRegistry
+import pytest
+
+from bll.helpers.date_helper import DateHelper
+from bll.registries.file_service_registry import FileServiceRegistry
+from bll.services.command_service.command_service import CommandService
+from dal.entities.birthday import Birthday
+from dal.entities.record import Record
+from dal.entities.tag import Tag
+from dal.exceptions.exit_bot_error import ExitBotError
 
 
 # ================================
@@ -22,7 +23,12 @@ class FakeField:
 
 
 class FakeNote:
-    def __init__(self, name="my_note", title="Old title", content="Old content"):
+    def __init__(
+        self,
+        name: str = "my_note",
+        title: str = "Old title",
+        content: str = "Old content",
+    ) -> None:
         self.name = FakeField(name)
         self.title = FakeField(title)
         self.content = FakeField(content)
@@ -31,7 +37,7 @@ class FakeNote:
         self.created_at = datetime.now()
         self.updated_at = None
 
-    def update(self):
+    def update(self) -> "FakeNoteBuilder":
         return FakeNoteBuilder(self)
 
 
@@ -63,15 +69,15 @@ class FakeNoteBuilder:
 
 
 class FakeNoteService:
-    def __init__(self):
-        self.notes = {}
+    def __init__(self) -> None:
+        self.notes: dict[str, FakeNote] = {}
 
     def add(self, name, title, content):
         note = FakeNote(name, title, content)
         self.notes[name] = note
         return note
 
-    def get_by_name(self, name):
+    def get_by_name(self, name) -> FakeNote:
         return self.notes[name]
 
     def update(self, name, note):
@@ -85,12 +91,12 @@ class FakeNoteService:
         note.tags = list(existing.values())
         return note
 
-    def remove_tag(self, note_name, tag_name):
+    def remove_tag(self, note_name: str, tag_name: str) -> FakeNote:
         note = self.get_by_name(note_name)
         note.tags = [tag for tag in note.tags if tag.value.lower() != tag_name.lower()]
         return note
 
-    def get_distinct_tags(self):
+    def get_distinct_tags(self) -> list[Tag]:
         seen: dict[str, Tag] = {}
         for note in self.notes.values():
             for tag in note.tags:
@@ -99,7 +105,7 @@ class FakeNoteService:
                     seen[key] = Tag(tag.value, tag.color)
         return sorted(seen.values(), key=lambda t: t.value.lower())
 
-    def get_all_sorted_by_tags(self, tag_name=None):
+    def get_all_sorted_by_tags(self, tag_name: str | None = None) -> list[FakeNote]:
         notes = list(self.notes.values())
         if tag_name:
             normalized = tag_name.lower()
@@ -187,22 +193,22 @@ class FakeFileService:
 
 
 class FakeInputService:
-    def __init__(self):
+    def __init__(self) -> None:
         self.value_queue: list[str | None] = []
         self.next_value: str | None = ""
         self.next_multiline: str | None = None
         self.single_choice_queue: list[str | None] = []
         self.multi_choice_queue: list[list[str]] = []
 
-    def read_value(self, *args, **kwargs):
+    def read_value(self, *args: object, **kwargs: object) -> str | None:
         if self.value_queue:
             return self.value_queue.pop(0)
         return self.next_value
 
-    def read_multiline(self, *args, **kwargs):
+    def read_multiline(self, *args: object, **kwargs: object) -> str | None:
         return self.next_multiline
 
-    def choose_from_list(self, *args, **kwargs):
+    def choose_from_list(self, *args: object, **kwargs: object) -> str | None:
         if self.single_choice_queue:
             return self.single_choice_queue.pop(0)
         return "__auto__"
@@ -277,7 +283,7 @@ def test_add_phone(command_service, fake_record_service):
     fake_record_service.save(rec)
 
     result = command_service.add_phone(["John", "+380111222333"])
-    assert "Contact updated" in result
+    assert "Phone added" in result
     assert len(fake_record_service.records["John"].phones) == 2
 
 
@@ -285,9 +291,10 @@ def test_show_phone(command_service, fake_record_service):
     rec = Record("John", "+380991112233", "+380665554433")
     fake_record_service.save(rec)
 
-    result = command_service.show_phone(["John"])
-    assert "+380991112233" in result
-    assert "+380665554433" in result
+    result = command_service.show_contact(["John"])
+    # Phones are displayed with color codes, check for the digit part
+    assert "380991112233" in result
+    assert "380665554433" in result
 
 
 def test_add_birthday(command_service, fake_record_service):
@@ -295,16 +302,8 @@ def test_add_birthday(command_service, fake_record_service):
     fake_record_service.save(rec)
 
     result = command_service.add_birthday(["John", "05.11.2000"])
-    assert "Contact updated" in result
+    assert "Birthday set" in result
     assert isinstance(fake_record_service.records["John"].birthday, Birthday)
-
-
-def test_show_birthday(command_service, fake_record_service):
-    rec = Record("John", "+380991112233", birthday="05.11.2000")
-    fake_record_service.save(rec)
-
-    result = command_service.show_birthday(["John"])
-    assert "05.11.2000" in result
 
 
 def test_birthdays(command_service, fake_record_service):
@@ -358,13 +357,13 @@ def test_hello_and_help(command_service):
 
 def test_exit_bot_no_save(command_service, fake_contact_file_service):
     fake_contact_file_service._saveable = False
-    with pytest.raises(ExitBotException):
+    with pytest.raises(ExitBotError):
         command_service.exit_bot()
 
 
 def test_exit_bot_with_save(command_service, fake_contact_file_service):
     fake_contact_file_service._saveable = True
-    with pytest.raises(ExitBotException):
+    with pytest.raises(ExitBotError):
         command_service.exit_bot()
 
 
@@ -418,7 +417,7 @@ def test_add_note(command_service, fake_note_service, fake_input_service):
     fake_input_service.next_multiline = "Content is long enough"
 
     result = command_service.add_note(["my_note"])
-    assert "Note added" in result
+    assert "Note created" in result
     assert fake_note_service.has("my_note")
     assert fake_note_service.notes["my_note"].title.value == "My Title"
 

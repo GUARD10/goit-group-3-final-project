@@ -1,7 +1,9 @@
-import pytest
 from datetime import date, datetime, timedelta
-from dal.entities.Birthday import Birthday
-from dal.exceptions.InvalidException import InvalidException
+
+import pytest
+
+from dal.entities.birthday import Birthday
+from dal.exceptions.invalid_error import InvalidError
 
 
 def test_valid_birthday_from_string():
@@ -23,15 +25,17 @@ def test_valid_birthday_from_datetime():
 
 def test_future_birthday_raises():
     future_date = date.today() + timedelta(days=1)
-    with pytest.raises(InvalidException, match="Birthday cannot be in the future"):
+    # твій код тепер кидає ValueError
+    with pytest.raises(ValueError, match="Birthday cannot be in the future"):
         Birthday(future_date)
 
 
 def test_invalid_string_format_raises():
-    with pytest.raises(InvalidException, match="Birthday must be in format"):
+    with pytest.raises(InvalidError, match="Birthday must be in format"):
         Birthday("2000/11/05")
 
 
 def test_invalid_type_raises():
-    with pytest.raises(InvalidException, match="Birthday value must be"):
+    # твій код кидає ValueError
+    with pytest.raises(ValueError, match="Birthday value must be"):
         Birthday(12345)

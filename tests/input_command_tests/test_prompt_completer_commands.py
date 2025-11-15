@@ -1,5 +1,11 @@
+from typing import cast
+
 from prompt_toolkit.document import Document
-from bll.helpers.PromptCompleter import PromptCompleter
+
+from bll.helpers.prompt_completer import PromptCompleter
+from bll.services.command_service.command_service import CommandService
+from bll.services.note_service.note_service import NoteService
+from bll.services.record_service.record_service import RecordService
 
 
 class FakeCommand:
@@ -9,14 +15,32 @@ class FakeCommand:
         self.description = ""
 
 
+class FakeFileService:
+    def __init__(self, files: list[str]):
+        self._files = files
+
+    def get_file_list(self) -> list[str]:
+        return self._files
+
+
+class FakeFileServiceRegistry:
+    def __init__(self):
+        self._services = {
+            "contacts": FakeFileService(
+                ["contacts_autosave_1.pkl", "contacts_backup.pkl"]
+            ),
+            "notes": FakeFileService(["notes_autosave_1.pkl", "notes_ideas.pkl"]),
+        }
+
+    def get(self, key: str):
+        return self._services.get(key)
+
+
 class FakeCommandService:
     def __init__(self):
-        # Команди, які нас цікавлять для автокомпліта
         names = [
-            "show-phone",
             "add-phone",
             "add-email",
-            "update-email",
             "delete-email",
             "set-address",
             "delete-address",
@@ -29,12 +53,22 @@ class FakeCommandService:
             "delete-note",
             "add-note-tags",
             "remove-note-tag",
-            "show-notes-by-tag",  # додали, бо є логіка для тегів
+            "show-notes-by-tag",
+            # файли контактів
+            "load-contact",
+            "delete-contact-file",
+            "contacts-files",
+            # файли нотаток
+            "load-note",
+            "delete-note-file",
+            "note-files",
             "help",
             "exit",
         ]
 
         self.commands = {name: FakeCommand(name) for name in names}
+        # емулюємо те, що є в реальному CommandService
+        self.file_service_registry = FakeFileServiceRegistry()
 
 
 class FakeRecord:
@@ -74,7 +108,6 @@ class FakeNoteService:
             FakeNote("Shopping list", tags=["groceries", "todo"]),
             FakeNote("Work tasks", tags=["work", "urgent"]),
             FakeNote("Roman study plan", tags=["study", "todo"]),
-            # окрема нота з простим name без пробілів, щоб зручно тестувати remove-note-tag
             FakeNote("Roman", tags=["roman-tag", "todo"]),
         ]
 
@@ -83,134 +116,129 @@ class FakeNoteService:
 
 
 def collect_completions(completer: PromptCompleter, text: str) -> list[str]:
-    """
-    Допоміжна функція: створює Document і повертає список текстів completion’ів.
-    """
     doc = Document(text=text, cursor_position=len(text))
     return [c.text for c in completer.get_completions(doc, None)]
 
 
-def test_command_name_completion_by_prefix():
+def _make_completer() -> PromptCompleter:
     """
-    Перевіряємо, що при введенні префіксу першого слова
-    (команди) PromptCompleter підказує відповідні команди.
+    Створюємо PromptCompleter з фейковими сервісами,
+    але через cast кажемо mypy, що це ок.
     """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
+    return PromptCompleter(
+        command_service=cast(CommandService, FakeCommandService()),
+        record_service=cast(RecordService, FakeRecordService()),
+        note_service=cast(NoteService, FakeNoteService()),
     )
 
-    # Користувач пише "add-" → очікуємо, що будуть "add-phone", "add-email"
+
+def test_command_name_completion_by_prefix():
+    completer = _make_completer()
+
     completions = collect_completions(completer, "add-")
 
     assert "add-phone" in completions
     assert "add-email" in completions
-    # але, наприклад, "edit-note-title" не має бути в цих підказках
     assert "edit-note-title" not in completions
 
 
 def test_contact_commands_suggest_contact_names():
-    """
-    Для contact_commands (наприклад show-phone) друге слово має доповнюватися
-    іменами контактів з RecordService.
-    """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
-    )
+    completer = _make_completer()
 
-    # Користувач пише: "show-phone Ro"
-    completions = collect_completions(completer, "show-phone Ro")
+    completions = collect_completions(completer, "add-phone Ro")
 
-    # Очікуємо, що підкаже "Roman"
     assert "Roman" in completions
-    # А, наприклад, "John" не підходить під префікс "Ro"
     assert "John" not in completions
 
 
 def test_note_title_commands_suggest_note_names():
-    """
-    Для note_title_commands (edit-note-title, edit-note-content, delete-note,
-    add-note-tags, remove-note-tag)
-    перший аргумент має доповнюватися іменами нотаток (name), а не title.
-    """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
-    )
+    completer = _make_completer()
 
-    # Користувач пише: "edit-note-title Ro"
     completions = collect_completions(completer, "edit-note-title Ro")
 
-    # Має запропонувати ім'я нотатки, яке починається на "Ro"
-    # (FakeNoteService повертає нотатку з name = "Roman study plan")
     assert "Roman study plan" in completions
-
-    # А, наприклад, "Shopping list" не підходить під префікс "Ro"
     assert "Shopping list" not in completions
 
 
 def test_add_note_tags_suggests_all_tags_by_prefix():
-    """
-    Для add-note-tags [name] [tag] другий та наступні аргументи
-    мають доповнюватися всіма відомими тегами по префіксу.
-    """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
-    )
+    completer = _make_completer()
 
-    # Користувач пише: "add-note-tags Roman study plan t"
-    # parts = ["add-note-tags", "Roman", "study", "plan", "t"]
     completions = collect_completions(completer, "add-note-tags Roman study plan t")
 
-    # У всіх нотатках є теги: groceries, todo, work, urgent, study, roman-tag
-    # За префіксом "t" очікуємо "todo"
     assert "todo" in completions
-    # А, наприклад, "urgent" не має з'являтися, бо не починається на "t"
     assert "urgent" not in completions
 
 
 def test_remove_note_tag_suggests_tags_for_specific_note():
-    """
-    Для remove-note-tag [name] [tag] теги мають підказуватися
-    тільки з обраної нотатки.
-    """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
-    )
+    completer = _make_completer()
 
-    # Використаємо нотатку з простим name "Roman", щоб не ламатися на пробілах
-    # parts = ["remove-note-tag", "Roman", "t"]
     completions = collect_completions(completer, "remove-note-tag Roman t")
 
-    # У нотатки "Roman" теги: ["roman-tag", "todo"]
-    # Префікс "t" → очікуємо "todo"
     assert "todo" in completions
-    # "roman-tag" не підходить під префікс "t"
     assert "roman-tag" not in completions
 
 
 def test_show_notes_by_tag_suggests_all_tags():
-    """
-    Для show-notes-by-tag [tag] автокомпліт має пропонувати список усіх тегів.
-    """
-    completer = PromptCompleter(
-        command_service=FakeCommandService(),
-        record_service=FakeRecordService(),
-        note_service=FakeNoteService(),
-    )
+    completer = _make_completer()
 
-    # Користувач пише: "show-notes-by-tag t"
     completions = collect_completions(completer, "show-notes-by-tag t")
 
-    # За префіксом "t" очікуємо тег "todo"
     assert "todo" in completions
-    # Тег "work" не має підходити під префікс "t"
     assert "work" not in completions
+
+
+def test_load_contact_suggests_contact_files():
+    """
+    load-contact [filename] має підказувати тільки файли контактів.
+    """
+    completer = _make_completer()
+
+    completions = collect_completions(completer, "load-contact c")
+
+    assert "contacts_autosave_1.pkl" in completions
+    assert "contacts_backup.pkl" in completions
+    # файли нотаток не мають з'являтися
+    assert "notes_autosave_1.pkl" not in completions
+    assert "notes_ideas.pkl" not in completions
+
+
+def test_delete_contact_file_suggests_contact_files():
+    """
+    delete-contact-file [filename] має підказувати тільки файли контактів.
+    """
+    completer = _make_completer()
+
+    completions = collect_completions(completer, "delete-contact-file c")
+
+    assert "contacts_autosave_1.pkl" in completions
+    assert "contacts_backup.pkl" in completions
+    assert "notes_autosave_1.pkl" not in completions
+    assert "notes_ideas.pkl" not in completions
+
+
+def test_load_note_suggests_note_files():
+    """
+    load-note [filename] має підказувати тільки файли нотаток.
+    """
+    completer = _make_completer()
+
+    completions = collect_completions(completer, "load-note n")
+
+    assert "notes_autosave_1.pkl" in completions
+    assert "notes_ideas.pkl" in completions
+    assert "contacts_autosave_1.pkl" not in completions
+    assert "contacts_backup.pkl" not in completions
+
+
+def test_delete_note_file_suggests_note_files():
+    """
+    delete-note-file [filename] має підказувати тільки файли нотаток.
+    """
+    completer = _make_completer()
+
+    completions = collect_completions(completer, "delete-note-file n")
+
+    assert "notes_autosave_1.pkl" in completions
+    assert "notes_ideas.pkl" in completions
+    assert "contacts_autosave_1.pkl" not in completions
+    assert "contacts_backup.pkl" not in completions

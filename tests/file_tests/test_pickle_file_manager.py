@@ -1,6 +1,6 @@
 import pytest
 
-from dal.file_managers.pickle_file_manager.PickleFileManager import PickleFileManager
+from dal.file_managers.pickle_file_manager.pickle_file_manager import PickleFileManager
 
 
 @pytest.fixture

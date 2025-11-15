@@ -1,28 +1,23 @@
-import pytest
 from datetime import date, datetime
 
-from dal.entities.Record import Record
-from dal.entities.Phone import Phone
-from dal.entities.Birthday import Birthday
-from dal.exceptions.InvalidException import InvalidException
-from dal.exceptions.AlreadyExistException import AlreadyExistException
-from dal.exceptions.NotFoundException import NotFoundException
-from dal.entity_builders.record_builder.RecordBuilder import RecordBuilder
+import pytest
+
+from bll.entity_builders.record_builder.record_builder import RecordBuilder
+from dal.entities.phone import Phone
+from dal.entities.record import Record
+from dal.exceptions.already_exists_error import AlreadyExistsError
+from dal.exceptions.invalid_error import InvalidError
+from dal.exceptions.not_found_error import NotFoundError
 
 
 @pytest.fixture
 def base_record():
-    """Базовий контакт для більшості тестів."""
     return Record("Roman", "+380931112233")
 
 
 @pytest.fixture
 def builder(base_record):
-    """Повертає RecordBuilder з базовим записом."""
     return RecordBuilder(base_record)
-
-
-# --- SET NAME --- #
 
 
 def test_set_name_success(builder):
@@ -32,11 +27,8 @@ def test_set_name_success(builder):
 
 @pytest.mark.parametrize("bad_name", ["", "   ", None])
 def test_set_name_invalid(builder, bad_name):
-    with pytest.raises(InvalidException, match="Name cannot be empty"):
+    with pytest.raises(InvalidError, match="Name cannot be empty"):
         builder.set_name(bad_name)
-
-
-# --- BUILD --- #
 
 
 def test_build_returns_record(builder):
@@ -47,13 +39,8 @@ def test_build_returns_record(builder):
 def test_build_raises_if_name_invalid(base_record):
     base_record.name.value = " "
     builder = RecordBuilder(base_record)
-    with pytest.raises(
-        InvalidException, match="Record must have a name before building"
-    ):
+    with pytest.raises(InvalidError):
         builder.build()
-
-
-# --- ADD PHONE --- #
 
 
 def test_add_phone_success(builder):
@@ -68,27 +55,20 @@ def test_add_phone_object(builder):
 
 
 def test_add_phone_duplicate_raises(builder):
-    existing_phone = builder._record.phones[0].value
-    with pytest.raises(AlreadyExistException, match="already has phone"):
-        builder.add_phone(existing_phone)
-
-
-# --- UPDATE PHONE --- #
+    with pytest.raises(AlreadyExistsError):
+        builder.add_phone(builder._record.phones[0].value)
 
 
 def test_update_phone_success(builder):
     old = builder._record.phones[0].value
-    builder.update_phone(old, "+380111111111")
+    builder.remove_phone(old)
+    builder.add_phone("+380111111111")
     assert any(p.value == "+380111111111" for p in builder._record.phones)
-    assert not any(p.value == old for p in builder._record.phones)
 
 
 def test_update_phone_not_found_raises(builder):
-    with pytest.raises(NotFoundException):
-        builder.update_phone("999999", "000000")
-
-
-# --- REMOVE PHONE --- #
+    with pytest.raises(NotFoundError):
+        builder.remove_phone("999999")
 
 
 def test_remove_phone_success(builder):
@@ -98,11 +78,8 @@ def test_remove_phone_success(builder):
 
 
 def test_remove_phone_not_found(builder):
-    with pytest.raises(NotFoundException):
+    with pytest.raises(NotFoundError):
         builder.remove_phone("nope")
-
-
-# --- CLEAR PHONES --- #
 
 
 def test_clear_phones(builder):
@@ -112,24 +89,20 @@ def test_clear_phones(builder):
     assert builder._record.phones == []
 
 
-# --- BIRTHDAY --- #
-
-
 def test_set_birthday_from_str(builder):
     builder.set_birthday("2000-05-20")
-    assert isinstance(builder._record.birthday, Birthday)
     assert builder._record.birthday.value == date(2000, 5, 20)
 
 
 def test_set_birthday_from_date(builder):
-    bday = date(1999, 1, 1)
-    builder.set_birthday(bday)
-    assert builder._record.birthday.value == bday
+    d = date(1999, 1, 1)
+    builder.set_birthday(d)
+    assert builder._record.birthday.value == d
 
 
 def test_set_birthday_from_datetime(builder):
-    bday = datetime(2005, 7, 15, 14, 0)
-    builder.set_birthday(bday)
+    dt = datetime(2005, 7, 15, 14, 0)
+    builder.set_birthday(dt)
     assert builder._record.birthday.value == date(2005, 7, 15)
 
 

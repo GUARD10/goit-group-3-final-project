@@ -1,9 +1,9 @@
 import pytest
 
-from bll.services.record_service.RecordService import RecordService
-from dal.storages.AddressBookStorage import AddressBookStorage
-from dal.entities.Record import Record
-from dal.exceptions.InvalidException import InvalidException
+from bll.services.record_service.record_service import RecordService
+from dal.entities.record import Record
+from dal.exceptions.invalid_error import InvalidError
+from dal.storages.address_book_storage import AddressBookStorage
 
 
 @pytest.fixture
@@ -49,5 +49,5 @@ def test_search_no_results(service):
 
 
 def test_search_empty_query_raises(service):
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         service.search("  ")

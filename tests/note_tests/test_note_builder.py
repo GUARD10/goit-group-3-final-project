@@ -1,6 +1,7 @@
 import pytest
-from dal.entities.Note import Note
-from dal.entity_builders.note_builder.NoteBuilder import NoteBuilder
+
+from bll.entity_builders.note_builder.note_builder import NoteBuilder
+from dal.entities.note import Note
 
 
 def test_note_builder_setters():

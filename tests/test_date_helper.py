@@ -1,7 +1,9 @@
-import pytest
 from datetime import date, timedelta
-from bll.helpers.DateHelper import DateHelper
-from dal.exceptions.InvalidException import InvalidException
+
+import pytest
+
+from bll.helpers.date_helper import DateHelper
+from dal.exceptions.invalid_error import InvalidError
 
 
 def test_date_within_next_week():
@@ -30,12 +32,12 @@ def test_parse_valid_formats():
 
 
 def test_parse_invalid_format():
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         DateHelper.parse_to_date("31-10-2024")
 
 
 def test_parse_none_value():
-    with pytest.raises(InvalidException):
+    with pytest.raises(InvalidError):
         DateHelper.parse_to_date(None)
 
 

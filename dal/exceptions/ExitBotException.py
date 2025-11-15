@@ -1,2 +1,0 @@
-class ExitBotException(Exception):
-    pass

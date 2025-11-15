@@ -1,6 +1,6 @@
 import pytest
 
-from dal.entities.Address import Address
+from dal.entities.address import Address
 
 
 def test_address_valid_simple():

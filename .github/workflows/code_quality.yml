@@ -2,9 +2,9 @@ name: Code Quality Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, main-beta ]
   push:
-    branches: [ main ]
+    branches: [ main, main-beta ]
 
 jobs:
   lint-and-typecheck:
@@ -23,7 +23,7 @@ jobs:
       - name: 📦 Встановлення залежностей
         run: |
           echo "🔧 Встановлюємо залежності з requirements-dev.txt..."
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt
           echo "✅ Залежності встановлено!"
 
       - name: 🎯 Ruff — лінтинг та перевірка форматування

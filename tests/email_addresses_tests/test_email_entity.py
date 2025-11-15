@@ -1,6 +1,6 @@
 import pytest
 
-from dal.entities.Email import Email
+from dal.entities.email import Email
 
 
 def test_email_valid_simple():
