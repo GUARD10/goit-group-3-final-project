@@ -3,6 +3,7 @@ from datetime import date
 from bll.helpers.date_helper import DateHelper
 from bll.helpers.search_helper import SearchHelper
 from bll.services.record_service.i_record_service import IRecordService
+from bll.validation_policies.phone_validation_policy import PhoneValidationPolicy
 from dal.entities.record import Record
 from dal.exceptions.already_exists_error import AlreadyExistsError
 from dal.exceptions.invalid_error import InvalidError
@@ -18,7 +19,7 @@ class RecordService(IRecordService):
         self._validate_record(new_record)
 
         if self.has(new_record.name.value):
-            raise AlreadyExistsError(f"Record '{new_record.name.value}' already exists")
+            raise AlreadyExistsError(f"Record '{new_record.name}' already exists")
 
         self.storage.add(new_record)
 
@@ -105,6 +106,19 @@ class RecordService(IRecordService):
 
         return self.storage.filter(is_match)
 
+    def _validate_record_arguments(self, record_name: str, record_phone: str) -> None:
+
+        self._validate_record_name(record_name)
+
+        if not isinstance(record_phone, str):
+            raise TypeError("Phone value should be str")
+
+        if not record_phone or not record_phone.strip():
+            raise ValueError("Phone value cannot be empty")
+
+        if not PhoneValidationPolicy.validate(record_phone):
+            PhoneValidationPolicy.error_message(record_phone)
+
     @staticmethod
     def _validate_record_name(record_name: str) -> None:
         if record_name is None:
@@ -112,6 +126,7 @@ class RecordService(IRecordService):
 
         if not isinstance(record_name, str):
             raise InvalidError("Record name has invalid type")
+
 
     @staticmethod
     def _validate_record(record: Record) -> None:

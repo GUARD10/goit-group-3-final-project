@@ -1,9 +1,9 @@
 import pytest
 
+from bll.validation_policies.phone_validation_policy import PhoneValidationPolicy
 from dal.entities.field import Field
 from dal.entities.name import Name
 from dal.entities.phone import Phone
-from bll.validation_policies.phone_validation_policy import PhoneValidationPolicy
 
 
 def test_field_equality():

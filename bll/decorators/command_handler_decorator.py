@@ -3,10 +3,10 @@ from typing import Callable
 
 from colorama import Fore, Style
 
+from dal.exceptions.already_exists_error import AlreadyExistsError
 from dal.exceptions.exit_bot_error import ExitBotError
 from dal.exceptions.invalid_error import InvalidError
 from dal.exceptions.not_found_error import NotFoundError
-from dal.exceptions.already_exists_error import AlreadyExistsError
 
 
 def command_handler_decorator(func: Callable) -> Callable:

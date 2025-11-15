@@ -18,6 +18,7 @@ from bll.services.command_service.i_command_service import ICommandService
 from bll.services.input_service.i_input_service import IInputService
 from bll.services.note_service.i_note_service import INoteService
 from bll.services.record_service.i_record_service import IRecordService
+from bll.validation_policies.phone_validation_policy import PhoneValidationPolicy
 from dal.entities.command import Command
 from dal.entities.note import Note
 from dal.entities.record import Record
@@ -54,12 +55,12 @@ class CommandService(ICommandService):
             ),
             # Contact Commands
             "add-contact": Command(
-                "add-contact [name] [phone]",
+                "add-contact [contact-name] [phone]",
                 self.add_contact,
                 "➕ Create new contact with name and phone",
             ),
             "delete-contact": Command(
-                "delete-contact [name]",
+                "delete-contact [contact-name]",
                 self.delete_contact,
                 "🗑️ Remove contact completely",
             ),
@@ -69,46 +70,46 @@ class CommandService(ICommandService):
                 "📋 Show all your contacts",
             ),
             "show-contact": Command(
-                "show-contact [name]",
+                "show-contact [contact-name]",
                 self.show_contact,
                 "👁️ View contact details"),
             "add-phone": Command(
-                "add-phone [name] [phone]",
+                "add-phone [contact-name] [phone]",
                 self.add_phone,
                 "📞 Add another phone to contact",
             ),
             "delete-phone": Command(
-                "delete-phone [name] [phone]",
+                "delete-phone [contact-name] [phone]",
                 self.delete_phone,
                 "🗑️ Remove phone from contact",
             ),
             "add-email": Command(
-                "add-email",
+                "add-email [contact-name] [email]",
                 self.add_email,
                 "📧 Add email to contact",
             ),
             "delete-email": Command(
-                "delete-email [name] [email]",
+                "delete-email [contact-name] [email]",
                 self.delete_email,
                 "🗑️ Remove email from contact",
             ),
             "set-address": Command(
-                "set-address [name] [address...]",
+                "set-address [contact-name] [address...]",
                 self.set_address,
                 "🏠 Set contact's address",
             ),
             "clear-address": Command(
-                "clear-address [name]",
+                "clear-address [contact-name]",
                 self.delete_address,
                 "🗑️ Clear contact's address",
             ),
             "add-birthday": Command(
-                "add-birthday [name] [DD.MM.YYYY]",
+                "add-birthday [contact-name] [DD.MM.YYYY]",
                 self.add_birthday,
-                "🎂 Set birthday (replaces existing)",
+                "🎂 Set birthday to contact (replaces existing)",
             ),
             "clear-birthday": Command(
-                "clear-birthday [name]", self.clear_birthday, "🗑️ Clear birthday"
+                "clear-birthday [contact-name]", self.clear_birthday, "🗑️ Clear birthday"
             ),
             "upcoming-birthdays": Command(
                 "upcoming-birthdays [days]?",
@@ -121,17 +122,17 @@ class CommandService(ICommandService):
                 "🔍 Find contacts by name, phone, email, etc.",
             ),
             "save-contact": Command(
-                "save-contact [filename]?",
+                "save-contact [file-name]?",
                 self.save_contact_state,
                 "💾 Save contacts (leave empty for autosave)",
             ),
             "load-contact": Command(
-                "load-contact [filename]",
+                "load-contact [file-name]",
                 self.load_contact_state,
                 "📂 Load contacts from file",
             ),
             "delete-contact-file": Command(
-                "delete-contact-file [filename]",
+                "delete-contact-file [file-name]",
                 self.delete_contact_file,
                 "🗑️ Delete saved contacts file",
             ),
@@ -142,14 +143,19 @@ class CommandService(ICommandService):
             ),
             # Note Commands
             "add-note": Command(
-                "add-note [name]",
+                "add-note [note-name]",
                 self.add_note,
                 "📝 Create new note",
             ),
             "delete-note": Command(
-                "delete-note [name]",
+                "delete-note [note-name]",
                 self.delete_note,
                 "🗑️ Remove note",
+            ),
+            "show-note": Command(
+                "show-note [note-name]",
+                self.show_contact,
+                "👁️ View note details"
             ),
             "all-notes": Command("all-notes", self.show_all_notes, "📚 View all notes"),
             "search-notes": Command(
@@ -158,22 +164,22 @@ class CommandService(ICommandService):
                 "🔍 Find notes by content or tags",
             ),
             "edit-note-title": Command(
-                "edit-note-title [name]",
+                "edit-note-title [note-name]",
                 self.edit_note_title,
                 "✏️ Change note title",
             ),
             "edit-note-content": Command(
-                "edit-note-content [name]",
+                "edit-note-content [note-name]",
                 self.edit_note_content,
                 "📄 Update note content",
             ),
             "add-note-tags": Command(
-                "add-note-tags [name] [tag:color]...",
+                "add-note-tags [note-name] [tag:color]...",
                 self.add_note_tags,
                 "🏷️ Add colored tags to note",
             ),
             "remove-note-tag": Command(
-                "remove-note-tag [name] [tag]",
+                "remove-note-tag [note-name] [tag]",
                 self.remove_note_tag,
                 "❌ Remove tag from note",
             ),
@@ -183,17 +189,17 @@ class CommandService(ICommandService):
                 "🏷️ Filter notes by tag",
             ),
             "save-note": Command(
-                "save-note [filename]?",
+                "save-note [file-name]?",
                 self.save_note_state,
                 "💾 Save notes (leave empty for autosave)",
             ),
             "load-note": Command(
-                "load-note [filename]",
+                "load-note [file-name]",
                 self.load_note_state,
                 "📂 Load notes from file",
             ),
             "delete-note-file": Command(
-                "delete-note-file [filename]",
+                "delete-note-file [file-name]",
                 self.delete_note_file,
                 "🗑️ Delete saved notes file",
             ),
@@ -220,6 +226,12 @@ class CommandService(ICommandService):
     @command_handler_decorator
     def add_contact(self, arguments: list[str]) -> str:
         name, phone = [arg.strip() for arg in arguments]
+
+
+
+        if not PhoneValidationPolicy.validate(phone):
+            PhoneValidationPolicy.error_message(phone)
+
         new_contact = Record(name, phone)
         self.record_service.save(new_contact)
 
