@@ -19,10 +19,10 @@ class PhoneValidationPolicy:
 
     _MESSAGES: Dict[str, str] = {
         "UA": (
-            "Use +380XX XXX XX XX or 0XX XXX XX XX; spaces/- allowed; "
+            "Use +380XX-XXX-XX-XX or 0XX-XXX-XX-XX; - allowed; "
             "optional parentheses around operator code."
         ),
-        "US": "Use +1 NNN NNN NNNN or (NNN) NNN-NNNN; spaces/- allowed.",
+        "US": "Use +1-NNN-NNN-NNNN or (NNN)-NNN-NNNN; - allowed.",
         "INTL": (
             "Use E.164: +[country][number], total 7-15 digits without separators."
         ),
