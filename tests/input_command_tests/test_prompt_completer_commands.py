@@ -38,7 +38,7 @@ class FakeRecord:
     def __init__(self, name: str):
         # емулюємо dal.entities.Name
         self.name = type("N", (), {"value": name})
-        self.phones = []
+        self.phones: list[str] = []
 
 
 class FakeRecordService:
