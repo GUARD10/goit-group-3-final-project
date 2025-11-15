@@ -39,12 +39,3 @@ class Email(Field):
         normalized = f"{local}@{domain.lower()}"
 
         super().__init__(normalized)
-
-
-
-
-
-
-
-
-

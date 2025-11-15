@@ -43,12 +43,3 @@ class Address(Field):
         normalized = " ".join(raw.split())
 
         super().__init__(normalized)
-
-
-
-
-
-
-
-
-

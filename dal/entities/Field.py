@@ -17,12 +17,3 @@ class Field:
         if not isinstance(other, Field):
             return NotImplemented
         return self.value == other.value
-
-
-
-
-
-
-
-
-

@@ -9,12 +9,3 @@ class IRegistry(ABC):
     @abstractmethod
     def get_all(self):
         pass
-
-
-
-
-
-
-
-
-

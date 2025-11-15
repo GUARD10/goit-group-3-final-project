@@ -39,12 +39,3 @@ class ICommandService(ABC):
     @abstractmethod
     def get_command(self, command_name: str) -> Command | None:
         pass
-
-
-
-
-
-
-
-
-

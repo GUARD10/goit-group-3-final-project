@@ -51,12 +51,3 @@ def test_search_no_results(service):
 def test_search_empty_query_raises(service):
     with pytest.raises(InvalidError):
         service.search("  ")
-
-
-
-
-
-
-
-
-

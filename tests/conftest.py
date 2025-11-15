@@ -10,12 +10,3 @@ def setup_phone_validation():
     """Initialize phone validation policy for all tests."""
     PhoneValidationPolicy.set_region("UA")
     yield
-
-
-
-
-
-
-
-
-

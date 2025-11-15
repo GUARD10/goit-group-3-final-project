@@ -21,12 +21,3 @@ class FileServiceRegistry(IRegistry):
 
     def get_all(self) -> dict[str, IFileService]:
         return self._services
-
-
-
-
-
-
-
-
-

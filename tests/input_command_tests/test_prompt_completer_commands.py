@@ -1,5 +1,6 @@
 from prompt_toolkit.document import Document
-from bll.helpers.PromptCompleter import PromptCompleter
+
+from bll.helpers.prompt_completer import PromptCompleter
 
 
 class FakeCommand:

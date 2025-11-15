@@ -35,12 +35,3 @@ class Birthday(Field):
 
     def __str__(self):
         return self.value.strftime(self.DATE_FORMAT)
-
-
-
-
-
-
-
-
-

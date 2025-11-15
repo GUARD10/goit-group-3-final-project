@@ -133,12 +133,3 @@ def _format_datetime(note: Note, value: datetime | None) -> str:
         return "—"
     date_format = getattr(note, "DATETIME_FORMAT", Note.DATETIME_FORMAT)
     return value.strftime(date_format)
-
-
-
-
-
-
-
-
-

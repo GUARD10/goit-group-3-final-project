@@ -14,12 +14,3 @@ class Phone(Field):
             raise ValueError(f"Incorrect phone number: '{value}'")
 
         super().__init__(value)
-
-
-
-
-
-
-
-
-

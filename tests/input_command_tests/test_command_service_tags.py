@@ -110,12 +110,3 @@ def test_show_all_notes_sorted_and_filtered(command_service):
     # Filtering by specific tag
     filtered_notes = ns.get_all_sorted_by_tags("a")
     assert [n.name.value for n in filtered_notes] == ["n2"]
-
-
-
-
-
-
-
-
-

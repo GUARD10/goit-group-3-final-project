@@ -41,12 +41,3 @@ def test_note_update_returns_builder():
     builder = note.update()
     assert hasattr(builder, "set_title")
     assert hasattr(builder, "build")
-
-
-
-
-
-
-
-
-

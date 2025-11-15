@@ -52,7 +52,6 @@ class CommandService(ICommandService):
                 self.show_calendar,
                 "📅 View calendar with birthdays (default: full year)",
             ),
-
             # Contact Commands
             "add-contact": Command(
                 "add-contact [name] [phone]",
@@ -110,9 +109,8 @@ class CommandService(ICommandService):
                 "🎂 Set birthday (replaces existing)",
             ),
             "clear-birthday": Command(
-                "clear-birthday [name]",
-                self.clear_birthday,
-                "🗑️ Clear birthday"),
+                "clear-birthday [name]", self.clear_birthday, "🗑️ Clear birthday"
+            ),
             "upcoming-birthdays": Command(
                 "upcoming-birthdays [days]?",
                 self.birthdays,
@@ -143,7 +141,6 @@ class CommandService(ICommandService):
                 self.show_contact_files,
                 "📁 List saved contacts files",
             ),
-
             # Note Commands
             "add-note": Command(
                 "add-note [name]",
@@ -155,9 +152,7 @@ class CommandService(ICommandService):
                 self.delete_note,
                 "🗑️ Remove note",
             ),
-            "all-notes": Command(
-                "all-notes", self.show_all_notes, "📚 View all notes"
-            ),
+            "all-notes": Command("all-notes", self.show_all_notes, "📚 View all notes"),
             "search-notes": Command(
                 "search-notes [text]",
                 self.search_notes,
@@ -344,10 +339,7 @@ class CommandService(ICommandService):
     def clear_birthday(self, arguments: list[str]) -> str:
         name = arguments[0]
         updated_contact = (
-            self.record_service.get_by_name(name)
-            .update()
-            .clear_birthday()
-            .build()
+            self.record_service.get_by_name(name).update().clear_birthday().build()
         )
         self.record_service.update(name, updated_contact)
         message = (
@@ -931,12 +923,3 @@ class CommandService(ICommandService):
             if service.is_save_able():
                 saved_file = service.save_with_name()
                 print(f"{Fore.GREEN}💾 [{key}] saved → {saved_file}{Style.RESET_ALL}")
-
-
-
-
-
-
-
-
-

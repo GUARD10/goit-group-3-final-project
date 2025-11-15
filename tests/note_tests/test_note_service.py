@@ -81,12 +81,3 @@ def test_delete_note(service):
 def test_delete_missing(service):
     with pytest.raises(NotFoundError):
         service.delete("nope")
-
-
-
-
-
-
-
-
-

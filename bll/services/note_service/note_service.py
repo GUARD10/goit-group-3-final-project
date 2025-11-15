@@ -232,12 +232,3 @@ class NoteService(INoteService):
             raise InvalidError("Tag name cannot be empty")
 
         return normalized
-
-
-
-
-
-
-
-
-

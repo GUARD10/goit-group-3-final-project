@@ -30,12 +30,3 @@ class IStorage[Key, Item](ABC):
     @abstractmethod
     def filter(self, predicate: Callable[[Item], bool]) -> list[Item]:
         pass
-
-
-
-
-
-
-
-
-

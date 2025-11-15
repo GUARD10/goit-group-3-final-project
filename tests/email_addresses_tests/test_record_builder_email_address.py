@@ -4,7 +4,6 @@ import pytest
 
 from bll.entity_builders.record_builder.record_builder import RecordBuilder
 from dal.entities.address import Address
-from dal.entities.birthday import Birthday
 from dal.entities.email import Email
 from dal.entities.record import Record
 from dal.exceptions.already_exists_error import AlreadyExistsError

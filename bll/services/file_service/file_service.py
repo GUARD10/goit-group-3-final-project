@@ -84,12 +84,3 @@ class FileService[Data](IFileService):
             raise InvalidError("File name must be a string")
         if not name or not name.strip():
             raise InvalidError("File name cannot be empty or whitespace")
-
-
-
-
-
-
-
-
-

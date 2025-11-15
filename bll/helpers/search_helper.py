@@ -85,12 +85,3 @@ class SearchHelper:
 
         walk(obj)
         return results
-
-
-
-
-
-
-
-
-

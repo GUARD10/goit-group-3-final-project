@@ -110,12 +110,3 @@ def test_get_with_upcoming_birthdays_days_param(service):
     upcoming5 = service.get_with_upcoming_birthdays(days=5)
     names5 = [r.name.value for r in upcoming5]
     assert "Near" in names5 and "Far" not in names5
-
-
-
-
-
-
-
-
-

@@ -21,12 +21,3 @@ class IFileManager[Data](ABC):
     @abstractmethod
     def has_file_with_name(self, name: str) -> bool:
         pass
-
-
-
-
-
-
-
-
-

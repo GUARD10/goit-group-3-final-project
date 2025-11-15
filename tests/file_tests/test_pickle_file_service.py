@@ -120,12 +120,3 @@ def test_validate_name_invalid(bad_name):
 
 def test_validate_name_valid():
     FileService._validate_name("valid_name.pkl")
-
-
-
-
-
-
-
-
-

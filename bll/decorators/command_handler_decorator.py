@@ -57,12 +57,3 @@ def command_handler_decorator(func: Callable) -> Callable:
             raise InvalidError(f"Unexpected error: {ex}")
 
     return wrapper
-
-
-
-
-
-
-
-
-

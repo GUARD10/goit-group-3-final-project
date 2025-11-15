@@ -65,12 +65,3 @@ class INoteService(ABC):
     @abstractmethod
     def get_distinct_tags(self) -> list[Tag]:
         pass
-
-
-
-
-
-
-
-
-

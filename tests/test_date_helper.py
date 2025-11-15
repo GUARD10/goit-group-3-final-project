@@ -49,12 +49,3 @@ def test_cross_year_window_includes_next_year_birthday():
 
     # window = 1 day (Dec 31 to Jan 1 inclusive) should include
     assert DateHelper.is_date_within_next_week(jan1_any, dec31, days=1)
-
-
-
-
-
-
-
-
-

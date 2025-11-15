@@ -441,12 +441,3 @@ def test_edit_note_content(command_service, fake_note_service, fake_input_servic
         fake_note_service.get_by_name("my_note").content.value
         == "New multiline content"
     )
-
-
-
-
-
-
-
-
-

@@ -35,12 +35,3 @@ def test_phone_validation():
         Phone("abc")
     with pytest.raises(ValueError):
         Phone("12345")
-
-
-
-
-
-
-
-
-

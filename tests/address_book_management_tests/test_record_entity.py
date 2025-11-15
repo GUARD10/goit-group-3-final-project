@@ -90,12 +90,3 @@ def test_update_returns_record_builder_instance():
 
     assert isinstance(builder, RecordBuilder)
     assert builder._record is record
-
-
-
-
-
-
-
-
-

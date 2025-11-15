@@ -105,12 +105,3 @@ class InputService(IInputService):
         if result is None:
             return []
         return [value for value in result]
-
-
-
-
-
-
-
-
-

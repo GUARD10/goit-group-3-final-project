@@ -5,12 +5,3 @@ from main import main
 __all__ = ["main"]
 
 colorama_init(autoreset=False)
-
-
-
-
-
-
-
-
-

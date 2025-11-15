@@ -38,12 +38,3 @@ class IInputService(ABC):
         self, title: str, text: str, options: list[tuple[str, str]]
     ) -> list[str] | None:
         pass
-
-
-
-
-
-
-
-
-

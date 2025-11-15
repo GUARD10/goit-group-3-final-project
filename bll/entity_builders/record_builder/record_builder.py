@@ -86,7 +86,6 @@ class RecordBuilder:
         except ValueError as e:
             raise InvalidError(str(e))
 
-
     def remove_email(self, email: str | Email) -> "RecordBuilder":
         try:
             email_obj = email if isinstance(email, Email) else Email(email)
@@ -115,12 +114,3 @@ class RecordBuilder:
 
         self._record.address = None
         return self
-
-
-
-
-
-
-
-
-

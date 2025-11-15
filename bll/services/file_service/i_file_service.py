@@ -25,12 +25,3 @@ class IFileService(ABC):
     @abstractmethod
     def is_save_able(self) -> bool:
         pass
-
-
-
-
-
-
-
-
-

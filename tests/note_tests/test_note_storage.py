@@ -54,12 +54,3 @@ def test_note_storage_filter():
 
     result = storage.filter(lambda n: n.title.value == "World")
     assert result == [n2]
-
-
-
-
-
-
-
-
-

@@ -10,12 +10,3 @@ class Name(Field):
             raise ValueError("Name value cannot be empty")
 
         super().__init__(value)
-
-
-
-
-
-
-
-
-

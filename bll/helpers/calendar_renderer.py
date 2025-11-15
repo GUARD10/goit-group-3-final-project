@@ -160,12 +160,3 @@ def _collect_birthdays(
             month_bucket[day].sort()
 
     return {month: dict(days) for month, days in birthdays.items()}
-
-
-
-
-
-
-
-
-

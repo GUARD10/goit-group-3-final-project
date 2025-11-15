@@ -42,12 +42,3 @@ class NoteStorage(UserDict, IStorage[str, Note], ISerializableStorage[dict[str, 
             )
 
         self.data = state
-
-
-
-
-
-
-
-
-

@@ -60,12 +60,3 @@ class DateHelper:
             return date(target_year, 2, 28)
 
         return date(target_year, birthday_date.month, birthday_date.day)
-
-
-
-
-
-
-
-
-

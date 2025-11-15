@@ -79,12 +79,3 @@ def test_email_value_none_raises_value_error():
 def test_email_non_str_type_raises_type_error():
     with pytest.raises(TypeError):
         Email(123)  # type: ignore[arg-type]
-
-
-
-
-
-
-
-
-

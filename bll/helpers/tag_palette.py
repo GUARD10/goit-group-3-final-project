@@ -12,12 +12,3 @@ TAG_COLORS: list[tuple[str, str]] = [
 ]
 
 TAG_COLOR_CODES: list[str] = [code for _, code in TAG_COLORS]
-
-
-
-
-
-
-
-
-

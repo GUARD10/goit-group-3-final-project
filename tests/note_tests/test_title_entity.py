@@ -19,12 +19,3 @@ def test_title_empty_raises():
 def test_title_wrong_type_raises():
     with pytest.raises(TypeError):
         Title(123)
-
-
-
-
-
-
-
-
-

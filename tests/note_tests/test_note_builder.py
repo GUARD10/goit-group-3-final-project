@@ -37,12 +37,3 @@ def test_note_builder_missing_fields_raises():
 
     with pytest.raises(ValueError):
         builder.build()
-
-
-
-
-
-
-
-
-

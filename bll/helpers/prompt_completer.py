@@ -3,8 +3,8 @@ from typing import Iterable, List
 from prompt_toolkit.completion import Completer, Completion
 
 from bll.services.command_service.command_service import CommandService
-from bll.services.record_service.record_service import RecordService
 from bll.services.note_service.note_service import NoteService
+from bll.services.record_service.record_service import RecordService
 
 
 class PromptCompleter(Completer):

@@ -16,12 +16,3 @@ def test_content_too_short():
 def test_content_wrong_type():
     with pytest.raises(TypeError):
         Content(123)
-
-
-
-
-
-
-
-
-

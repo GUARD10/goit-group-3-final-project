@@ -43,12 +43,3 @@ class NoteBuilder:
         self._note.updated_at = self._note.created_at
 
         return self._note
-
-
-
-
-
-
-
-
-

@@ -133,12 +133,3 @@ class Note:
 
     def _sort_tags(self) -> None:
         self.tags.sort(key=lambda tag: tag.value.lower())
-
-
-
-
-
-
-
-
-

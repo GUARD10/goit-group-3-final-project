@@ -48,6 +48,7 @@ class Config:
     def set_notes_dir(self, path: Path) -> None:
         self._notes_dir = path
 
+
 _config: Optional[Config] = None
 
 
@@ -61,12 +62,3 @@ def get_config() -> Config:
 def reset_config() -> None:
     global _config
     _config = None
-
-
-
-
-
-
-
-
-

@@ -9,12 +9,3 @@ class ISerializableStorage[Dict](ABC):
     @abstractmethod
     def import_state(self, state: Dict) -> None:
         pass
-
-
-
-
-
-
-
-
-

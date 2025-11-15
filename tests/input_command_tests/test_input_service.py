@@ -28,12 +28,3 @@ def test_parse_input_static():
     cmd, args = InputService._parse_input("add John 12345")
     assert cmd == "add"
     assert args == ["John", "12345"]
-
-
-
-
-
-
-
-
-

@@ -39,12 +39,3 @@ class IRecordService(ABC):
     @abstractmethod
     def search(self, query: str) -> list[Record]:
         pass
-
-
-
-
-
-
-
-
-

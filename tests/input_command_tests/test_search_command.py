@@ -74,12 +74,3 @@ def test_search_contacts_flow(bot):
 
     cmd, args = input_service.handle("search-contacts not-found")
     assert "No contacts found" in command_service.execute(cmd, args)
-
-
-
-
-
-
-
-
-

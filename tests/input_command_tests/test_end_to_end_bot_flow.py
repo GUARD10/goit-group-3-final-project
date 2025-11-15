@@ -66,12 +66,3 @@ def full_bot():
     input_service.command_service = command_service
 
     return input_service, command_service, record_service, note_service, registry
-
-
-
-
-
-
-
-
-

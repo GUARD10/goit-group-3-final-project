@@ -1,11 +1,2 @@
 class InvalidError(Exception):
     pass
-
-
-
-
-
-
-
-
-

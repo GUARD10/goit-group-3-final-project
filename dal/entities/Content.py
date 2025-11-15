@@ -10,12 +10,3 @@ class Content(Field):
             raise ValueError("Content value must be at least 10 characters long")
 
         super().__init__(value)
-
-
-
-
-
-
-
-
-

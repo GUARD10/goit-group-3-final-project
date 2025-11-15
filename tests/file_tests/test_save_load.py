@@ -70,12 +70,3 @@ def test_contacts_and_notes_save_load(temp_dirs):
 
     loaded_n1 = note_storage.data["note1"]
     assert loaded_n1.content.value.startswith("Content AAAA")
-
-
-
-
-
-
-
-
-

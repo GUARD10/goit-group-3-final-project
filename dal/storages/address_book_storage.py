@@ -47,12 +47,3 @@ class AddressBookStorage(
             )
 
         self.data = state
-
-
-
-
-
-
-
-
-

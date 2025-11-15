@@ -41,12 +41,3 @@ def test_render_calendar_defaults_to_current_month():
     assert "January 2024" not in result
     assert "December 2024" not in result
     assert "Carol" in result
-
-
-
-
-
-
-
-
-

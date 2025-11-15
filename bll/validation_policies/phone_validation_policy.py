@@ -47,12 +47,3 @@ class PhoneValidationPolicy:
     def error_message(cls, value: str) -> str:
         hint = cls._MESSAGES.get(cls._region, "")
         return f"Invalid {cls._region} phone number: '{value}'. {hint}"
-
-
-
-
-
-
-
-
-

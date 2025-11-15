@@ -3,7 +3,6 @@ from datetime import date, datetime
 import pytest
 
 from bll.entity_builders.record_builder.record_builder import RecordBuilder
-from dal.entities.birthday import Birthday
 from dal.entities.phone import Phone
 from dal.entities.record import Record
 from dal.exceptions.already_exists_error import AlreadyExistsError

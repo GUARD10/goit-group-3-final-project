@@ -1,7 +1,9 @@
 from colorama import Fore, Style
 from colorama import init as colorama_init
+from prompt_toolkit import PromptSession
 
 from bll.configs.config import get_config
+from bll.helpers.prompt_completer import PromptCompleter
 from bll.registries.file_service_registry import FileServiceRegistry
 from bll.services.command_service.command_service import CommandService
 from bll.services.file_service.file_service import FileService
@@ -19,9 +21,6 @@ from dal.file_managers.pickle_file_manager.pickle_file_manager import PickleFile
 from dal.storages.address_book_storage import AddressBookStorage
 from dal.storages.note_storage import NoteStorage
 
-from prompt_toolkit import PromptSession
-from bll.helpers.PromptCompleter import PromptCompleter
-
 
 def main() -> None:
     colorama_init(autoreset=False)
@@ -35,7 +34,6 @@ def main() -> None:
 
     contact_file_manager = PickleFileManager[dict[str, Record]](config.contacts_dir)
     note_file_manager = PickleFileManager[dict[str, Note]](config.notes_dir)
-
 
     contact_file_service = FileService[dict[str, Record]](
         contact_file_manager, book_storage
