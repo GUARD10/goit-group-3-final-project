@@ -662,49 +662,57 @@ class CommandService(ICommandService):
         tags: list[tuple[str, str | None]] = []
 
         existing_tags = self.note_service.get_distinct_tags()
-        if existing_tags:
-            choices = [
-                (
-                    tag.value,
-                    f"{tag.value}" + (f" ({tag.color})" if tag.color else ""),
-                )
-                for tag in existing_tags
-            ]
-            selected = (
-                self.input_service.choose_multiple_from_list(
-                    "🏷️ Existing Tags",
-                    "Select tags (↑↓ + Space, Enter to confirm, Esc to skip)",
-                    choices,
-                )
-                or []
+        choices = [
+            (
+                tag.value,
+                f"{tag.value}" + (f" ({tag.color})" if tag.color else ""),
             )
+            for tag in existing_tags
+        ]
 
-            color_map = {tag.value: tag.color for tag in existing_tags}
-            for tag_name in selected:
-                tags.append((tag_name, color_map.get(tag_name)))
+        selected = self.input_service.choose_multiple_from_list(
+            "🏷️ Tags",
+            "Select existing tags (use TAB + ↑↓ and Enter to select) or type new ones (use name:#hex for custom color)",
+            choices,
+            allow_custom=True,
+        )
 
-        while True:
-            raw = self.input_service.read_value(
-                "\n🏷️ Add new tags (comma-separated: work, urgent:#FF0000) "
-                "or press Enter to finish",
-                allow_empty=True,
-            )
+        if not selected:
+            return []
 
-            if not raw:
-                break
+        color_map = {tag.value.lower(): tag for tag in existing_tags}
+        seen: set[str] = set()
 
-            entries = [entry.strip() for entry in raw.split(",") if entry.strip()]
-            if not entries:
-                break
+        for raw_value in selected:
+            raw_value = raw_value.strip()
+            if not raw_value:
+                continue
 
-            for entry in entries:
-                if ":" in entry:
-                    name, raw_color = entry.split(":", 1)
-                    color_value: str | None = raw_color.strip() or None
-                    tags.append((name.strip(), color_value))
-                else:
-                    color_value = self._prompt_tag_color(entry)
-                    tags.append((entry, color_value))
+            existing = color_map.get(raw_value.lower())
+            if existing:
+                key = existing.value.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                tags.append((existing.value, existing.color))
+                continue
+
+            if ":" in raw_value:
+                name, raw_color = raw_value.split(":", 1)
+                color_value: str | None = raw_color.strip() or None
+            else:
+                name = raw_value
+                color_value = self._prompt_tag_color(name)
+
+            name = name.strip()
+            if not name:
+                continue
+
+            key = name.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            tags.append((name, color_value))
 
         return tags
 
@@ -733,7 +741,7 @@ class CommandService(ICommandService):
 
         choice = self.input_service.choose_from_list(
             f"🎨 Color for '{tag_name}'",
-            "Use ↑↓ and Enter to select",
+            "Use TAB + ↑↓ and Enter to select",
             options,
         )
 

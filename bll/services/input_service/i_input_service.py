@@ -35,6 +35,11 @@ class IInputService(ABC):
 
     @abstractmethod
     def choose_multiple_from_list(
-        self, title: str, text: str, options: list[tuple[str, str]]
+        self,
+        title: str,
+        text: str,
+        options: list[tuple[str, str]],
+        *,
+        allow_custom: bool = False,
     ) -> list[str] | None:
         pass
