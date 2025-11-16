@@ -43,10 +43,7 @@ source .venv/bin/activate  # macOS/Linux
 pip install -e .
 ```
 
-
 ### 4. Запуск
-
-#### Якщо встановлено як пакет:
 ```pwsh
 assistant-bot
 ```
@@ -182,7 +179,6 @@ pip install -e .
 
 ### 4. Run
 
-#### If installed as package (Option A):
 ```pwsh
 assistant-bot
 ```
