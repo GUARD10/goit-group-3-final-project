@@ -306,13 +306,14 @@ def test_add_birthday(command_service, fake_record_service):
     assert "Birthday set" in result
     assert isinstance(fake_record_service.records["John"].birthday, Birthday)
 
+
 def test_birthdays(command_service, fake_record_service):
     dt = date.today() + timedelta(days=1)
     bday = dt.replace(year=2000).strftime("%d.%m.%Y")
     rec = Record("John", "+380991112233", birthday=bday)
     fake_record_service.save(rec)
 
-    result = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]").sub("",  command_service.birthdays())
+    result = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]").sub("", command_service.birthdays())
     assert "John" in result
     assert bday in result
 
