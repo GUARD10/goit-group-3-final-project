@@ -83,16 +83,6 @@ assistant-bot
 
 ---
 
-### 🟨 Файли контактів
-| Команда | Опис |
-|--------|------|
-| `save-contact [file-name]?` | 💾 Зберегти контакти |
-| `load-contact [file-name]` | 📂 Завантажити контакти |
-| `delete-contact-file [file-name]` | 🗑️ Видалити файл |
-| `contacts-files` | 📁 Список файлів |
-
----
-
 ### 🟧 Нотатки
 | Команда | Опис |
 |--------|------|
@@ -109,14 +99,17 @@ assistant-bot
 
 ---
 
-### 🟪 Файли нотаток
+### 🟪 Файли
 | Команда | Опис |
 |--------|------|
+| `save-contact [file-name]?` | 💾 Зберегти контакти |
+| `load-contact [file-name]` | 📂 Завантажити контакти |
+| `delete-contact-file [file-name]` | 🗑️ Видалити файл |
+| `contacts-files` | 📁 Список файлів |
 | `save-note [file-name]?` | 💾 Зберегти |
 | `load-note [file-name]` | 📂 Завантажити |
 | `delete-note-file [file-name]` | 🗑️ Видалити файл |
 | `note-files` | 📁 Список файлів |
-
 ---
 ### 6. Конфігурація (опціонально)
 Ви можете налаштувати директорії для збереження файлів за допомогою змінних середовища:
@@ -201,56 +194,51 @@ On startup the bot tries to load the most recent contacts/notes snapshot from th
 ### 🟩 Contacts
 | Command | Description |
 |--------|-------------|
-| `add-contact [name] [phone]` | ➕ Create contact |
-| `delete-contact [name]` | 🗑️ Delete contact |
-| `show-contact [name]` | 👁️ Show details |
+| `add-contact [contact-name] [phone]` | ➕ Create contact |
+| `delete-contact [contact-name]` | 🗑️ Delete contact |
+| `show-contact [contact-name]` | 👁️ Show details |
 | `all-contacts` | 📋 List all contacts |
-| `add-phone [name] [phone]` | 📞 Add phone |
-| `delete-phone [name] [phone]` | 🗑️ Remove phone |
-| `add-email [name] [email]` | 📧 Add email |
-| `delete-email [name] [email]` | 🗑️ Remove email |
-| `set-address [name] [address...]` | 🏠 Set address |
-| `clear-address [name]` | 🗑️ Clear address |
-| `add-birthday [name] [DD.MM.YYYY]` | 🎂 Add birthday |
-| `clear-birthday [name]` | 🗑️ Clear birthday |
+| `add-phone [contact-name] [phone]` | 📞 Add phone |
+| `delete-phone [contact-name] [phone]` | 🗑️ Remove phone |
+| `add-email [contact-name] [email]` | 📧 Add email |
+| `delete-email [contact-name] [email]` | 🗑️ Remove email |
+| `set-address [contact-name] [address...]` | 🏠 Set address |
+| `clear-address [contact-name]` | 🗑️ Clear address |
+| `add-birthday [contact-name] [DD.MM.YYYY]` | 🎂 Add birthday |
+| `clear-birthday [contact-name]` | 🗑️ Clear birthday |
 | `upcoming-birthdays [days]?` | 🎁 Birthdays in next N days |
 | `search-contacts [text]` | 🔍 Search contacts |
-
----
-
-### 🟨 Contact Files
-| Command | Description |
-|--------|-------------|
-| `save-contact [file]?` | 💾 Save contacts |
-| `load-contact [file]` | 📂 Load contacts |
-| `delete-contact-file [file]` | 🗑️ Delete file |
-| `contacts-files` | 📁 List files |
 
 ---
 
 ### 🟧 Notes
 | Command | Description |
 |--------|-------------|
-| `add-note [name]` | 📝 Create note |
-| `delete-note [name]` | 🗑️ Delete note |
-| `show-note [name]` | 👁️ Show note |
+| `add-note [note-name]` | 📝 Create note |
+| `delete-note [note-name]` | 🗑️ Delete note |
+| `show-note [note-name]` | 👁️ Show note |
 | `all-notes` | 📚 List notes |
 | `search-notes [text]` | 🔍 Search notes |
-| `edit-note-title [name]` | ✏️ Edit title |
-| `edit-note-content [name]` | 📄 Edit content |
-| `add-note-tags [name] [tag:color]...` | 🏷️ Add tags |
-| `remove-note-tag [name] [tag]` | ❌ Remove tag |
+| `edit-note-title [note-name]` | ✏️ Edit title |
+| `edit-note-content [note-name]` | 📄 Edit content |
+| `add-note-tags [note-name] [tag:color]...` | 🏷️ Add tags |
+| `remove-note-tag [note-name] [tag]` | ❌ Remove tag |
 | `show-notes-by-tag [tag]?` | 🏷️ Filter by tag |
 
 ---
 
-### 🟪 Note Files
+### 🟪 Files
 | Command | Description |
 |--------|-------------|
-| `save-note [file]?` | 💾 Save notes |
-| `load-note [file]` | 📂 Load notes |
-| `delete-note-file [file]` | 🗑️ Delete note file |
+| `save-note [file-name]?` | 💾 Save notes |
+| `load-note [file-name]` | 📂 Load notes |
+| `delete-note-file [file-name]` | 🗑️ Delete note file |
 | `note-files` | 📁 List files |
+| `save-contact [file-name]?` | 💾 Save contacts |
+| `load-contact [file-name]` | 📂 Load contacts |
+| `delete-contact-file [file-name]` | 🗑️ Delete file |
+| `contacts-files` | 📁 List files |
+
 
 ### 6. Configuration (optional)
 You can customize file storage directories using environment variables:
