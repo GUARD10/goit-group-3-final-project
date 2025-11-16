@@ -27,7 +27,7 @@ Assistant Bot — це консольний застосунок для керу
 Встановлення як пакет 
 **Клонування репозиторію**
 ```pwsh
-git clone <url>
+git clone https://github.com/GUARD10/goit-group-3-final-project.git
 cd goit-group-3-final-project
 ```
 
@@ -155,7 +155,7 @@ Assistant Bot is a command-line application for managing contacts and notes. It 
 
 **Clone the repository**
 ```pwsh
-git clone <url>
+git clone https://github.com/GUARD10/goit-group-3-final-project.git
 cd goit-group-3-final-project
 ```
 **Create & activate a virtual environment (recommended)**
