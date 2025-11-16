@@ -331,17 +331,12 @@ class CommandService(ICommandService):
                 f"{Fore.YELLOW}🎂 No birthdays in the next {days} days{Style.RESET_ALL}"
             )
 
-        summary_lines = [
-            f"🎉 {contact.name.value} — {contact.birthday}"
-            for contact in contacts_with_upcoming_birthdays
-        ]
         title = f"🎁 Upcoming birthdays (next {days} days)"
         table = render_contacts_table(
             contacts_with_upcoming_birthdays,
             title=title,
         )
-        summary = "\n".join(summary_lines)
-        return f"{summary}\n{table}"
+        return f"{table}"
 
     @command_handler_decorator
     def clear_birthday(self, arguments: list[str]) -> str:
