@@ -45,7 +45,7 @@ class FakeCommandService:
             "set-address",
             "delete-address",
             "add-birthday",
-            "show-birthday",
+            "show-contact",
             "delete-contact",
             "search-contacts",
             "edit-note-title",

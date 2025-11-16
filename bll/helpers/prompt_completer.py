@@ -53,6 +53,26 @@ class PromptCompleter(Completer):
 
         return sorted(set(emails))
 
+    def _get_contact_phones(self, contact_name: str) -> List[str]:
+        rec = self._get_record_by_name(contact_name)
+        if not rec:
+            return []
+
+        phones = []
+        # варіант 1: список емейлів
+        if hasattr(rec, "phones"):
+            for e in getattr(rec, "phones", []):
+                value = getattr(e, "value", str(e))
+                if value:
+                    phones.append(str(value))
+        # варіант 2: один емейл
+        elif hasattr(rec, "phone"):
+            value = getattr(rec.phone, "value", str(rec.phone))
+            if value:
+                phones.append(str(value))
+
+        return sorted(set(phones))
+
     def _get_note_names(self) -> List[str]:
         names = []
         for note in self._note_service.get_all():
@@ -165,6 +185,21 @@ class PromptCompleter(Completer):
             # phone не доповнюємо
             return
 
+        # delete-phone [name] [phone]
+        # - 1-й аргумент - ім'я
+        # - 2-й аргумент - phone цього контакту
+        if cmd == "delete-phone":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            elif arg_index == 2:
+                contact_name = parts[1]
+                for phone in self._get_contact_phones(contact_name):
+                    if phone.startswith(prefix):
+                        yield Completion(phone, start_position=-len(prefix))
+            return
+
         # add-email [name] [new_email] - тільки ім'я
         if cmd == "add-email":
             if arg_index == 1:
@@ -198,8 +233,8 @@ class PromptCompleter(Completer):
             # address не доповнюємо
             return
 
-        # delete-address [name] - ім'я
-        if cmd == "delete-address":
+        # clear-address [name] - ім'я
+        if cmd == "clear-address":
             if arg_index == 1:
                 for name in self._get_contact_names():
                     if name.startswith(prefix):
@@ -231,8 +266,16 @@ class PromptCompleter(Completer):
             # birthday не доповнюємо
             return
 
-        # show-birthday [name] - ім'я
-        if cmd == "show-birthday":
+        # clear-birthday [name] - ім'я
+        if cmd == "clear-birthday":
+            if arg_index == 1:
+                for name in self._get_contact_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
+        # show-contact [name] - ім'я
+        if cmd == "show-contact":
             if arg_index == 1:
                 for name in self._get_contact_names():
                     if name.startswith(prefix):
