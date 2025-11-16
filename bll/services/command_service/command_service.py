@@ -453,6 +453,7 @@ class CommandService(ICommandService):
                     "add-note",
                     "delete-note",
                     "all-notes",
+                    "show-note",
                     "search-notes",
                     "edit-note-title",
                     "edit-note-content",
