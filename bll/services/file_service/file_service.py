@@ -111,7 +111,8 @@ class FileService[Data](IFileService):
         if self._last_loaded_name == name:
             self._last_loaded_name = self.get_latest_file_name()
             self._last_loaded_bytes = pickle.dumps(
-                self.file_manager.load(self._last_loaded_name))
+                self.file_manager.load(self._last_loaded_name)
+            )
 
     @staticmethod
     def _validate_name(name: str) -> None:
