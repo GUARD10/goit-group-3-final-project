@@ -643,8 +643,7 @@ class CommandService(ICommandService):
         note = self.note_service.get_by_name(note_name)
 
         message = (
-            f"{Fore.CYAN}📝 {Fore.MAGENTA}{note_name}"
-            f"{Fore.CYAN} note:{Style.RESET_ALL}"
+            f"{Fore.CYAN}📝 {Fore.MAGENTA}{note_name}{Fore.CYAN} note:{Style.RESET_ALL}"
         )
         return self._note_response(message, note)
 
