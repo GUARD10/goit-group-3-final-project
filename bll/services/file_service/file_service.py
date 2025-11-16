@@ -49,6 +49,7 @@ class FileService[Data](IFileService):
 
         loaded_data = self.file_manager.load(name)
         self.storage.import_state(loaded_data)
+        self._update_last_loaded(name, loaded_data)
         self._last_loaded_bytes = pickle.dumps(loaded_data)
         self._last_loaded_name = name
 
@@ -107,9 +108,18 @@ class FileService[Data](IFileService):
             raise InvalidError(f"File with name '{name}' does not exist")
         self.file_manager.delete(name)
 
+        if self._last_loaded_name == name:
+            self._last_loaded_name = self.get_latest_file_name()
+            self._last_loaded_bytes = pickle.dumps(
+                self.file_manager.load(self._last_loaded_name))
+
     @staticmethod
     def _validate_name(name: str) -> None:
         if not isinstance(name, str):
             raise InvalidError("File name must be a string")
         if not name or not name.strip():
             raise InvalidError("File name cannot be empty or whitespace")
+
+    def _update_last_loaded(self, name: str, data: Data) -> None:
+        self._last_loaded_name = name
+        self._last_loaded_bytes = pickle.dumps(data)
