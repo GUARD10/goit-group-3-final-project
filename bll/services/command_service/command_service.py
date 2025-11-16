@@ -227,7 +227,7 @@ class CommandService(ICommandService):
         name, phone = [arg.strip() for arg in arguments]
 
         if not PhoneValidationPolicy.validate(phone):
-            PhoneValidationPolicy.error_message(phone)
+            raise InvalidError(PhoneValidationPolicy.error_message(phone))
 
         new_contact = Record(name, phone)
         self.record_service.save(new_contact)
