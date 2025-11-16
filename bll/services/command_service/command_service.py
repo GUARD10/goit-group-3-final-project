@@ -51,7 +51,7 @@ class CommandService(ICommandService):
             "calendar": Command(
                 "calendar [month]? [year]?",
                 self.show_calendar,
-                "📅 View calendar with birthdays (default: full year)",
+                "📅 View calendar with birthdays",
             ),
             # Contact Commands
             "add-contact": Command(
