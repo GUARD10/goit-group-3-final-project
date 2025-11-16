@@ -70,7 +70,36 @@ class FileService[Data](IFileService):
 
     def get_latest_file_name(self) -> str:
         names = self.get_file_list()
-        return sorted(names)[-1]
+        latest_name = None
+        latest_dt = None
+
+        for name in names:
+            if "." not in name:
+                continue
+            base, _ext = name.rsplit(".", 1)
+
+            parts = base.split("_")
+            if len(parts) < 3:
+                continue
+
+            date_part = parts[-2]
+            time_part = parts[-1]
+
+            if len(date_part) != 8 or len(time_part) != 6:
+                continue
+            if not (date_part + time_part).isdigit():
+                continue
+
+            try:
+                dt = datetime.strptime(f"{date_part}_{time_part}", "%Y%m%d_%H%M%S")
+            except ValueError:
+                continue
+
+            if latest_dt is None or dt > latest_dt:
+                latest_dt = dt
+                latest_name = name
+
+        return latest_name if latest_name else sorted(names)[-1]
 
     def delete_by_name(self, name: str) -> None:
         self._validate_name(name)
