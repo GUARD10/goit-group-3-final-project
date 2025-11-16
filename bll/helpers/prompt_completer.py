@@ -361,6 +361,14 @@ class PromptCompleter(Completer):
         if cmd == "show-all-notes":
             return
 
+        # show-note [note-name] - ім'я
+        if cmd == "show-note":
+            if arg_index == 1:
+                for name in self._get_note_names():
+                    if name.startswith(prefix):
+                        yield Completion(name, start_position=-len(prefix))
+            return
+
         # search-notes [text] - нічого
         if cmd == "search-notes":
             return

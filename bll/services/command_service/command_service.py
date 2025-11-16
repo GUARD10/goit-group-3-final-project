@@ -154,7 +154,7 @@ class CommandService(ICommandService):
                 "🗑️ Remove note",
             ),
             "show-note": Command(
-                "show-note [note-name]", self.show_contact, "👁️ View note details"
+                "show-note [note-name]", self.show_note, "👁️ View note details"
             ),
             "all-notes": Command("all-notes", self.show_all_notes, "📚 View all notes"),
             "search-notes": Command(
@@ -636,6 +636,17 @@ class CommandService(ICommandService):
             )
         title = f"📚 Notes ({len(notes)})"
         return render_notes_table(notes, title=title)
+
+    @command_handler_decorator
+    def show_note(self, arguments: list[str]) -> str:
+        note_name = arguments[0].strip()
+        note = self.note_service.get_by_name(note_name)
+
+        message = (
+            f"{Fore.CYAN}📝 {Fore.MAGENTA}{note_name}"
+            f"{Fore.CYAN} note:{Style.RESET_ALL}"
+        )
+        return self._note_response(message, note)
 
     @command_handler_decorator
     def search_contacts(self, arguments: list[str]) -> str:
