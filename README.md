@@ -33,9 +33,17 @@ cd goit-group-3-final-project
 
 **Створення та активація середовища (рекомендовано)**
 ```pwsh
-python -m venv .venv
-.\.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
+# Якщо 'py' є стандартним лаунчером python
+py -m venv .venv 
+
+# Якщо 'python' є стандартним лаунчером
+python -m venv .venv 
+
+ # Активація середовища в Windows
+.\.venv\Scripts\activate 
+
+# Активація середовища в macOS/Linux
+source .venv/bin/activate  
 ```
 
 **Встановлення у режимі редагування**
@@ -102,14 +110,14 @@ assistant-bot
 ### 🟪 Файли
 | Команда | Опис |
 |--------|------|
+| `save-note [file-name]?` | 💾 Зберегти нотатки |
+| `load-note [file-name]` | 📂 Завантажити нотатки |
+| `delete-note-file [file-name]` | 🗑️ Видалити файл нотатки |
+| `note-files` | 📁 Список файлів |
 | `save-contact [file-name]?` | 💾 Зберегти контакти |
 | `load-contact [file-name]` | 📂 Завантажити контакти |
 | `delete-contact-file [file-name]` | 🗑️ Видалити файл |
 | `contacts-files` | 📁 Список файлів |
-| `save-note [file-name]?` | 💾 Зберегти |
-| `load-note [file-name]` | 📂 Завантажити |
-| `delete-note-file [file-name]` | 🗑️ Видалити файл |
-| `note-files` | 📁 Список файлів |
 ---
 ### 6. Конфігурація (опціонально)
 Ви можете налаштувати директорії для збереження файлів за допомогою змінних середовища:
@@ -130,8 +138,133 @@ assistant-bot
 - Контакти: `files/contacts`
 - Нотатки: `files/notes`
 
----
+### 7. Архітектура (огляд)
+Шарова модель:
+- CLI (`assistant_bot_cli.py`, `main.py`): цикл введення, автодоповнення через Prompt Toolkit.
+- BLL (`bll/services`, `helpers`, `entity_builders`): маршрутизація команд, CRUD, форматування таблиць/календаря.
+- DAL (`dal/entities`, `storages`, `file_managers`): доменні сутності, збереження pickle-снепшотів.
+Докладніше: див. `structure.md`.
 
+### 8. Персистентність даних
+- Файли зберігаються окремо для контактів та нотаток у `files/contacts`, `files/notes`.
+- Автозбереження при виконанні команд `save-*` без імені файлу.
+- Можливість мати історію станів (timestamp у назві файлу) та завантажувати будь-який.
+- Поточний backend: лише `pickle`.
+
+### 8.1 Змінні середовища (повний список)
+| Змінна | Значення за замовчуванням | Призначення |
+|--------|---------------------------|-------------|
+| `ASSISTANT_CONTACTS_DIR` | `files/contacts` | Каталог збереження контактів |
+| `ASSISTANT_NOTES_DIR` | `files/notes` | Каталог збереження нотаток |
+| `ASSISTANT_PHONE_REGION` | `UA` | Регіон для валідації телефонів (`UA`, `US`, `INTL`) |
+
+Приклад:
+```pwsh
+$env:ASSISTANT_PHONE_REGION="US"
+assistant-bot
+```
+
+### 8.2 Палітра кольорів тегів
+Доступні кольори (назва → HEX):
+```
+Coral Red  #F44336
+Cerise     #E91E63
+Royal Purple #9C27B0
+Indigo     #3F51B5
+Sky Blue   #03A9F4
+Teal       #009688
+Emerald    #4CAF50
+Amber      #FF9800
+Mocha      #795548
+Slate      #607D8B
+```
+Використання: `add-note-tags idea teal:009688 focus amber:FF9800` (можна задавати ім'я або hex через `tag:color`).
+
+### 11. Тестування та якість коду
+Запуск тестів:
+```pwsh
+pytest -q
+```
+Інструменти якості (dev-залежності у `pyproject.toml`):
+```pwsh
+pip install -e .[dev]
+ruff check .
+mypy .
+```
+PEP 8 забезпечується через Ruff; типи — через mypy. Тести покривають календар, дати, команди, роботу зі сховищами.
+Додатково: запуск частини тестів:
+```pwsh
+pytest tests/test_calendar_renderer.py -q
+pytest tests/note_tests -q
+```
+
+### 11.1 GitHub Actions (CI)
+У каталозі `.github/workflows/` знаходяться ОКРЕМІ файли робочих процесів CI:
+
+| Файл | Призначення |
+|------|-------------|
+| `.github/workflows/tests.yml` | Запуск `pytest` (юнiт-тести) на гілках `main`, `main-beta` для `push` та `pull_request`. |
+| `.github/workflows/code_quality.yml` | Лінтинг (Ruff) і статична перевірка типів (mypy) на тих самих гілках. |
+
+Як працює pipeline узагальнено:
+1. Checkout репозиторію.
+2. Встановлення Python 3.12.
+3. Встановлення залежностей з `requirements.txt`.
+4. Виконання лінтингу / типізації (code_quality) або тестів (tests).
+5. У разі помилок робочий процес завершується зі статусом failure.
+
+### 11.2 Гайд для розробника
+Швидкий старт:
+```pwsh
+git clone https://github.com/GUARD10/goit-group-3-final-project.git
+cd goit-group-3-final-project
+py -m venv .venv
+./.venv/Scripts/activate
+pip install -e .[dev]
+ruff check .
+mypy .
+pytest -q
+assistant-bot
+```
+Перед пушем:
+```pwsh
+ruff check .
+ruff format .  # якщо потрібно автоформатування
+mypy .
+pytest
+```
+
+### 13. Відповідність критеріям прийому
+| Критерій | Виконання                                |
+|----------|------------------------------------------|
+| Публічний репозиторій | ✅ GitHub, відкритий доступ               |
+| Документація/README | ✅ Опис, інструкції, команди, архітектура |
+| CLI інтерфейс (цикл) | ✅ `main.py` цикл до `exit`               |
+| Інтерактивність / автодоповнення | ✅ Prompt Toolkit (`PromptCompleter`)     |
+| Меню лише при старті | ✅ Привітальне повідомлення один раз      |
+| Читабельність та кольори | ✅ Colorama + таблиці/календар            |
+| Збереження даних між сесіями | ✅ Pickle файли у `files/*`               |
+| Обробка некоректних даних | ✅ Винятки без падіння програми           |
+| ООП, спадкування, композиція | ✅ Сутності + builder + сервіси           |
+| Валідація кожного поля | ✅ Телефон, email, дата народження        |
+| Чистий код, PEP 8 | ✅ Ruff, структуровані модулі             |
+| Код-ревʼю ментора | ✅ Перевірено                             |
+| Теги до нотаток | ✅ `add-note-tags`, `show-notes-by-tag`   |
+| Пошук/фільтр за тегами | ✅ `show-notes-by-tag`, `search-notes`    |
+| Наявність CI (GitHub Actions) | ✅ `tests.yml`, `code_quality.yml`        |
+
+### 14. Roadmap (можливі покращення)
+- Перехід з pickle на SQLite/JSON.
+- Розширена типізація (увімкнути `disallow_untyped_defs`).
+- Логування замість `print` (модуль `logging`).
+- Інтеграційні тести для повних сценаріїв.
+- Підтримка `json` backend як перша альтернатива.
+- Документація палітри тегів у окремому markdown (`tags.md`).
+
+### 15. Ліцензія
+MIT License (див. `pyproject.toml`).
+
+---
 ## EN · English
 
 ### 1. Overview
@@ -160,9 +293,17 @@ cd goit-group-3-final-project
 ```
 **Create & activate a virtual environment (recommended)**
 ```pwsh
-python -m venv .venv
-.\.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
+# if 'py' is the default python launcher
+py -m venv .venv 
+
+# if 'python' is the default python launcher
+python -m venv .venv 
+
+ # .venv actiovation in Windows
+.\.venv\Scripts\activate 
+
+# .venv actiovation in macOS/Linux
+source .venv/bin/activate 
 ```
 
 **Install in editable mode**
@@ -258,3 +399,130 @@ assistant-bot
 **Defaults:**
 - Contacts: `files/contacts`
 - Notes: `files/notes`
+
+### 7. Architecture (overview)
+Layered model:
+- CLI (`assistant_bot_cli.py`, `main.py`): input loop, autocompletion via Prompt Toolkit.
+- BLL (`bll/services`, `helpers`, `entity_builders`): command routing, CRUD, table/calendar formatting.
+- DAL (`dal/entities`, `storages`, `file_managers`): domain entities, pickle snapshot persistence.
+See `structure.md` for details.
+
+### 8. Persistence
+- Files are stored separately for contacts and notes in `files/contacts`, `files/notes`.
+- Autosave on `save-*` commands without filename.
+- Supports state history (timestamp in filename) and loading any state.
+- Current backend: only `pickle`.
+
+### 8.1 Environment Variables
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ASSISTANT_CONTACTS_DIR` | `files/contacts` | Contacts storage dir |
+| `ASSISTANT_NOTES_DIR` | `files/notes` | Notes storage dir |
+| `ASSISTANT_PHONE_REGION` | `UA` | Phone validation region |
+
+Example:
+```pwsh
+$env:ASSISTANT_PHONE_REGION="US"
+assistant-bot
+```
+
+### 8.2 Tag Color Palette
+Available colors (name → HEX):
+```
+Coral Red  #F44336
+Cerise     #E91E63
+Royal Purple #9C27B0
+Indigo     #3F51B5
+Sky Blue   #03A9F4
+Teal       #009688
+Emerald    #4CAF50
+Amber      #FF9800
+Mocha      #795548
+Slate      #607D8B
+```
+Usage: `add-note-tags idea teal:009688 focus amber:FF9800` (can use name or hex via `tag:color`).
+
+### 11. Testing & Quality
+Run tests with:
+```pwsh
+pytest -q
+```
+Quality tools (dev dependencies in `pyproject.toml`):
+```pwsh
+pip install -e .[dev]
+ruff check .
+mypy .
+```
+PEP 8 compliance is ensured via Ruff; types — via mypy. Tests cover calendar, dates, commands, storage interactions.
+Partial test runs:
+```pwsh
+pytest tests/test_calendar_renderer.py -q
+pytest tests/note_tests -q
+```
+
+### 11.1 GitHub Actions (CI)
+In catalog `.github/workflows/` we have separate CI workflow files:
+
+| File | Purpose                                                                                 |
+|------|-----------------------------------------------------------------------------------------|
+| `.github/workflows/tests.yml` | Run `pytest` (unit-tests) on branches `main`, `main-beta` for `push` an `pull_request`. |
+| `.github/workflows/code_quality.yml` | Lint (Ruff) and static type checking (mypy) on the same branches.             |
+
+How the pipeline works in general:
+1. Checkout the repository.
+2. Install Python 3.12.
+3. Install dependencies from `requirements.txt`.
+4. Perform linting/typing (code_quality) or tests (tests).
+5. If there are errors, the workflow ends with a failure status.
+
+### 11.2 Developer Guide
+Quick start:
+```pwsh
+git clone https://github.com/GUARD10/goit-group-3-final-project.git
+cd goit-group-3-final-project
+py -m venv .venv
+./.venv/Scripts/activate
+pip install -e .[dev]
+ruff check .
+mypy .
+pytest -q
+assistant-bot
+```
+Pre-push:
+```pwsh
+ruff check .
+ruff format .  # if auto-formatting needed
+mypy .
+pytest
+```
+
+### 13. Compliance Checklist
+| Criterion | Met                                                 |
+|----------|-----------------------------------------------------|
+| Public repository | ✅ GitHub, open access                               |
+| Documentation/README | ✅ Description, instructions, commands, architecture |
+| CLI interface (loop) | ✅ `main.py` loop until `exit`                       |
+| Interactivity / autocompletion | ✅ Prompt Toolkit (`PromptCompleter`)                |
+| Menu only at startup | ✅ Welcome message once                              |
+| Readability and colors | ✅ Colorama + tables/calendar                        |
+| Data persistence between sessions | ✅ Pickle files in `files/*`                         |
+| Invalid data handling | ✅ Exceptions without crashing                       |
+| OOP, inheritance, composition | ✅ Entities + builder + services                     |
+| Field validation | ✅ Phone, email, birth date                          |
+| Clean code, PEP 8 | ✅ Ruff, structured modules                          |
+| Mentor code review | ✅ Verified                                             |
+| Tags for notes | ✅ `add-note-tags`, `show-notes-by-tag`              |
+| Search/filter by tags | ✅ `show-notes-by-tag`, `search-notes`               |
+| CI (GitHub Actions) | ✅ `tests.yml`, `code_quality.yml`                   |
+
+### 14. Roadmap (possible improvements)
+- Migrate from pickle to SQLite/JSON.
+- Enhanced typing (enable `disallow_untyped_defs`).
+- CI (GitHub Actions): pytest + ruff + mypy.
+- Logging instead of `print` (use `logging` module).
+- Integration tests for full scenarios.
+- Enable json backend (env already supports value).
+- Separate tag palette doc (`tags.md`).
+
+### 15. License
+MIT License (see `pyproject.toml`).
